@@ -1,9 +1,9 @@
 theme: jekyll-theme-hacker
-title: [The title of your site]
-description: [A short description of your site's purpose]
+title: [Jules Perret ]
+description: [Sutend at paris Saclayl university -Code repository]
 lsi: false
 safe: true
-source: [your repo's top level directory]
+source: [https://github.com/jperret21?tab=repositories]
 incremental: false
 highlighter: rouge
 gist:
