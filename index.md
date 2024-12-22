@@ -14,3 +14,8 @@ I am **Jules Perret**, a PhD student in gravitational astrophysics at the Astrop
 
 ## Recent Projects
 - **Bayesian Inference for Gravitational Wave Analysis**
+
+
+
+## Other Pages
+- [Curriculum Vitae](cv)
