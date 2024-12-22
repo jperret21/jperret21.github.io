@@ -4,18 +4,18 @@ title: Welcome
 ---
 
 
-I am **Jules Perret**, a PhD candiate in gravitational astrophysics at the Astroparticle and Cosmology Laboratory (APC-CNRS).
+I am **Jules Perret**, a PhD candidate in gravitational astrophysics at the Astroparticle and Cosmology Laboratory (APC-CNRS).
 
 ## About Me
-- Specialized in gravitational astrophysics data analysis 🔭
-- Member of the LIGO-Virgo-Kagra (LVK) and Einstein (ET) collaborations 💫
-- Passionate about Astrophysics, Numerical simulation and HPC programming  💻
-- passionate builder and enthusiast of drones and other UAVs 🚀
+- Specializing in gravitational astrophysics and **gravitational waves** data analysis. 🔭
+- Member of the **LIGO-Virgo-Kagra (LVK)** and **Einstein Telescope (ET)** collaborations. 💫
+- Passionate about astrophysics, **numerical simulation**, and **HPC** programming 💻
+- Enthusiastic builder and drone/UAV. 🚀
 
- 
+
 ## Recent Projects
-- **DeepHMC: A deep-neural-network based Hamiltonian Monte Carlo algorithm for compact Binary parameter estimation.**
-- Vanilla HMC: A simple 2 dimensional Hamiltonian Monte Carlo. Used essentitally for outreach and teaching purpose. the code is available [here](./404.html) on my github repository.
+- **DeepHMC**: A deep neural network-based Hamiltonian Monte Carlo algorithm for compact binary parameter estimation.
+- **Vanilla HMC**: A simple 2-dimensional Hamiltonian Monte Carlo, primarily used for outreach and teaching purposes. The code is available [here](./404.html) in my GitHub repository.
 
 
 
