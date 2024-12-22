@@ -21,4 +21,4 @@ nav:
 
 collections:
   posts:
-    output: False
+    output: True
