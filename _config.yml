@@ -1,6 +1,6 @@
-theme: minima
+# General site settings
 title: Jules Perret
-description: Personnal page 
+description: Personal page
 lsi: false
 safe: true
 source: jperret21
@@ -8,17 +8,23 @@ incremental: false
 highlighter: rouge
 gist:
   noscript: false
+
+# Markdown settings
 kramdown:
   math_engine: mathjax
   syntax_highlighter: rouge
-markdown: kramdown
+  markdown: kramdown
 
-# Navigation
+# Navigation links
 nav:
   - About: /about
   - Research: /research
   - Publications: /publications
 
+# Collections and outputs
 collections:
   posts:
-    output: True
+    output: true
+
+# Theme configuration
+theme: minima
