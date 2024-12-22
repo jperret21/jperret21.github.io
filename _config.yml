@@ -19,7 +19,6 @@ nav:
   - Research: /research
   - Publications: /publications
 
-
 collections:
   posts:
     output: true
