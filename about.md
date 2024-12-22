@@ -4,17 +4,12 @@ title: Curriculum Vitae
 ---
 
 
-# Jules Perret - Resume
+# Academic background & Professional Experiences
 
-## Personal Information
-
-- **Name:** Jules Perret
-- **Location:** Paris, France
-- **Email:** perret(at)apc.in2p3.fr
 
 ---
 
-## Summary
+# Summary
 
 I am Jules Perret, a PhD candidate in gravitational astrophysics at the Laboratoire Astroparticule et Cosmologie (APC, CNRS). My research focuses on Bayesian methods for the parameter estimation of gravitational waves originating from binary compact object systems, including Binary Neutron Stars (BNS), Binary Black Holes (BBH), and Neutron Star-Black Hole (NSBH) binaries. I am also a member of the LIGO-Virgo-KAGRA (LVK) collaboration and part of the collaboration Einstein Telescope to prepare the futur parameter estimation methods for the third generation of gravitationnal waves. 
 
@@ -24,17 +19,17 @@ I am particularly interested in numerical simulations applied to astrophysics. W
 
 ---
 
-## Education
+# Education
 
-### PhD in Astrophysics
+## PhD in Astrophysics
 - **Institution:** Laboratoire Astroparticule et Cosmologie APC-CNRS
 - **Duration:** 2022 - Present
 - **Description:**
-  - Development of Python package: Deep Hamiltonian Monte Carlo (DeepHMC) for parameter estimation of gravitational wave sources.
+  - Development of Python package: Deep Hamiltonian Monte Carlo (DeepHMC) for parameter estimation of gravitational wave sources.git 
   - Bayesian statistics and numerical applications.
   - Member of the Ligo-Virgo-Kagra (LVK) Collaboration.
 
-### Master’s Degree in High Performance Computing & Numerical Simulation
+## Master’s Degree in High Performance Computing & Numerical Simulation
 - **Institution:** Ecole Normale Supérieure Paris-Saclay, Paris, FR
 - **Duration:** 2020 - 2022
 - **Description:**
@@ -45,7 +40,7 @@ I am particularly interested in numerical simulations applied to astrophysics. W
   - Programming for GPU architecture and supercomputing
 
 
-### Bachelor’s in Computer Science & Full Stack Web Development
+## Bachelor’s in Computer Science & Full Stack Web Development
 - **Institution:** Université de Bourgogne
 - **Duration:** 2016 - 2020
 - **Description:**
@@ -60,7 +55,7 @@ I am particularly interested in numerical simulations applied to astrophysics. W
 
 
 
-### Preparatory Year / 1st Year Bachelor in Physics
+## Preparatory Year / 1st Year Bachelor in Physics
 - **Institution:** Université de Montréal
 - **Duration:** 2014 - 2016
 - **Description:**

@@ -18,3 +18,5 @@ markdown: kramdown
 nav:
   - Home: /
   - About: /about
+  - Research: /research
+  - Publications: /publications
