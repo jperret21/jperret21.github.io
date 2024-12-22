@@ -1,9 +1,8 @@
 ---
 layout: default
-title: 
+title: Welcome
 ---
 
-# Welcome!
 
 I am **Jules Perret**, a PhD student in gravitational astrophysics at the Astroparticle and Cosmology Laboratory (APC-CNRS).
 
