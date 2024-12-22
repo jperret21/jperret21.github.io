@@ -1,9 +1,9 @@
 theme: minima
-title: [Jules Perret]
-description: [ gravitational  Astrophysics Phd student at laboratoire Astroparticule et Cosmologie (APC-CNRS) -Code repository-]
+title: "Jules Perret"
+description: "Gravitational Astrophysics PhD student at APC-CNRS"
 lsi: false
 safe: true
-source: [jperret21]
+source: jperret21
 incremental: false
 highlighter: rouge
 gist:
@@ -11,3 +11,10 @@ gist:
 kramdown:
   math_engine: mathjax
   syntax_highlighter: rouge
+markdown: kramdown
+
+
+# Navigation
+nav:
+  - Home: /
+  - About: /about
