@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "My First Post"
+title: "My example Post"
 date: 2024-12-22
 categories: [general, personal]
 tags: [first-post, introduction]
