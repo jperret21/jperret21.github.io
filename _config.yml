@@ -1,6 +1,6 @@
 theme: minima
 title: Jules Perret
-description: Personnal website of Jules Perret Phd student in gravitational astrophysics
+description: Personnal page 
 lsi: false
 safe: true
 source: jperret21
@@ -13,9 +13,13 @@ kramdown:
   syntax_highlighter: rouge
 markdown: kramdown
 
-
 # Navigation
 nav:
   - About: /about
   - Research: /research
   - Publications: /publications
+
+
+collections:
+  posts:
+    output: true
