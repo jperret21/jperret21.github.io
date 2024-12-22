@@ -18,4 +18,4 @@ I am **Jules Perret**, a PhD student in gravitational astrophysics at the Astrop
 
 
 ## Other Pages
-- [Curriculum Vitae](cv)
+- [Curriculum Vitae](about)
