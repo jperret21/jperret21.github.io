@@ -17,4 +17,4 @@ markdown: kramdown
 # Navigation
 nav:
   - Home: /
-  - About: /cv
+  - About: /about
