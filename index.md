@@ -15,6 +15,7 @@ I am **Jules Perret**, a PhD candidate in gravitational astrophysics at the Astr
 
 ## Recent Projects
 - **DeepHMC**: A deep neural network-based Hamiltonian Monte Carlo algorithm for compact binary parameter estimation.
+
 - **Vanilla HMC**: A simple 2-dimensional Hamiltonian Monte Carlo, primarily used for outreach and teaching purposes. The code is available [here](./404.html) in my GitHub repository.
 
 
