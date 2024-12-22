@@ -3,9 +3,7 @@ layout: default
 title: Curriculum Vitae
 ---
 
-
 # Academic background & Professional Experiences
-
 
 ---
 
