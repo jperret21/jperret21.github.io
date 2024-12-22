@@ -99,9 +99,3 @@ I am particularly interested in numerical simulations applied to astrophysics. W
     - Using 3Dslicer to process tomography of brain image data.
 
 ---
-
-## Footer
-
-- **Copyright:** Jules Perret, All Rights Reserved.
-- **Designed by:** [BootstrapMade](https://bootstrapmade.com/)
-
