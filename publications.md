@@ -9,7 +9,7 @@ title: Publications
 
 
 - **DeepHMC: a deep-neural-network accelerated Hamiltonian Monte Carlo algorithm for binary neutron star parameter estimation**  
-  Perret, J., Aréne, M., & Porter, E. K. *arXiv:2505.02589*, 2025. https://doi.org/10.48550/arXiv.2505.02589
+  Perret, J., Aréne, M., & Porter, E. K. [arXiv:2505.02589](https://doi.org/10.48550/arXiv.2505.02589), (2025)
 
 ## Collaboration papers
 
