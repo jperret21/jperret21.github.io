@@ -47,7 +47,7 @@ title: Publications
 
 - **Observation of gravitational waves from the coalescence of a 2.5–4.5 M⊙ compact object and a neutron star**  
   Abac, A., Abbott, R., Abouelfettouh, I., Acernese, F., Creighton, T., Diaz, M. C., ...  
-  *The Astrophysical Journal Letters*, 2024.
+  *The Astrophysical Journal Letters*, 2024. [2404.04248](https://arxiv.org/abs/2404.04248)
 
 - **DeepHMC: a deep-neural-network accelerated Hamiltonian Monte Carlo algorithm for binary neutron star parameter estimation**  
   Perret, J., Aréne, M., & Porter, E. K.  
