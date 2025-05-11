@@ -6,10 +6,15 @@ title: Welcome
 I am **Jules Perret**, a PhD candidate in gravitational astrophysics at the Astroparticle and Cosmology Laboratory (APC-CNRS). Currently in the final year of my PhD, I mainly focus on advanced methods for Parameter Estimation (PE) of compact binary systems, such as binary neutron stars and binary black holes, using Bayesian techniques and deep neural networks. I'm also strongly interested by numerical simulations and High Performance Computing ( Parallel and GPU devellopment ) for astrophysics applications.
 
 
+
+
+
+
 ## About Me
 - Specializing in gravitational astrophysics and **gravitational waves** data analysis. 🔭
 - Member of the **LIGO-Virgo-Kagra (LVK)** and **Einstein Telescope (ET)** collaborations. 💫
 - Passionate about astrophysics, **numerical simulation**, and **HPC** programming 💻
+- Member of the Societe Astronomique de Bourgogne (SAB).
 - Enthusiastic builder and drone/UAV. 🚀
 
 
