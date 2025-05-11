@@ -49,6 +49,4 @@ title: Publications
   Abac, A., Abbott, R., Abouelfettouh, I., Acernese, F., Creighton, T., Diaz, M. C., ...  
   *The Astrophysical Journal Letters*, 2024. [2404.04248](https://arxiv.org/abs/2404.04248)
 
-- **DeepHMC: a deep-neural-network accelerated Hamiltonian Monte Carlo algorithm for binary neutron star parameter estimation**  
-  Perret, J., Aréne, M., & Porter, E. K.  
-  *arXiv:2505.02589*, 2025. https://doi.org/10.48550/arXiv.2505.02589
+
