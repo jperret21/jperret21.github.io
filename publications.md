@@ -27,7 +27,7 @@ title: Publications
 
 - **A search using GEO600 for gravitational waves coincident with fast radio bursts from SGR 1935+2154**  
   LIGO Scientific Collaboration, Virgo Collaboration, KAGRA Collaboration  
-  *The Astrophysical Journal*, 977(2), 20, 2024.
+  *The Astrophysical Journal*, 977(2), 20, 2024.  [2410.09151](https://arxiv.org/abs/2410.09151)
 
 - **Search for gravitational waves emitted from SN 2023ixf**  
   Abac, A. G., Abbott, R., Abouelfettouh, I., Acernese, F., Ackley, K., Adhicary, S., ...  
@@ -35,7 +35,7 @@ title: Publications
 
 - **Ultralight vector dark matter search using data from the KAGRA O3GK run**  
   Abac, A. G., Abbott, R., Abe, H., Abouelfettouh, I., Acernese, F., Ackley, K., ...  
-  *Physical Review D*, 110(4), 042001, 2024.
+  *Physical Review D*, 110(4), 042001, 2024. [2403.03004](https://arxiv.org/abs/2403.03004)
 
 - **The International Astronomical Search Collaboration (IASC)—Citizen Scientist System for Asteroid Discovery**  
   Miller, P., Weryk, R., Wainscoat, R., Perret, J., Hartung, S., Vorobjov, T., Buzzi, L., ...  
@@ -43,7 +43,7 @@ title: Publications
 
 - **Search for eccentric black hole coalescences during the third observing run of LIGO and Virgo**  
   Abac, A. G., Abbott, R., Abe, H., Creighton, T., Diaz, M. C., Villarreal, F. L., ...  
-  *The Astrophysical Journal*, 2024.
+  *The Astrophysical Journal*, [2308.03822](https://arxiv.org/abs/2308.03822) ,2024.
 
 - **Observation of gravitational waves from the coalescence of a 2.5–4.5 M⊙ compact object and a neutron star**  
   Abac, A., Abbott, R., Abouelfettouh, I., Acernese, F., Creighton, T., Diaz, M. C., ...  
