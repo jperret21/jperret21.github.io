@@ -1,0 +1,2139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive Nested Sampling Demo | Jules Perret</title>
+  <meta name="description" content="Interactive visualization of the Nested Sampling algorithm for Bayesian inference" />
+
+  <!-- MathJax for LaTeX rendering -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js"></script>
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+      }
+    };
+  </script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: #fafafa;
+      color: #1a1a1a;
+      margin: 0;
+      padding: 0;
+      line-height: 1.6;
+    }
+
+    /* Jekyll-compatible header navigation */
+    .site-header {
+      border-top: 5px solid #424242;
+      border-bottom: 1px solid #e8e8e8;
+      min-height: 55.95px;
+      position: relative;
+      background-color: white;
+    }
+
+    .site-header .wrapper {
+      max-width: calc(1200px - (30px * 2));
+      margin-right: auto;
+      margin-left: auto;
+      padding-right: 30px;
+      padding-left: 30px;
+    }
+
+    .site-title {
+      font-size: 26px;
+      font-weight: 300;
+      line-height: 54px;
+      letter-spacing: -1px;
+      margin-bottom: 0;
+      float: left;
+      text-decoration: none;
+      color: #424242;
+    }
+
+    .site-title:hover {
+      text-decoration: none;
+      color: #111;
+    }
+
+    .site-nav {
+      float: right;
+      line-height: 54px;
+    }
+
+    .site-nav .nav-trigger {
+      display: none;
+    }
+
+    .site-nav .menu-icon {
+      display: none;
+    }
+
+    .site-nav .page-link {
+      color: #111;
+      line-height: 1.5;
+      text-decoration: none;
+      margin-left: 20px;
+    }
+
+    .site-nav .page-link:hover {
+      text-decoration: underline;
+    }
+
+    .site-nav .page-link.active {
+      font-weight: 600;
+    }
+
+    @media screen and (max-width: 600px) {
+      .site-nav {
+        position: absolute;
+        top: 9px;
+        right: 15px;
+        background-color: white;
+        border: 1px solid #e8e8e8;
+        border-radius: 5px;
+        text-align: right;
+      }
+
+      .site-nav label[for="nav-trigger"] {
+        display: block;
+        float: right;
+        width: 36px;
+        height: 36px;
+        z-index: 2;
+        cursor: pointer;
+      }
+
+      .site-nav .menu-icon {
+        display: block;
+        float: right;
+        width: 36px;
+        height: 26px;
+        line-height: 0;
+        padding-top: 10px;
+        text-align: center;
+      }
+
+      .site-nav .menu-icon > svg {
+        fill: #424242;
+      }
+
+      .site-nav input ~ .trigger {
+        clear: both;
+        display: none;
+      }
+
+      .site-nav input:checked ~ .trigger {
+        display: block;
+        padding-bottom: 5px;
+      }
+
+      .site-nav .page-link {
+        display: block;
+        padding: 5px 10px;
+        margin-left: 20px;
+      }
+    }
+
+    .page-content {
+      padding: 0;
+    }
+
+    .wrapper {
+      max-width: calc(1200px - (30px * 2));
+      margin-right: auto;
+      margin-left: auto;
+      padding-right: 30px;
+      padding-left: 30px;
+    }
+
+    .page-heading {
+      font-size: 2rem;
+      font-weight: 600;
+      margin: 2rem 0 1rem;
+      color: #1a1a1a;
+    }
+
+    .page-subtitle {
+      font-size: 1.1rem;
+      color: #4a5568;
+      margin-bottom: 2rem;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .section {
+      background: white;
+      border-radius: 8px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+
+    .section-title {
+      font-size: 1.4rem;
+      font-weight: 600;
+      margin: 0 0 1.5rem 0;
+      color: #1a1a1a;
+      border-bottom: 2px solid #111827;
+      padding-bottom: 0.5rem;
+    }
+
+    .controls-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .control-group label {
+      font-weight: 500;
+      font-size: 0.9rem;
+      color: #4a5568;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .control-value {
+      font-weight: 600;
+      color: #111827;
+      font-size: 1rem;
+    }
+
+    input[type=range] {
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: #e2e8f0;
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #111827;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    input[type=range]::-webkit-slider-thumb:hover {
+      background: #374151;
+      transform: scale(1.1);
+    }
+
+    select {
+      padding: 0.5rem;
+      border: 1px solid #cbd5e0;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      background: white;
+      cursor: pointer;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    button {
+      background: #111827;
+      color: white;
+      border: none;
+      padding: 0.6rem 1.3rem;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: all 0.2s;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    button:hover {
+      background: #374151;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    button.secondary {
+      background: #4b5563;
+    }
+
+    button.secondary:hover {
+      background: #6b7280;
+    }
+
+    button.tertiary {
+      background: #9ca3af;
+    }
+
+    button.tertiary:hover {
+      background: #6b7280;
+    }
+
+    .visualization-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .canvas-container {
+      position: relative;
+    }
+
+    .canvas-label {
+      font-weight: 600;
+      font-size: 1rem;
+      margin-bottom: 0.75rem;
+      color: #2d3748;
+    }
+
+    canvas {
+      border: 1px solid #e2e8f0;
+      background: white;
+      border-radius: 4px;
+      display: block;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .marginal-plots {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .marginal-plot {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stats-panel {
+      background: linear-gradient(135deg, #f6f8fc 0%, #eef2f7 100%);
+      border-radius: 8px;
+      padding: 1.5rem;
+      border: 1px solid #e2e8f0;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .stat-item {
+      background: white;
+      padding: 0.75rem;
+      border-radius: 4px;
+      border-left: 3px solid #111827;
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: #718096;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-value {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #2d3748;
+      margin-top: 0.25rem;
+    }
+
+    .algorithm-box {
+      background: #f7fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 1.5rem;
+      margin-top: 1rem;
+      overflow-x: auto;
+    }
+
+    .algorithm-box ol {
+      margin: 0.5rem 0 0 0;
+      padding-left: 1.5rem;
+    }
+
+    .algorithm-box li {
+      margin: 0.5rem 0;
+      font-family: 'Courier New', monospace;
+      font-size: 0.95rem;
+    }
+
+    .step-info {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 1.25rem;
+      font-size: 0.9rem;
+      margin-top: 1rem;
+    }
+
+    .step-info strong {
+      color: #111827;
+      font-size: 0.95rem;
+    }
+
+    .status-accepted {
+      color: #38a169;
+      font-weight: 600;
+    }
+
+    .status-rejected {
+      color: #e53e3e;
+      font-weight: 600;
+    }
+
+    .info-note {
+      background: #fef5e7;
+      border-left: 4px solid #f39c12;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 4px;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 768px) {
+      .visualization-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .controls-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .section {
+        padding: 1.5rem 1rem;
+      }
+
+      .container {
+        padding: 1rem;
+      }
+
+      .header {
+        padding: 1.5rem 1rem;
+      }
+
+      .header h1 {
+        font-size: 1.5rem;
+      }
+
+      .header p {
+        font-size: 0.9rem;
+      }
+
+      canvas#posterior {
+        width: 100% !important;
+        height: auto !important;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header class="site-header">
+  <div class="wrapper">
+    <a class="site-title" rel="author" href="/">Jules Perret</a>
+    <nav class="site-nav">
+      <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+      <label for="nav-trigger">
+        <span class="menu-icon">
+          <svg viewBox="0 0 18 15" width="18px" height="15px">
+            <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+          </svg>
+        </span>
+      </label>
+      <div class="trigger">
+        <a class="page-link" href="/about.html">Curriculum Vitae</a>
+        <a class="page-link" href="/publications.html">Publications</a>
+        <a class="page-link" href="/research.html">Research</a>
+        <a class="page-link" href="/mcmc.html">MCMC Demo</a>
+        <a class="page-link" href="/hmc.html">HMC Demo</a>
+        <a class="page-link active" href="/nested_sampling.html">Nested Sampling Demo</a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main class="page-content" aria-label="Content">
+  <div class="wrapper">
+    <h1 class="page-heading">Nested Sampling</h1>
+    <p class="page-subtitle">
+      Interactive visualization of evidence computation and posterior sampling via nested sampling<br>
+      <span style="font-size: 0.9rem; color: #718096;">Part 3 of the MCMC Samplers Series | See also: 
+      <a href="/mcmc.html" style="color: #667eea;">Metropolis–Hastings</a> · 
+      <a href="/hmc.html" style="color: #667eea;">HMC</a></span>
+    </p>
+  </div>
+</main>
+
+<div class="container">
+
+  <!-- INTRODUCTION -->
+  <div class="section">
+    <h2 class="section-title">Introduction to Nested Sampling</h2>
+    <p>
+      <strong>Nested Sampling</strong> is a computational approach to Bayesian inference introduced by John Skilling (2004, 2006). 
+      Unlike traditional MCMC methods that sample from the posterior distribution, nested sampling is primarily designed 
+      to compute the <strong>Bayesian evidence</strong> (marginal likelihood) \(\mathcal{Z}\), with posterior samples 
+      obtained as a byproduct.
+    </p>
+    <p>
+      The key innovation is transforming the multi-dimensional integration problem into a one-dimensional problem by 
+      evolving samples from regions of low likelihood to high likelihood. This makes nested sampling particularly 
+      effective for model comparison and exploring multimodal posteriors.
+    </p>
+    
+    <div class="algorithm-box" style="margin-top: 1.5rem;">
+      <strong>Why Nested Sampling?</strong>
+      <ul style="margin: 0.5rem 0; padding-left: 1.5rem;">
+        <li><strong>Evidence computation:</strong> Directly calculates \(\mathcal{Z} = \int \mathcal{L}(\mathbf{\theta}) \pi(\mathbf{\theta}) d\mathbf{\theta}\) for model comparison</li>
+        <li><strong>Multimodal posteriors:</strong> Naturally explores multiple modes without mode-hopping difficulties</li>
+        <li><strong>No burn-in:</strong> Every point contributes to the evidence calculation; no samples are discarded</li>
+        <li><strong>Automatic termination:</strong> Algorithm stops when the remaining evidence contribution is negligible</li>
+        <li><strong>Posterior samples:</strong> Importance-weighted samples from the posterior are obtained automatically</li>
+      </ul>
+    </div>
+
+    <div class="info-note" style="margin-top: 1.5rem;">
+      <strong>The Key Insight:</strong> Instead of sampling directly from the posterior \(\pi(\mathbf{\theta}|\mathbf{d})\), 
+      nested sampling samples from constrained priors with increasing likelihood thresholds. By tracking the shrinking 
+      prior volume at each likelihood level, we can numerically integrate to compute the evidence and generate posterior samples.
+    </div>
+  </div>
+
+  <!-- ALGORITHM DESCRIPTION -->
+  <div class="section">
+    <h2 class="section-title">The Nested Sampling Algorithm</h2>
+    <p>
+      <strong>Nested Sampling</strong> was introduced by Skilling (2004, 2006) for calculating the Bayesian evidence. 
+      The algorithm maintains a set of "live points" sampled from the prior, progressively replacing the point 
+      with the lowest likelihood while shrinking the prior volume.
+    </p>
+
+    <div class="algorithm-box">
+      <strong>The Evidence Integral:</strong>
+      <p style="margin: 0.75rem 0;">
+        Bayes' theorem in terms of evidence:
+      </p>
+      $$\pi(\mathbf{\theta}|\mathbf{d}) = \frac{\mathcal{L}(\mathbf{\theta})\pi(\mathbf{\theta})}{\mathcal{Z}}$$
+      <p style="margin: 0.5rem 0;">
+        where the evidence is:
+      </p>
+      $$\mathcal{Z} = \int \mathcal{L}(\mathbf{\theta}) \pi(\mathbf{\theta}) d\mathbf{\theta}$$
+      <p style="margin: 0.75rem 0 0 0;">
+        Nested sampling rewrites this integral in terms of prior volume \(X\) enclosed by likelihood contour \(\mathcal{L}\):
+      </p>
+      $$\mathcal{Z} = \int_0^1 \mathcal{L}(X) dX$$
+    </div>
+    
+    <div class="algorithm-box" style="margin-top: 1.5rem;">
+      <strong>Nested Sampling Algorithm:</strong>
+      <ol style="margin: 0.5rem 0 0.5rem 0; padding-left: 1.5rem;">
+        <li style="margin: 0.75rem 0;">
+          <strong>Initialize:</strong> Draw \(N\) live points \(\{\mathbf{\theta}_i\}\) from the prior \(\pi(\mathbf{\theta})\). 
+          Set \(X_0 = 1\) (entire prior volume).
+        </li>
+        <li style="margin: 0.75rem 0;">
+          <strong>Iterate:</strong> At iteration \(i\):
+          <ul style="margin: 0.5rem 0; padding-left: 1.5rem;">
+            <li>Find the live point with lowest likelihood: \(\mathcal{L}_i^* = \min_j \mathcal{L}(\mathbf{\theta}_j)\)</li>
+            <li>Save this point as a sample: \((\mathbf{\theta}_i^*, \mathcal{L}_i^*, X_i)\)</li>
+            <li>Estimate prior volume shrinkage: \(X_i \approx t_i X_{i-1}\) where \(t_i \sim \text{Beta}(N, 1)\)</li>
+            <li>Replace the discarded point by sampling from the prior with constraint \(\mathcal{L}(\mathbf{\theta}) > \mathcal{L}_i^*\)</li>
+          </ul>
+        </li>
+        <li style="margin: 0.75rem 0;">
+          <strong>Terminate:</strong> Stop when the estimated remaining evidence contribution is negligible 
+          (typically when \(\mathcal{L}_{\text{max}} \times X < \epsilon \times \mathcal{Z}_{\text{current}}\))
+        </li>
+        <li style="margin: 0.75rem 0;">
+          <strong>Compute evidence:</strong> Numerical integration via trapezoidal rule:
+          $$\mathcal{Z} \approx \sum_{i=1}^{M} \mathcal{L}_i^* \Delta X_i$$
+          where \(\Delta X_i = X_{i-1} - X_{i+1}\) (or variants)
+        </li>
+        <li style="margin: 0.75rem 0;">
+          <strong>Extract posterior:</strong> Samples \(\{\mathbf{\theta}_i^*\}\) with importance weights \(w_i = \mathcal{L}_i^* \Delta X_i / \mathcal{Z}\)
+        </li>
+      </ol>
+    </div>
+
+    <div class="info-note" style="margin-top: 1.5rem;">
+      <strong>Key Challenge:</strong> Step 2 requires sampling from a constrained prior (the hardest part). 
+      This demo uses a simple rejection sampling approach: draw from the prior and reject if \(\mathcal{L} \leq \mathcal{L}_{\text{min}}\). 
+      Real implementations use MCMC within nested sampling (e.g., slice sampling, Metropolis) or advanced techniques 
+      like MultiNest's ellipsoidal decomposition or dynesty's dynamic nested sampling.
+    </div>
+  </div>
+
+  <!-- TARGET DISTRIBUTIONS -->
+  <div class="section">
+    <h2 class="section-title">Target Distributions</h2>
+    <p>
+      This demonstration provides three target distributions ranging from simple to challenging, 
+      illustrating different aspects of MCMC performance:
+    </p>
+    
+    <div style="display: grid; grid-template-columns: 1fr; gap: 1.5rem; margin-top: 1rem;">
+      <div class="algorithm-box">
+        <strong>Bivariate Gaussian (Default)</strong>
+        <p style="margin: 0.5rem 0;">
+          A standard correlated 2D Gaussian with correlation coefficient \(\rho = 0.8\):
+        </p>
+        <div style="overflow-x: auto;">
+          $$\pi(x_1, x_2) \propto \exp\left(-\frac{1}{2(1-\rho^2)}(x_1^2 - 2\rho x_1 x_2 + x_2^2)\right)$$
+        </div>
+        <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem; color: #4a5568;">
+          This distribution has elliptical contours aligned with the correlation structure. 
+          With strong correlation (\(\rho = 0.8\)), random-walk proposals struggle because they explore 
+          axis-by-axis when parameters should move together along the correlation direction.
+        </p>
+      </div>
+
+      <div class="algorithm-box">
+        <strong>Rosenbrock's Banana Distribution</strong>
+        <p style="margin: 0.5rem 0;">
+          A transformed Gaussian that creates a curved, banana-shaped density (Haario et al., 1999):
+        </p>
+        <div style="overflow-x: auto;">
+          $$\pi(x_1, x_2) \propto \exp\left(-\frac{1}{200}(x_1^2 + 100(x_2 - x_1^2)^2)\right)$$
+        </div>
+        <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem; color: #4a5568;">
+          This distribution is strongly correlated along a curved manifold, making it difficult for 
+          random-walk samplers to explore efficiently. The "banana" shape arises from the nonlinear 
+          transformation \(x_2 - x_1^2\), creating regions where standard proposals are inefficient.
+        </p>
+      </div>
+      
+      <div class="algorithm-box">
+        <strong>Neal's Funnel Distribution</strong>
+        <p style="margin: 0.5rem 0;">
+          A hierarchical model that exhibits strong scale variations (Neal, 2003):
+        </p>
+        <div style="overflow-x: auto;">
+          $$\begin{aligned}
+          x_1 &\sim \mathcal{N}(0, 3^2) \\
+          x_2 \mid x_1 &\sim \mathcal{N}(0, \exp(x_1)^2)
+          \end{aligned}$$
+        </div>
+        <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem; color: #4a5568;">
+          The joint density is \(\pi(x_1, x_2) \propto \exp(-x_1^2/18 - x_2^2/(2e^{2x_1}))\). 
+          This creates a "funnel" where the scale of \(x_2\) depends exponentially on \(x_1\), 
+          challenging for fixed-width proposals. Common in hierarchical Bayesian models with variance parameters.
+        </p>
+      </div>
+      
+      <div class="algorithm-box" style="background: #fef3c7; border-left: 4px solid #f59e0b;">
+        <strong>🌟 Bimodal Gaussian Mixture (Showcases Nested Sampling!)</strong>
+        <p style="margin: 0.5rem 0;">
+          Two well-separated Gaussian modes demonstrating multimodal inference:
+        </p>
+        <div style="overflow-x: auto;">
+          $$\pi(\theta_1, \theta_2) = 0.4 \cdot \mathcal{N}((-2,-2), 0.8^2I) + 0.6 \cdot \mathcal{N}((+2,+2), 0.8^2I)$$
+        </div>
+        <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem; color: #78350f;">
+          <strong>Why this matters for nested sampling:</strong> This is where nested sampling truly shines! 
+          MCMC methods (MH, HMC) struggle with mode-hopping—they often get stuck in one mode and never find the other. 
+          Nested sampling naturally explores both modes because it samples from the entire prior and progressively 
+          contracts. Watch the posterior weights plot—you should see <strong>two peaks</strong>, one for each mode!
+        </p>
+      </div>
+    </div>
+    
+    <div class="info-note" style="margin-top: 1rem;">
+      <strong>Why these distributions?</strong> The Gaussian provides a baseline. The banana and funnel test 
+      challenging geometry (from MCMC/HMC demos for comparison). <strong>The bimodal distribution is the star here</strong>—it 
+      demonstrates nested sampling's key advantage: naturally finding and weighing multiple modes without getting trapped. 
+      Try running MH or HMC on the bimodal distribution and compare—they'll likely only find one mode!
+    </div>
+  </div>
+
+  <!-- CONTROLS -->
+  <div class="section">
+    <h2 class="section-title">Simulation Controls</h2>
+    <p>
+      Nested sampling has one key parameter: the <strong>number of live points</strong> \(N\). More live points 
+      improve accuracy but slow down computation. The algorithm automatically terminates when the remaining 
+      evidence contribution becomes negligible.
+    </p>
+    
+    <div class="controls-grid">
+      <div class="control-group">
+        <label>
+          Number of Live Points (N)
+          <span class="control-value" id="nliveVal">50</span>
+        </label>
+        <input type="range" min="10" max="200" step="10" value="50" id="nlive">
+        <div style="font-size: 0.85rem; color: #4a5568; margin-top: 0.25rem;">
+          More points → better evidence estimate, but slower. Typically 50-500.
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label>
+          Iteration Speed (ms)
+          <span class="control-value" id="speedVal">100</span>
+        </label>
+        <input type="range" min="10" max="500" step="10" value="100" id="speed">
+        <div style="font-size: 0.85rem; color: #4a5568; margin-top: 0.25rem;">
+          Delay between iterations. Slower helps visualize the progression.
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label>
+          Target Distribution
+        </label>
+        <select id="dist">
+          <option value="gaussian">Bivariate Gaussian</option>
+          <option value="banana">Rosenbrock's Banana</option>
+          <option value="funnel">Neal's Funnel</option>
+          <option value="bimodal">Bimodal Mixture (★ Best for NS!)</option>
+        </select>
+        <div style="font-size: 0.85rem; color: #4a5568; margin-top: 0.25rem;">
+          The bimodal distribution showcases nested sampling's key advantage: naturally finding multiple modes.
+        </div>
+      </div>
+    </div>
+
+    <div class="button-group">
+      <button onclick="start()">▶ Start Sampling</button>
+      <button class="secondary" onclick="singleStep()">→ Single Iteration</button>
+      <button class="tertiary" onclick="reset()">⟲ Reset</button>
+    </div>
+
+    <div class="info-note" style="margin-top: 1.5rem;">
+      <strong>Note on implementation:</strong> This demo uses simple rejection sampling to generate new live points 
+      (draw from prior, reject if likelihood too low). Real implementations use MCMC methods (slice sampling, 
+      Metropolis) to efficiently sample from the constrained prior, especially important in high dimensions or 
+      for complex likelihood contours.
+    </div>
+  </div>
+
+  <!-- VISUALIZATION -->
+  <div class="section">
+    <h2 class="section-title">Nested Sampling Visualization</h2>
+    <p>
+      The main plot shows the joint posterior \(\pi(\theta_1, \theta_2)\) with darker regions indicating higher probability. 
+      <span style="color: #3b82f6; font-weight: 600;">Blue points</span> show the current live points (actively sampling), and 
+      <span style="color: #dc2626; font-weight: 600;">red points</span> show dead points (discarded) that contribute 
+      to the evidence calculation. Watch how live points progressively contract toward higher-likelihood regions.
+    </p>
+    
+    <div class="visualization-grid">
+      <!-- Main posterior plot -->
+      <div class="canvas-container">
+        <div class="canvas-label">Joint Posterior Distribution π(θ₁, θ₂)</div>
+        <canvas id="posterior" width="650" height="650"></canvas>
+        <p style="font-size: 0.85rem; color: #4a5568; margin-top: 0.5rem;">
+          Live points sample the constrained prior uniformly, naturally exploring all high-density regions 
+          (darker areas). For multimodal distributions, you'll see live points in multiple modes simultaneously.
+        </p>
+      </div>
+
+      <!-- Marginal plots -->
+      <div class="marginal-plots">
+        <div class="marginal-plot">
+          <div class="canvas-label">Marginal Posterior Distribution of θ₁</div>
+          <canvas id="histX" width="300" height="280"></canvas>
+          <p style="font-size: 0.85rem; color: #4a5568; margin-top: 0.5rem;">
+            <strong>Importance-weighted</strong> histogram of θ₁ samples. Each dead point contributes 
+            proportionally to its posterior weight \(w_i = \mathcal{L}_i \Delta X_i / \mathcal{Z}\). 
+            Approximates the true marginal \(\pi(\theta_1 | \text{data})\).
+          </p>
+        </div>
+        <div class="marginal-plot">
+          <div class="canvas-label">Marginal Posterior Distribution of θ₂</div>
+          <canvas id="histY" width="300" height="280"></canvas>
+          <p style="font-size: 0.85rem; color: #4a5568; margin-top: 0.5rem;">
+            <strong>Importance-weighted</strong> histogram of θ₂ samples. Properly accounts for the fact that 
+            different samples contribute differently to the posterior. This is crucial for nested sampling 
+            as raw dead points are NOT posterior samples without weighting.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Current step info -->
+    <div class="stats-panel">
+      <strong>Current Iteration Details</strong>
+      <div id="stepInfo" class="step-info">
+        Click "Start Sampling" or "Single Iteration" to begin nested sampling.
+      </div>
+    </div>
+  </div>
+
+  <!-- NESTED SAMPLING DIAGNOSTICS -->
+  <div class="section">
+    <h2 class="section-title">Nested Sampling Diagnostics</h2>
+    <p>
+      Unlike MCMC diagnostics (which focus on chain mixing and autocorrelation), nested sampling requires monitoring the <strong>prior volume shrinkage</strong> 
+      and <strong>evidence evolution</strong>. These plots show how the algorithm progressively constrains the prior 
+      and accumulates evidence.
+    </p>
+    
+    <div class="algorithm-box" style="margin-bottom: 1.5rem;">
+      <strong>What to monitor in nested sampling:</strong>
+      <ul style="margin: 0.5rem 0; padding-left: 1.5rem;">
+        <li><strong>Prior volume X(i):</strong> Should shrink exponentially as \(X_i \approx \exp(-i/N)\)</li>
+        <li><strong>Log-likelihood evolution:</strong> Should increase as we move to higher-likelihood regions</li>
+        <li><strong>Evidence accumulation:</strong> log(Z) should stabilize when most evidence is captured</li>
+        <li><strong>Posterior weights:</strong> Show which samples contribute most to the posterior</li>
+      </ul>
+    </div>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+      <div>
+        <div class="canvas-label">Prior Volume Shrinkage: log(X) vs Iteration</div>
+        <canvas id="traceX" width="100%" height="250" style="width: 100%;"></canvas>
+        <p style="font-size: 0.85rem; color: #4a5568; margin-top: 0.5rem;">
+          Prior volume X shrinks exponentially. The slope should be approximately -1/N. 
+          Linear on log scale confirms proper shrinkage rate.
+        </p>
+      </div>
+      <div>
+        <div class="canvas-label">Log-Likelihood Evolution</div>
+        <canvas id="traceY" width="100%" height="250" style="width: 100%;"></canvas>
+        <p style="font-size: 0.85rem; color: #4a5568; margin-top: 0.5rem;">
+          Minimum log-likelihood at each iteration. Should increase monotonically as we sample 
+          from progressively more constrained priors.
+        </p>
+      </div>
+    </div>
+    
+    <div style="margin-top: 1.5rem;">
+      <div class="canvas-label">Evidence Evolution: log(Z) vs Iteration</div>
+      <canvas id="evidencePlot" width="100%" height="250" style="width: 100%;"></canvas>
+      <p style="font-size: 0.85rem; color: #4a5568; margin-top: 0.5rem;">
+        Cumulative log-evidence. Should plateau when remaining prior volume × max likelihood becomes negligible.
+        The stabilization indicates convergence.
+      </p>
+    </div>
+  </div>
+
+  <!-- DIAGNOSTICS -->
+  <div class="section">
+    <h2 class="section-title">Posterior Analysis</h2>
+    
+    <h3 style="font-size: 1.1rem; font-weight: 600; margin: 0 0 1rem 0;">Understanding Posterior Weights</h3>
+    <p>
+      This is the <strong>most important diagnostic</strong> for nested sampling. It shows you which dead points 
+      actually matter for your posterior inference.
+    </p>
+    
+    <div class="algorithm-box" style="margin-bottom: 1.5rem;">
+      <strong>The Key Insight:</strong>
+      <p style="margin: 0.75rem 0;">
+        Each dead point has a posterior weight:
+      </p>
+      $$w_i = \frac{\mathcal{L}_i \times \Delta X_i}{\mathcal{Z}}$$
+      <p style="margin: 0.75rem 0;">
+        This weight is the <strong>product of two competing factors</strong>:
+      </p>
+      <ul style="margin: 0.5rem 0; padding-left: 1.5rem;">
+        <li>\(\mathcal{L}_i\): Likelihood (how well the parameters fit the data) — <strong>increases</strong> with iteration</li>
+        <li>\(\Delta X_i\): Prior volume width — <strong>decreases</strong> exponentially with iteration</li>
+      </ul>
+    </div>
+    
+    <div class="info-note" style="margin-bottom: 1.5rem;">
+      <strong>What the plot shows you:</strong>
+      <div style="margin-top: 0.75rem; line-height: 1.8;">
+        <p style="margin: 0.5rem 0;">
+          <strong>📊 Early iterations (left side):</strong><br>
+          • Large prior volume (\(\Delta X_i\) is big) ✓<br>
+          • BUT low likelihood (\(\mathcal{L}_i\) is small) ✗<br>
+          • <span style="color: #dc2626;">→ Low weights</span> (these points don't contribute much to posterior)
+        </p>
+        
+        <p style="margin: 1rem 0 0.5rem 0;">
+          <strong>🎯 Middle iterations (peak of the curve):</strong><br>
+          • Moderate prior volume (\(\Delta X_i\) still reasonable) ✓<br>
+          • High likelihood (\(\mathcal{L}_i\) is large) ✓<br>
+          • <span style="color: #059669; font-weight: 600;">→ HIGH WEIGHTS — These are your most important samples!</span><br>
+          • These points are near the posterior mode and dominate your inference
+        </p>
+        
+        <p style="margin: 1rem 0 0.5rem 0;">
+          <strong>📉 Late iterations (right side):</strong><br>
+          • Very high likelihood (\(\mathcal{L}_i\) is huge) ✓<br>
+          • BUT tiny prior volume (\(\Delta X_i \approx 0\)) ✗<br>
+          • <span style="color: #dc2626;">→ Low weights</span> (not much prior volume left to contribute)
+        </p>
+      </div>
+    </div>
+    
+    <div class="algorithm-box" style="margin-bottom: 1.5rem;">
+      <strong>Practical interpretation:</strong>
+      <ul style="margin: 0.5rem 0; padding-left: 1.5rem;">
+        <li><strong>Sharp, narrow peak:</strong> Posterior is concentrated; only a few iterations matter. 
+        May need more live points for accuracy.</li>
+        <li><strong>Broad, smooth peak:</strong> Many iterations contribute; good sampling of posterior. 
+        ESS will be closer to number of iterations.</li>
+        <li><strong>Multiple peaks:</strong> Multimodal posterior! Each peak corresponds to exploring a different mode.</li>
+        <li><strong>Peak location:</strong> Shows when you've transitioned from prior-dominated to likelihood-dominated region.</li>
+      </ul>
+    </div>
+    
+    <div class="canvas-label">Posterior Weights vs Iteration</div>
+    <canvas id="acfXY" width="100%" height="350" style="width: 100%;"></canvas>
+    
+    <p style="margin-top: 1rem; color: #4a5568; font-size: 0.9rem;">
+      <strong>What to look for:</strong> The peak shows the "sweet spot" where nested sampling finds the bulk of the posterior mass. 
+      This is where \(\mathcal{L}_i\) is high enough to matter, but \(\Delta X_i\) hasn't shrunk to zero yet. 
+      Before the peak, you're exploring low-likelihood regions (prior). After the peak, you're refining details 
+      but with negligible volume contribution.
+    </p>
+
+    <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 1rem; margin-top: 1rem; border-radius: 4px;">
+      <strong style="color: #92400e;">💡 Key takeaway:</strong>
+      <p style="margin: 0.5rem 0 0 0; color: #78350f;">
+        Unlike MCMC where every sample contributes equally, nested sampling naturally identifies which samples 
+        matter most. The posterior weights plot reveals this directly—you can literally see which ~10-30% of 
+        iterations carry most of the posterior information!
+      </p>
+    </div>
+      hasn't shrunk to negligibility yet. Early iterations (low likelihood) and late iterations 
+      (tiny prior volume) both have low weights.
+    </p>
+
+    <h3 style="font-size: 1.1rem; font-weight: 600; margin: 2rem 0 1rem 0;">Performance Metrics</h3>
+    <div class="stats-grid" style="margin-top: 1rem;">
+      <div class="stat-item">
+        <div class="stat-label">Iterations</div>
+        <div class="stat-value" id="totalIter">0</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Log Evidence</div>
+        <div class="stat-value" id="acceptRate">—</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Dead Points</div>
+        <div class="stat-value" id="acceptCount">0</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Effective Sample Size</div>
+        <div class="stat-value" id="essValue">—</div>
+      </div>
+    </div>
+    
+    <div class="algorithm-box" style="margin-top: 1.5rem;">
+      <strong>Effective Sample Size for Nested Sampling</strong>
+      <p style="margin: 0.75rem 0;">
+        In nested sampling, ESS is computed from the <strong>variance of the normalized importance weights</strong>, 
+        following standard importance sampling theory (Kish, 1965; Kong, 1992):
+      </p>
+      $$\text{ESS} = \frac{\left(\sum_{i=1}^{n} w_i\right)^2}{\sum_{i=1}^{n} w_i^2} = \frac{1}{\sum_{i=1}^{n} \tilde{w}_i^2}$$
+      <p style="margin: 0.75rem 0 0 0; font-size: 0.9rem;">
+        where \(w_i = \mathcal{L}_i \Delta X_i / \mathcal{Z}\) are the normalized posterior weights satisfying \(\sum w_i = 1\), 
+        so \(\tilde{w}_i = w_i\). This measures the variance of the weights—when all weights are equal (\(w_i = 1/n\)), 
+        we get ESS = \(n\). When weights are highly unequal (few samples dominate), ESS ≪ \(n\).
+      </p>
+      <p style="margin: 0.75rem 0 0 0; font-size: 0.9rem; color: #4a5568;">
+        <strong>Interpretation:</strong> ESS quantifies how many equally-weighted samples would provide the same 
+        Monte Carlo variance as the weighted sample. This is the standard diagnostic for importance sampling 
+        (Liu, 2001; Chopin & Ridgway, 2017) and is reported by nested sampling implementations like dynesty 
+        (Speagle, 2020) and NestedFit.
+      </p>
+    </div>
+    
+    <div class="info-note" style="margin-top: 1.5rem;">
+      <strong>Tuning the Number of Live Points:</strong> The number of live points \(N\) controls the resolution 
+      of the prior volume shrinkage. More live points give more accurate evidence estimates and better posterior 
+      resolution, but increase computational cost. A practical rule: \(N \gtrsim 25d\) for \(d\) dimensions 
+      (Skilling, 2006). For multimodal problems, increase \(N\) to ensure adequate sampling of each mode. 
+      Advanced implementations like MultiNest use ellipsoidal decomposition to adaptively allocate live points 
+      across modes.
+    </div>
+  </div>
+
+  <!-- STRENGTHS AND LIMITATIONS -->
+  <div class="section">
+    <h2 class="section-title">Strengths & Limitations of Nested Sampling</h2>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1rem;">
+      <div class="algorithm-box">
+        <strong style="color: #059669;">✓ Strengths</strong>
+        <ul style="margin: 0.75rem 0 0 0; padding-left: 1.5rem;">
+          <li style="margin: 0.5rem 0;"><strong>Evidence computation:</strong> Directly calculates \(\mathcal{Z}\) for model comparison (Bayes factors)</li>
+          <li style="margin: 0.5rem 0;"><strong>Multimodal posteriors:</strong> Naturally explores all modes without mode-hopping difficulties</li>
+          <li style="margin: 0.5rem 0;"><strong>No burn-in:</strong> Every point contributes; no samples wasted</li>
+          <li style="margin: 0.5rem 0;"><strong>Automatic termination:</strong> Stops when evidence is accurately determined</li>
+          <li style="margin: 0.5rem 0;"><strong>Parallel-friendly:</strong> Multiple live points can be updated independently</li>
+        </ul>
+      </div>
+      
+      <div class="algorithm-box">
+        <strong style="color: #dc2626;">✗ Limitations</strong>
+        <ul style="margin: 0.75rem 0 0 0; padding-left: 1.5rem;">
+          <li style="margin: 0.5rem 0;"><strong>Constrained sampling challenge:</strong> Sampling from prior with \(\mathcal{L} > \mathcal{L}_{\text{min}}\) is hard</li>
+          <li style="margin: 0.5rem 0;"><strong>Not ideal for posteriors alone:</strong> If you only want posterior samples, MCMC is often more efficient</li>
+          <li style="margin: 0.5rem 0;"><strong>Computational cost:</strong> Can be expensive, especially with rejection sampling</li>
+          <li style="margin: 0.5rem 0;"><strong>Curse of dimensionality:</strong> Rejection sampling becomes impractical in high dimensions (\(d > 20\))</li>
+          <li style="margin: 0.5rem 0;"><strong>Implementation complexity:</strong> Advanced variants (MultiNest, PolyChord) are complex</li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="info-note" style="margin-top: 1.5rem;">
+      <strong>When to use Nested Sampling:</strong>
+      <ul style="margin: 0.5rem 0 0 0; padding-left: 1.5rem;">
+        <li><strong>Model comparison:</strong> When you need Bayes factors or posterior odds ratios</li>
+        <li><strong>Multimodal posteriors:</strong> When the posterior has multiple well-separated modes</li>
+        <li><strong>Phase transitions:</strong> When the posterior has sharp features or phase transition behavior</li>
+        <li><strong>Low-to-moderate dimensions:</strong> Most effective for \(d \lesssim 20\) (with basic rejection) or \(d \lesssim 100\) (with advanced methods)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- COMPARISON -->
+  <div class="section">
+    <h2 class="section-title">Comparison: Nested Sampling vs. MCMC</h2>
+    <p>
+      Nested sampling and MCMC methods serve different primary purposes:
+    </p>
+    
+    <div class="algorithm-box" style="margin-top: 1rem;">
+      <strong>Key Differences:</strong>
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+        <div><strong>Property</strong></div>
+        <div><strong>MCMC (MH/HMC)</strong></div>
+        <div><strong>Nested Sampling</strong></div>
+        
+        <div style="padding: 0.5rem 0; border-top: 1px solid #e2e8f0;">Primary goal</div>
+        <div style="padding: 0.5rem 0; border-top: 1px solid #e2e8f0;">Posterior sampling</div>
+        <div style="padding: 0.5rem 0; border-top: 1px solid #e2e8f0;">Evidence computation</div>
+        
+        <div style="padding: 0.5rem 0;">Computes \(\mathcal{Z}\)?</div>
+        <div style="padding: 0.5rem 0;">No (requires thermodynamic integration)</div>
+        <div style="padding: 0.5rem 0;">Yes (directly)</div>
+        
+        <div style="padding: 0.5rem 0;">Multimodality</div>
+        <div style="padding: 0.5rem 0;">Struggles (mode-hopping hard)</div>
+        <div style="padding: 0.5rem 0;">Handles naturally</div>
+        
+        <div style="padding: 0.5rem 0;">Burn-in needed?</div>
+        <div style="padding: 0.5rem 0;">Yes</div>
+        <div style="padding: 0.5rem 0;">No</div>
+        
+        <div style="padding: 0.5rem 0;">Parallelization</div>
+        <div style="padding: 0.5rem 0;">Sequential chain</div>
+        <div style="padding: 0.5rem 0;">Embarrassingly parallel</div>
+        
+        <div style="padding: 0.5rem 0;">Best for</div>
+        <div style="padding: 0.5rem 0;">Posterior inference</div>
+        <div style="padding: 0.5rem 0;">Model comparison</div>
+      </div>
+    </div>
+    
+    <div style="margin-top: 1.5rem;">
+      <p>
+        <strong>Practical recommendation:</strong> Use nested sampling when you need to compare models 
+        (compute Bayes factors) or when the posterior is multimodal. Use HMC/NUTS for high-dimensional 
+        unimodal posterior inference. Use Metropolis–Hastings when gradients aren't available and 
+        dimensionality is low.
+      </p>
+    </div>
+  </div>
+
+  <!-- REFERENCES -->
+  <div class="section">
+    <h2 class="section-title">References & Further Reading</h2>
+    <div style="font-size: 0.9rem; line-height: 1.8;">
+      <p><strong>Nested Sampling Papers:</strong></p>
+      <ul style="padding-left: 1.5rem; margin: 0.5rem 0;">
+        <li>Skilling, J. (2004). "Nested Sampling." In <em>American Institute of Physics Conference Series</em>, 
+        Vol. 735 (eds. R. Fischer, R. Preuss, & U. V. Toussaint), 395-405.</li>
+        <li>Skilling, J. (2006). "Nested Sampling for General Bayesian Computation." 
+        <em>Bayesian Analysis</em>, 1(4), 833-860.</li>
+        <li>Feroz, F., Hobson, M.P., & Bridges, M. (2009). "MultiNest: An Efficient and Robust Bayesian Inference Tool 
+        for Cosmology and Particle Physics." <em>Monthly Notices of the Royal Astronomical Society</em>, 398(4), 1601-1614.</li>
+        <li>Speagle, J.S. (2020). "dynesty: A Dynamic Nested Sampling Package for Estimating Bayesian Posteriors and Evidences." 
+        <em>Monthly Notices of the Royal Astronomical Society</em>, 493(3), 3132-3158.</li>
+        <li>Ashton, G., et al. (2022). "Nested Sampling for Physical Scientists." 
+        <em>Nature Reviews Methods Primers</em>, 2, 39.</li>
+      </ul>
+      
+      <p style="margin-top: 1rem;"><strong>Importance Sampling & ESS Theory:</strong></p>
+      <ul style="padding-left: 1.5rem; margin: 0.5rem 0;">
+        <li>Kish, L. (1965). <em>Survey Sampling</em>. New York: Wiley. (Original ESS formula for weighted samples)</li>
+        <li>Kong, A. (1992). "A Note on Importance Sampling Using Standardized Weights." 
+        <em>Technical Report</em>, University of Chicago.</li>
+        <li>Liu, J.S. (2001). <em>Monte Carlo Strategies in Scientific Computing</em>. New York: Springer. 
+        (Chapter 2: Importance Sampling)</li>
+        <li>Chopin, N., & Ridgway, J. (2017). "Leave Pima Indians Alone: Binary Regression as a Benchmark for Bayesian Computation." 
+        <em>Statistical Science</em>, 32(1), 64-87. (Discussion of ESS for importance sampling)</li>
+      </ul>
+      
+      <p style="margin-top: 1rem;"><strong>Books:</strong></p>
+      <ul style="padding-left: 1.5rem; margin: 0.5rem 0;">
+        <li>Sivia, D.S., & Skilling, J. (2006). <em>Data Analysis: A Bayesian Tutorial</em> (2nd ed.). Oxford University Press.</li>
+        <li>Brooks, S., Gelman, A., Jones, G., & Meng, X.-L. (2011). <em>Handbook of Markov Chain Monte Carlo</em>. CRC Press.</li>
+        <li>Trotta, R. (2008). "Bayes in the Sky: Bayesian Inference and Model Selection in Cosmology." 
+        <em>Contemporary Physics</em>, 49(2), 71-104. (Review with nested sampling applications)</li>
+      </ul>
+      
+      <p style="margin-top: 1rem;"><strong>Software Implementations:</strong></p>
+      <ul style="padding-left: 1.5rem; margin: 0.5rem 0;">
+        <li><strong>dynesty:</strong> <a href="https://dynesty.readthedocs.io/" style="color: #667eea;">dynesty.readthedocs.io</a> 
+        - Pure Python, dynamic nested sampling with excellent documentation (reports ESS)</li>
+        <li><strong>MultiNest:</strong> <a href="https://github.com/farhanferoz/MultiNest" style="color: #667eea;">github.com/farhanferoz/MultiNest</a> 
+        - Fortran implementation with Python interface (PyMultiNest)</li>
+        <li><strong>PolyChord:</strong> <a href="https://github.com/PolyChord/PolyChordLite" style="color: #667eea;">PolyChord</a> 
+        - Efficient for high-dimensional problems</li>
+        <li><strong>UltraNest:</strong> Modern Python implementation with advanced diagnostics</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/***************************************************
+ * CANVAS & UI SETUP
+ ***************************************************/
+const canvas = document.getElementById("posterior");
+const ctx = canvas.getContext("2d");
+const hxCanvas = document.getElementById("histX");
+const hyCanvas = document.getElementById("histY");
+const hx = hxCanvas.getContext("2d");
+const hy = hyCanvas.getContext("2d");
+const acfCanvas = document.getElementById("acfXY");
+const acfXY = acfCanvas.getContext("2d");
+const traceXCanvas = document.getElementById("traceX");
+const traceYCanvas = document.getElementById("traceY");
+const traceX = traceXCanvas.getContext("2d");
+const traceY = traceYCanvas.getContext("2d");
+const evidencePlotCanvas = document.getElementById("evidencePlot");
+const evidencePlot = evidencePlotCanvas.getContext("2d");
+
+// Set canvas widths to actual container width
+acfCanvas.width = acfCanvas.offsetWidth;
+traceXCanvas.width = traceXCanvas.offsetWidth;
+traceYCanvas.width = traceYCanvas.offsetWidth;
+evidencePlotCanvas.width = evidencePlotCanvas.offsetWidth;
+
+const stepInfo = document.getElementById("stepInfo");
+const nliveSlider = document.getElementById("nlive");
+const speedSlider = document.getElementById("speed");
+const nliveVal = document.getElementById("nliveVal");
+const speedVal = document.getElementById("speedVal");
+
+nliveSlider.oninput = () => {
+  nliveVal.textContent = nliveSlider.value;
+};
+
+speedSlider.oninput = () => {
+  speedVal.textContent = speedSlider.value;
+  if (timer) {
+    clearInterval(timer);
+    timer = setInterval(nestedSamplingStep, parseInt(speedSlider.value));
+  }
+};
+
+/***************************************************
+ * DOMAIN & STATE
+ ***************************************************/
+// Domain will be set based on distribution
+let xmin, xmax, ymin, ymax;
+
+function setDomain() {
+  const type = document.getElementById("dist").value;
+  if (type === "funnel") {
+    // Neal's funnel: x ~ N(0, 3^2), y|x ~ N(0, exp(x)^2)
+    // x covers ±3 std devs = ±9, use ±10 to be safe
+    // For y: when x is large, exp(x) is huge. At x=5, exp(5)≈150
+    // So y needs range of about ±3*150 = ±450, but let's use ±50 for visualization
+    xmin = -10; xmax = 10;
+    ymin = -50; ymax = 50;
+  } else if (type === "banana") {
+    // Rosenbrock banana: x² + 100(y - x²)² ≤ C
+    // For 95% probability mass, C ≈ 200 * 5.99 ≈ 1200
+    // So x² ≤ 1200 → x ∈ [-35, 35], but main mass is closer
+    // The banana curves upward: when x=±2, y ≈ x² = 4
+    // Most mass is in x ∈ [-2.5, 2.5], y ∈ [-1, 7]
+    xmin = -3; xmax = 3;
+    ymin = -1; ymax = 8;
+  } else if (type === "bimodal") {
+    // Bimodal: two modes at (-2, -2) and (+2, +2)
+    // Each mode has width σ=0.8, so ±3σ ≈ 2.4 around each mode
+    // Cover both modes: [-2-3, 2+3] = [-5, 5]
+    xmin = -5; xmax = 5;
+    ymin = -5; ymax = 5;
+  } else {
+    // Gaussian: bivariate with ρ=0.8, unit variance
+    // ±4 standard deviations covers 99.99%
+    xmin = -4; xmax = 4;
+    ymin = -4; ymax = 4;
+  }
+}
+
+// Initialize domain
+setDomain();
+
+const samplesX = [];
+const samplesY = [];
+const samplesL = []; // Likelihoods
+const samplesX_prior = []; // Prior volumes
+
+// Nested sampling state
+let livePoints = []; // Array of {x, y, L}
+let deadPoints = []; // Array of {x, y, L, X}
+let logZ = -1e100; // Log evidence
+let H = 0; // Information (Bayesian model complexity)
+let iteration = 0;
+let timer = null;
+
+/***************************************************
+ * TARGET DISTRIBUTIONS
+ ***************************************************/
+function target(x, y) {
+  const type = document.getElementById("dist").value;
+  if (type === "funnel") return targetFunnel(x, y);
+  if (type === "banana") return targetBanana(x, y);
+  if (type === "bimodal") return targetBimodal(x, y);
+  return targetGaussian(x, y);
+}
+
+function targetGaussian(x, y) {
+  // Bivariate Gaussian with correlation rho = 0.8
+  const rho = 0.8;
+  const exponent = (x*x - 2*rho*x*y + y*y) / (2 * (1 - rho*rho));
+  return Math.exp(-exponent);
+}
+
+function targetBanana(x, y) {
+  // Rosenbrock's banana distribution
+  // π(x,y) ∝ exp(-1/200 * (x² + 100(y - x²)²))
+  const exponent = (x*x + 100 * (y - x*x)**2) / 200;
+  return Math.exp(-exponent);
+}
+
+function targetFunnel(x, y) {
+  // Neal's funnel distribution
+  // x ~ N(0, 3²), y|x ~ N(0, exp(x)²)
+  // π(x,y) ∝ exp(-x²/18 - y²/(2*exp(2x)))
+  const ex = Math.exp(x);
+  const exponent = x*x / 18 + y*y / (2 * ex * ex);
+  return Math.exp(-exponent);
+}
+
+function targetBimodal(x, y) {
+  // Bimodal Gaussian mixture - two well-separated modes
+  // Mode 1: centered at (-2, -2)
+  // Mode 2: centered at (+2, +2)
+  // This tests nested sampling's ability to find multiple modes
+  
+  const sigma = 0.8; // Width of each mode
+  
+  // Mode 1: weight = 0.4, center = (-2, -2)
+  const dx1 = x + 2;
+  const dy1 = y + 2;
+  const mode1 = 0.4 * Math.exp(-(dx1*dx1 + dy1*dy1) / (2 * sigma*sigma));
+  
+  // Mode 2: weight = 0.6, center = (+2, +2)  
+  const dx2 = x - 2;
+  const dy2 = y - 2;
+  const mode2 = 0.6 * Math.exp(-(dx2*dx2 + dy2*dy2) / (2 * sigma*sigma));
+  
+  return mode1 + mode2;
+}
+
+
+/***************************************************
+ * COORDINATE TRANSFORMATION
+ ***************************************************/
+function toCanvas(x, y) {
+  const px = (x - xmin) / (xmax - xmin) * canvas.width;
+  const py = canvas.height - (y - ymin) / (ymax - ymin) * canvas.height;
+  return [px, py];
+}
+
+/***************************************************
+ * DRAW DENSITY WITH PROPER AXES
+ ***************************************************/
+function drawDensity() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Compute density grid
+  const n = 200;
+  const density = [];
+  let maxP = 0;
+  
+  for (let i = 0; i < n; i++) {
+    density[i] = [];
+    for (let j = 0; j < n; j++) {
+      const xVal = xmin + (xmax - xmin) * i / n;
+      const yVal = ymin + (ymax - ymin) * j / n;
+      const pVal = target(xVal, yVal);
+      density[i][j] = pVal;
+      if (pVal > maxP) maxP = pVal;
+    }
+  }
+
+  // Draw density heatmap
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < n; j++) {
+      const alpha = Math.min(0.9, Math.max(0.05, 8 * density[i][j] / maxP));
+      ctx.fillStyle = `rgba(17, 24, 39, ${alpha})`;
+      ctx.fillRect(
+        i * canvas.width / n,
+        canvas.height - j * canvas.height / n,
+        canvas.width / n + 1,
+        canvas.height / n + 1
+      );
+    }
+  }
+
+  // Grid lines
+  ctx.strokeStyle = "#e0e0e0";
+  ctx.lineWidth = 0.5;
+  const gridN = 8;
+  for (let i = 0; i <= gridN; i++) {
+    const pos = i / gridN * canvas.width;
+    ctx.beginPath();
+    ctx.moveTo(pos, 0);
+    ctx.lineTo(pos, canvas.height);
+    ctx.stroke();
+    
+    ctx.beginPath();
+    ctx.moveTo(0, pos);
+    ctx.lineTo(canvas.width, pos);
+    ctx.stroke();
+  }
+
+  // Axes
+  ctx.strokeStyle = "#2d3748";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(0, canvas.height);
+  ctx.lineTo(canvas.width, canvas.height);
+  ctx.moveTo(0, 0);
+  ctx.lineTo(0, canvas.height);
+  ctx.stroke();
+
+  // Ticks and labels
+  ctx.fillStyle = "#2d3748";
+  ctx.font = "13px -apple-system, sans-serif";
+  ctx.textAlign = "center";
+  
+  const nTicks = 8;
+  for (let i = 0; i <= nTicks; i++) {
+    const xPos = i / nTicks * canvas.width;
+    const yPos = canvas.height - i / nTicks * canvas.height;
+    const xLabel = (xmin + (xmax - xmin) * i / nTicks).toFixed(1);
+    const yLabel = (ymin + (ymax - ymin) * i / nTicks).toFixed(1);
+    
+    // X-axis ticks
+    ctx.beginPath();
+    ctx.moveTo(xPos, canvas.height);
+    ctx.lineTo(xPos, canvas.height - 8);
+    ctx.stroke();
+    ctx.fillText(xLabel, xPos, canvas.height + 20);
+    
+    // Y-axis ticks
+    ctx.textAlign = "right";
+    ctx.beginPath();
+    ctx.moveTo(0, yPos);
+    ctx.lineTo(8, yPos);
+    ctx.stroke();
+    ctx.fillText(yLabel, -12, yPos + 4);
+    ctx.textAlign = "center";
+  }
+
+  // Axis labels
+  ctx.font = "bold 16px -apple-system, sans-serif";
+  ctx.fillStyle = "#1a1a1a";
+  ctx.fillText("x₁", canvas.width / 2, canvas.height + 45);
+  
+  ctx.save();
+  ctx.translate(15, canvas.height / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.fillText("x₂", 0, 0);
+  ctx.restore();
+}
+
+/***************************************************
+ * NESTED SAMPLING STEP
+ ***************************************************/
+function nestedSamplingStep() {
+  if (livePoints.length === 0) {
+    console.log("No live points");
+    return;
+  }
+  
+  // Find point with lowest likelihood
+  let minIdx = 0;
+  let minL = livePoints[0].L;
+  for (let i = 1; i < livePoints.length; i++) {
+    if (livePoints[i].L < minL) {
+      minL = livePoints[i].L;
+      minIdx = i;
+    }
+  }
+  
+  const worstPoint = livePoints[minIdx];
+  
+  // Estimate prior volume shrinkage
+  const N = livePoints.length;
+  const t = Math.exp(-1.0 / N);
+  const X_prev = iteration === 0 ? 1.0 : deadPoints[deadPoints.length - 1].X;
+  const X = X_prev * t;
+  
+  // Save as dead point
+  deadPoints.push({
+    x: worstPoint.x,
+    y: worstPoint.y,
+    L: worstPoint.L,
+    X: X
+  });
+  
+  // Update evidence using log-sum-exp for numerical stability
+  const deltaX = iteration === 0 ? (1.0 - X) : (deadPoints[deadPoints.length - 2].X - X);
+  const logLikelihood = Math.log(Math.max(worstPoint.L, 1e-300));
+  const logDeltaX = Math.log(Math.max(deltaX, 1e-300));
+  const logWeight = logLikelihood + logDeltaX;
+  
+  if (iteration === 0) {
+    logZ = logWeight;
+  } else {
+    // Log-sum-exp: log(exp(a) + exp(b)) = max(a,b) + log(1 + exp(-|a-b|))
+    const maxLog = Math.max(logZ, logWeight);
+    logZ = maxLog + Math.log(Math.exp(logZ - maxLog) + Math.exp(logWeight - maxLog));
+  }
+  
+  // Information (Bayesian complexity)
+  const weight = worstPoint.L * deltaX;
+  const Z = Math.exp(logZ);
+  if (Z > 0) {
+    H += weight * logLikelihood / Z - weight * Math.log(weight) / Z;
+  }
+  
+  iteration++;
+  
+  // Generate new live point with L > minL using rejection sampling
+  let newPoint = null;
+  let attempts = 0;
+  const maxAttempts = 10000;
+  
+  while (attempts < maxAttempts && !newPoint) {
+    // Sample from prior
+    const nx = xmin + Math.random() * (xmax - xmin);
+    const ny = ymin + Math.random() * (ymax - ymin);
+    const nL = target(nx, ny);
+    
+    if (nL > minL) {
+      newPoint = {x: nx, y: ny, L: nL};
+    }
+    attempts++;
+  }
+  
+  if (!newPoint) {
+    // Couldn't find new point - algorithm has converged
+    console.log("Nested sampling converged - couldn't find point above threshold");
+    if (timer) {
+      clearInterval(timer);
+      timer = null;
+    }
+    updateStepInfo(worstPoint.x, worstPoint.y, minL, X, logZ, true);
+    updateStats();
+    return;
+  }
+  
+  // Replace worst point with new point
+  livePoints[minIdx] = newPoint;
+  
+  // Redraw everything
+  drawDensity();
+  
+  // Draw all dead points
+  deadPoints.forEach(pt => {
+    const [dpx, dpy] = toCanvas(pt.x, pt.y);
+    ctx.fillStyle = "rgba(220, 38, 38, 0.5)";
+    ctx.beginPath();
+    ctx.arc(dpx, dpy, 2, 0, 2 * Math.PI);
+    ctx.fill();
+  });
+  
+  // Draw live points
+  livePoints.forEach(pt => {
+    const [lpx, lpy] = toCanvas(pt.x, pt.y);
+    ctx.fillStyle = "#3b82f6";
+    ctx.beginPath();
+    ctx.arc(lpx, lpy, 4, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.strokeStyle = "white";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  });
+  
+  // Store samples for posterior
+  samplesX.push(worstPoint.x);
+  samplesY.push(worstPoint.y);
+  samplesL.push(worstPoint.L);
+  samplesX_prior.push(X);
+  
+  // Update displays
+  if (deadPoints.length > 1) {
+    drawHistograms();
+    drawNestedSamplingDiagnostics();
+  }
+  updateStepInfo(worstPoint.x, worstPoint.y, minL, X, logZ, false);
+  updateStats();
+  
+  // Check termination criterion
+  const maxL = Math.max(...livePoints.map(p => p.L));
+  const remainingZ = maxL * X;
+  const currentZ = Math.exp(logZ);
+  if (remainingZ < 0.01 * currentZ && iteration > 50) {
+    console.log("Nested sampling converged: remaining evidence negligible");
+    if (timer) {
+      clearInterval(timer);
+      timer = null;
+    }
+  }
+}
+
+/***************************************************
+ * UPDATE STEP INFO
+ ***************************************************/
+function updateStepInfo(x, y, L, X, logZ, converged) {
+  const statusClass = converged ? 'status-rejected' : 'status-accepted';
+  const statusText = converged ? 'CONVERGED' : 'SAMPLING';
+  
+  stepInfo.innerHTML = `
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+      <div>
+        <strong>Discarded Point (Lowest L)</strong><br>
+        θ₁ = ${x.toFixed(4)}<br>
+        θ₂ = ${y.toFixed(4)}<br>
+        L(θ) = ${L.toExponential(4)}
+      </div>
+      <div>
+        <strong>Nested Sampling Progress</strong><br>
+        Iteration: ${iteration}<br>
+        Prior Volume: X = ${X.toExponential(4)}<br>
+        Live Points: ${livePoints.length}
+      </div>
+    </div>
+    <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e2e8f0;">
+      <strong>Evidence Computation</strong><br>
+      log(Z) = ${logZ.toFixed(4)}<br>
+      Z = ${Math.exp(logZ).toExponential(4)}<br>
+      Information H = ${H.toFixed(4)} nats<br>
+      <div style="margin-top: 0.5rem;">
+        <span style="font-size: 1.1rem; margin-top: 0.5rem; display: inline-block;" class="${statusClass}">
+          ${statusText}
+        </span>
+      </div>
+    </div>
+  `;
+}
+
+/***************************************************
+ * UPDATE STATISTICS
+ ***************************************************/
+function updateStats() {
+  document.getElementById("totalIter").textContent = iteration.toLocaleString();
+  document.getElementById("acceptCount").textContent = deadPoints.length.toLocaleString();
+  
+  document.getElementById("acceptRate").textContent = 
+    "log(Z) = " + logZ.toFixed(2);
+  
+  // Estimate ESS from importance weights
+  if (samplesL.length > 10 && deadPoints.length > 0) {
+    try {
+      // Compute posterior weights
+      const Z = Math.exp(logZ);
+      if (Z > 0 && isFinite(Z)) {
+        const weights = [];
+        for (let i = 0; i < samplesL.length; i++) {
+          const X_prev = i === 0 ? 1.0 : samplesX_prior[i-1];
+          const X_curr = samplesX_prior[i];
+          const X_next = i < samplesX_prior.length - 1 ? samplesX_prior[i+1] : X_curr * Math.exp(-1/livePoints.length);
+          const deltaX = X_prev - X_next;
+          const w = samplesL[i] * deltaX / Z;
+          if (isFinite(w) && w > 0) {
+            weights.push(w);
+          }
+        }
+        
+        if (weights.length > 0) {
+          // ESS from weights: 1 / sum(w_i^2)
+          const sumW2 = weights.reduce((sum, w) => sum + w*w, 0);
+          const ess = sumW2 > 0 ? 1.0 / sumW2 : 0;
+          document.getElementById("essValue").textContent = Math.round(ess).toLocaleString();
+        }
+      }
+    } catch (e) {
+      console.error("Error computing ESS:", e);
+      document.getElementById("essValue").textContent = "—";
+    }
+  }
+}
+
+/***************************************************
+ * HISTOGRAMS
+ ***************************************************/
+function drawHistograms() {
+  drawHistogram(hx, samplesX, "x₁", hxCanvas);
+  drawHistogram(hy, samplesY, "x₂", hyCanvas);
+  drawPosteriorWeights(acfXY, deadPoints);
+  // Note: Nested sampling diagnostics are drawn separately via drawNestedSamplingDiagnostics()
+}
+
+function drawHistogram(ctx, data, label, canvas) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  if (data.length === 0 || deadPoints.length === 0 || !livePoints || livePoints.length === 0) return;
+
+  const bins = 40;
+  const hist = Array(bins).fill(0);
+  const binWidth = (xmax - xmin) / bins;
+
+  // Compute posterior weights for importance weighting
+  const Z = Math.exp(logZ);
+  if (!isFinite(Z) || Z <= 0) return; // Can't compute weights without valid evidence
+  
+  const weights = [];
+  
+  for (let i = 0; i < deadPoints.length; i++) {
+    const X_prev = i === 0 ? 1.0 : deadPoints[i-1].X;
+    const X_curr = deadPoints[i].X;
+    const X_next = i < deadPoints.length - 1 ? deadPoints[i+1].X : X_curr * Math.exp(-1/livePoints.length);
+    const deltaX = X_prev - X_next;
+    const weight = (deadPoints[i].L * deltaX) / Z;
+    if (isFinite(weight) && weight >= 0) {
+      weights.push(weight);
+    } else {
+      weights.push(0);
+    }
+  }
+
+  // Fill histogram with WEIGHTED samples
+  data.forEach((v, idx) => {
+    if (idx < weights.length) {
+      const i = Math.floor((v - xmin) / (xmax - xmin) * bins);
+      if (i >= 0 && i < bins) {
+        hist[i] += weights[idx]; // Add weight instead of count
+      }
+    }
+  });
+
+  const hmax = Math.max(...hist, 1e-10);
+  
+  // Normalize histogram to approximate density
+  const totalWeight = weights.reduce((sum, w) => sum + w, 0);
+  const normalized = hist.map(h => h / (totalWeight * binWidth));
+  const ymax = Math.max(...normalized, 0.01);
+
+  const margin = {top: 20, right: 20, bottom: 50, left: 55};
+  const plotWidth = canvas.width - margin.left - margin.right;
+  const plotHeight = canvas.height - margin.top - margin.bottom;
+
+  // Draw bars
+  hist.forEach((h, i) => {
+    const x = margin.left + i * plotWidth / bins;
+    const barHeight = (h / hmax) * plotHeight;
+    ctx.fillStyle = "#374151";
+    ctx.fillRect(x, margin.top + plotHeight - barHeight, plotWidth / bins - 1, barHeight);
+  });
+
+  // Axes
+  ctx.strokeStyle = "#2d3748";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(margin.left, margin.top);
+  ctx.lineTo(margin.left, margin.top + plotHeight);
+  ctx.lineTo(margin.left + plotWidth, margin.top + plotHeight);
+  ctx.stroke();
+
+  // X-axis ticks
+  ctx.fillStyle = "#2d3748";
+  ctx.font = "12px -apple-system, sans-serif";
+  ctx.textAlign = "center";
+  const xTicks = 8;
+  for (let i = 0; i <= xTicks; i++) {
+    const xPos = margin.left + i / xTicks * plotWidth;
+    const xLabel = (xmin + (xmax - xmin) * i / xTicks).toFixed(1);
+    ctx.beginPath();
+    ctx.moveTo(xPos, margin.top + plotHeight);
+    ctx.lineTo(xPos, margin.top + plotHeight + 5);
+    ctx.stroke();
+    ctx.fillText(xLabel, xPos, margin.top + plotHeight + 20);
+  }
+
+  // Y-axis ticks
+  ctx.textAlign = "right";
+  const yTicks = 5;
+  for (let i = 0; i <= yTicks; i++) {
+    const yPos = margin.top + plotHeight - i / yTicks * plotHeight;
+    const yLabel = (ymax * i / yTicks).toFixed(2);
+    ctx.beginPath();
+    ctx.moveTo(margin.left - 5, yPos);
+    ctx.lineTo(margin.left, yPos);
+    ctx.stroke();
+    ctx.fillText(yLabel, margin.left - 10, yPos + 4);
+  }
+
+  // Labels
+  ctx.font = "bold 14px -apple-system, sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText(label, margin.left + plotWidth / 2, canvas.height - 10);
+  
+  ctx.save();
+  ctx.translate(15, margin.top + plotHeight / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.fillText("Density", 0, 0);
+  ctx.restore();
+  
+  // Add note about weighting
+  ctx.font = "11px -apple-system, sans-serif";
+  ctx.fillStyle = "#6b7280";
+  ctx.textAlign = "right";
+  ctx.fillText("(importance weighted)", canvas.width - 5, 15);
+}
+
+/***************************************************
+ * TRACE PLOTS
+ ***************************************************/
+/***************************************************
+ * NESTED SAMPLING DIAGNOSTIC PLOTS
+ ***************************************************/
+function drawNestedSamplingDiagnostics() {
+  if (deadPoints.length < 2) return;
+  
+  // Extract data
+  const iterations = deadPoints.map((_, i) => i);
+  const logX = deadPoints.map(pt => Math.log(pt.X));
+  const logL = deadPoints.map(pt => Math.log(Math.max(pt.L, 1e-300)));
+  
+  // History of logZ
+  const logZHistory = [];
+  let runningLogZ = -1e100;
+  for (let i = 0; i < deadPoints.length; i++) {
+    const deltaX = i === 0 ? (1.0 - deadPoints[i].X) : (deadPoints[i-1].X - deadPoints[i].X);
+    const logWeight = Math.log(deadPoints[i].L) + Math.log(deltaX);
+    
+    if (i === 0) {
+      runningLogZ = logWeight;
+    } else {
+      const maxLog = Math.max(runningLogZ, logWeight);
+      runningLogZ = maxLog + Math.log(Math.exp(runningLogZ - maxLog) + Math.exp(logWeight - maxLog));
+    }
+    logZHistory.push(runningLogZ);
+  }
+  
+  // Draw log(X) vs iteration
+  drawDiagnosticPlot(traceX, iterations, logX, "Iteration", "log(X)", "#1e40af", traceXCanvas);
+  
+  // Draw log(L) vs iteration  
+  drawDiagnosticPlot(traceY, iterations, logL, "Iteration", "log(L)", "#dc2626", traceYCanvas);
+  
+  // Draw log(Z) vs iteration
+  drawDiagnosticPlot(evidencePlot, iterations, logZHistory, "Iteration", "log(Z)", "#059669", evidencePlotCanvas);
+}
+
+function drawDiagnosticPlot(ctx, xData, yData, xLabel, yLabel, color, canvas) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  if (xData.length < 2) return;
+
+  const margin = {top: 20, right: 50, bottom: 50, left: 70};
+  const plotWidth = canvas.width - margin.left - margin.right;
+  const plotHeight = canvas.height - margin.top - margin.bottom;
+
+  // Find data range
+  const xMin = Math.min(...xData);
+  const xMax = Math.max(...xData);
+  const yMin = Math.min(...yData);
+  const yMax = Math.max(...yData);
+  const yRange = yMax - yMin;
+  const yPadding = yRange * 0.1;
+
+  // Grid
+  ctx.strokeStyle = "#e5e7eb";
+  ctx.lineWidth = 1;
+  const xTicks = 10;
+  const yTicks = 6;
+  
+  for (let i = 0; i <= xTicks; i++) {
+    const x = margin.left + i / xTicks * plotWidth;
+    ctx.beginPath();
+    ctx.moveTo(x, margin.top);
+    ctx.lineTo(x, margin.top + plotHeight);
+    ctx.stroke();
+  }
+  
+  for (let i = 0; i <= yTicks; i++) {
+    const y = margin.top + i / yTicks * plotHeight;
+    ctx.beginPath();
+    ctx.moveTo(margin.left, y);
+    ctx.lineTo(margin.left + plotWidth, y);
+    ctx.stroke();
+  }
+
+  // Draw line
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  
+  for (let i = 0; i < xData.length; i++) {
+    const xPos = margin.left + (xData[i] - xMin) / (xMax - xMin || 1) * plotWidth;
+    const yPos = margin.top + plotHeight - (yData[i] - (yMin - yPadding)) / (yMax - yMin + 2 * yPadding || 1) * plotHeight;
+    
+    if (i === 0) ctx.moveTo(xPos, yPos);
+    else ctx.lineTo(xPos, yPos);
+  }
+  ctx.stroke();
+
+  // Axes
+  ctx.strokeStyle = "#2d3748";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(margin.left, margin.top);
+  ctx.lineTo(margin.left, margin.top + plotHeight);
+  ctx.lineTo(margin.left + plotWidth, margin.top + plotHeight);
+  ctx.stroke();
+
+  // X-axis ticks and labels
+  ctx.fillStyle = "#2d3748";
+  ctx.font = "12px -apple-system, sans-serif";
+  ctx.textAlign = "center";
+  
+  for (let i = 0; i <= xTicks; i++) {
+    const x = margin.left + i / xTicks * plotWidth;
+    const val = xMin + i / xTicks * (xMax - xMin);
+    ctx.beginPath();
+    ctx.moveTo(x, margin.top + plotHeight);
+    ctx.lineTo(x, margin.top + plotHeight + 6);
+    ctx.stroke();
+    ctx.fillText(Math.round(val), x, margin.top + plotHeight + 20);
+  }
+  
+  ctx.font = "bold 13px -apple-system, sans-serif";
+  ctx.fillText(xLabel, margin.left + plotWidth / 2, canvas.height - 10);
+
+  // Y-axis ticks and labels
+  ctx.textAlign = "right";
+  ctx.font = "12px -apple-system, sans-serif";
+  
+  for (let i = 0; i <= yTicks; i++) {
+    const y = margin.top + plotHeight - i / yTicks * plotHeight;
+    const val = (yMin - yPadding) + i / yTicks * (yMax - yMin + 2 * yPadding);
+    ctx.beginPath();
+    ctx.moveTo(margin.left - 6, y);
+    ctx.lineTo(margin.left, y);
+    ctx.stroke();
+    ctx.fillText(val.toFixed(2), margin.left - 10, y + 4);
+  }
+  
+  ctx.font = "bold 13px -apple-system, sans-serif";
+  ctx.save();
+  ctx.translate(20, margin.top + plotHeight / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.textAlign = "center";
+  ctx.fillText(yLabel, 0, 0);
+  ctx.restore();
+}
+
+/***************************************************
+ * AUTOCORRELATION
+ ***************************************************/
+function autocorr(data, lagMax = 100) {
+  const n = data.length;
+  if (n === 0) return [];
+  
+  const mean = data.reduce((a, b) => a + b, 0) / n;
+  const totalVar = data.reduce((a, b) => a + (b - mean)**2, 0);
+  
+  if (totalVar === 0) return Array(lagMax + 1).fill(0);
+  
+  const acf = [];
+  for (let lag = 0; lag <= lagMax; lag++) {
+    let c = 0;
+    for (let i = 0; i < n - lag; i++) {
+      c += (data[i] - mean) * (data[i + lag] - mean);
+    }
+    acf.push(c / totalVar);
+  }
+  return acf;
+}
+
+function drawPosteriorWeights(ctx, deadPts) {
+  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  
+  if (!deadPts || deadPts.length < 2 || !livePoints || livePoints.length === 0) return;
+
+  // Calculate posterior weights
+  const Z = Math.exp(logZ);
+  if (!isFinite(Z) || Z <= 0) return;
+  
+  const weights = [];
+  const iterations = [];
+  
+  for (let i = 0; i < deadPts.length; i++) {
+    const X_prev = i === 0 ? 1.0 : deadPts[i-1].X;
+    const X_curr = deadPts[i].X;
+    const X_next = i < deadPts.length - 1 ? deadPts[i+1].X : X_curr * Math.exp(-1/livePoints.length);
+    const deltaX = X_prev - X_next;
+    const weight = (deadPts[i].L * deltaX) / Z;
+    
+    if (isFinite(weight) && weight >= 0) {
+      weights.push(weight);
+      iterations.push(i);
+    }
+  }
+  
+  if (weights.length === 0) return;
+
+  const margin = {top: 30, right: 50, bottom: 60, left: 70};
+  const plotWidth = ctx.canvas.width - margin.left - margin.right;
+  const plotHeight = ctx.canvas.height - margin.top - margin.bottom;
+
+  const yMax = Math.max(...weights) * 1.1;
+  const yMin = 0;
+
+  // Grid
+  ctx.strokeStyle = "#e5e7eb";
+  ctx.lineWidth = 1;
+  const xTicks = 10;
+  const yTicks = 6;
+  
+  for (let i = 0; i <= xTicks; i++) {
+    const x = margin.left + i / xTicks * plotWidth;
+    ctx.beginPath();
+    ctx.moveTo(x, margin.top);
+    ctx.lineTo(x, margin.top + plotHeight);
+    ctx.stroke();
+  }
+  
+  for (let i = 0; i <= yTicks; i++) {
+    const y = margin.top + i / yTicks * plotHeight;
+    ctx.beginPath();
+    ctx.moveTo(margin.left, y);
+    ctx.lineTo(margin.left + plotWidth, y);
+    ctx.stroke();
+  }
+
+  // Draw weights as bars
+  const barWidth = plotWidth / weights.length * 0.8;
+  ctx.fillStyle = "#8b5cf6"; // Purple color for weights
+  
+  for (let i = 0; i < weights.length; i++) {
+    const xPos = margin.left + (i / (weights.length - 1)) * plotWidth;
+    const barHeight = (weights[i] / yMax) * plotHeight;
+    const yPos = margin.top + plotHeight - barHeight;
+    
+    ctx.fillRect(xPos - barWidth/2, yPos, barWidth, barHeight);
+  }
+
+  // Axes
+  ctx.strokeStyle = "#2d3748";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(margin.left, margin.top);
+  ctx.lineTo(margin.left, margin.top + plotHeight);
+  ctx.lineTo(margin.left + plotWidth, margin.top + plotHeight);
+  ctx.stroke();
+
+  // X-axis ticks and labels
+  ctx.fillStyle = "#2d3748";
+  ctx.font = "13px -apple-system, sans-serif";
+  ctx.textAlign = "center";
+  
+  for (let i = 0; i <= xTicks; i++) {
+    const x = margin.left + i / xTicks * plotWidth;
+    const iter = Math.round(i / xTicks * (deadPts.length - 1));
+    ctx.beginPath();
+    ctx.moveTo(x, margin.top + plotHeight);
+    ctx.lineTo(x, margin.top + plotHeight + 6);
+    ctx.stroke();
+    ctx.fillText(iter, x, margin.top + plotHeight + 22);
+  }
+  
+  ctx.font = "bold 14px -apple-system, sans-serif";
+  ctx.fillText("Iteration", margin.left + plotWidth / 2, ctx.canvas.height - 15);
+
+  // Y-axis ticks and labels
+  ctx.textAlign = "right";
+  ctx.font = "13px -apple-system, sans-serif";
+  
+  for (let i = 0; i <= yTicks; i++) {
+    const y = margin.top + plotHeight - i / yTicks * plotHeight;
+    const val = i / yTicks * yMax;
+    ctx.beginPath();
+    ctx.moveTo(margin.left - 6, y);
+    ctx.lineTo(margin.left, y);
+    ctx.stroke();
+    ctx.fillText(val.toExponential(2), margin.left - 12, y + 4);
+  }
+  
+  ctx.font = "bold 14px -apple-system, sans-serif";
+  ctx.save();
+  ctx.translate(20, margin.top + plotHeight / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.textAlign = "center";
+  ctx.fillText("Posterior Weight wᵢ", 0, 0);
+  ctx.restore();
+
+  // Title
+  ctx.textAlign = "center";
+  ctx.font = "bold 14px -apple-system, sans-serif";
+  ctx.fillText("Peak shows which iterations contribute most to posterior", ctx.canvas.width / 2, 15);
+}
+
+  ctx.font = "13px -apple-system, sans-serif";
+  
+  ctx.fillStyle = "#1e40af";
+  ctx.fillRect(ctx.canvas.width - 85, 20, 15, 3);
+  ctx.fillStyle = "#2d3748";
+  ctx.fillText("x₁ chain", ctx.canvas.width - 65, 25);
+  
+  ctx.fillStyle = "#dc2626";
+  ctx.fillRect(ctx.canvas.width - 85, 40, 15, 3);
+  ctx.fillStyle = "#2d3748";
+  ctx.fillText("x₂ chain", ctx.canvas.width - 65, 45);
+
+
+/***************************************************
+ * CONTROLS
+ ***************************************************/
+function start() {
+  if (timer) {
+    clearInterval(timer);
+    timer = null;
+    return;
+  }
+  timer = setInterval(nestedSamplingStep, parseInt(speedSlider.value));
+}
+
+function singleStep() {
+  nestedSamplingStep();
+}
+
+function reset() {
+  if (timer) {
+    clearInterval(timer);
+    timer = null;
+  }
+  
+  // Update domain based on selected distribution
+  setDomain();
+  
+  samplesX.length = 0;
+  samplesY.length = 0;
+  samplesL.length = 0;
+  samplesX_prior.length = 0;
+  livePoints.length = 0;
+  deadPoints.length = 0;
+  
+  logZ = -1e100;
+  H = 0;
+  iteration = 0;
+  
+  // Initialize live points from prior
+  const N = parseInt(nliveSlider.value);
+  for (let i = 0; i < N; i++) {
+    const x = xmin + Math.random() * (xmax - xmin);
+    const y = ymin + Math.random() * (ymax - ymin);
+    const L = target(x, y);
+    livePoints.push({x, y, L});
+  }
+  
+  drawDensity();
+  
+  // Draw initial live points
+  livePoints.forEach(pt => {
+    const [px, py] = toCanvas(pt.x, pt.y);
+    ctx.fillStyle = "#3b82f6";
+    ctx.beginPath();
+    ctx.arc(px, py, 4, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.strokeStyle = "white";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  });
+  
+  hx.clearRect(0, 0, hxCanvas.width, hxCanvas.height);
+  hy.clearRect(0, 0, hyCanvas.width, hyCanvas.height);
+  acfXY.clearRect(0, 0, acfCanvas.width, acfCanvas.height);
+  traceX.clearRect(0, 0, traceXCanvas.width, traceXCanvas.height);
+  traceY.clearRect(0, 0, traceYCanvas.width, traceYCanvas.height);
+  evidencePlot.clearRect(0, 0, evidencePlotCanvas.width, evidencePlotCanvas.height);
+  
+  stepInfo.innerHTML = "Click 'Start Sampling' or 'Single Iteration' to begin nested sampling.";
+  
+  document.getElementById("totalIter").textContent = "0";
+  document.getElementById("acceptCount").textContent = "0";
+  document.getElementById("acceptRate").textContent = "—";
+  document.getElementById("essValue").textContent = "—";
+}
+
+/***************************************************
+ * GAUSSIAN RNG (Box-Muller)
+ ***************************************************/
+function randn() {
+  let u = 0, v = 0;
+  while (u === 0) u = Math.random();
+  while (v === 0) v = Math.random();
+  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+}
+
+/***************************************************
+ * INITIALIZATION
+ ***************************************************/
+// Wait for DOM to be ready before initializing
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', function() {
+    reset(); // Initialize live points
+  });
+} else {
+  reset(); // Initialize live points
+}
+
+// Add event listener to distribution selector to auto-reset on change
+document.getElementById("dist").addEventListener("change", function() {
+  reset();
+});
+</script>
+
+</body>
+</html>
