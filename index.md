@@ -43,7 +43,7 @@ A pedagogical 2-dimensional Hamiltonian Monte Carlo implementation for outreach 
 
 ### Bayesian Inference Introduction
 An interactive guide to Bayesian methods and sampling algorithms:
-- **[Introduction to Bayesian Inference](bayes_inference)** — From Bayes' theorem to posterior sampling
+- **[Introduction to Bayesian Inference](bayesian_inference)** — From Bayes' theorem to posterior sampling
   - [MCMC Sampler](/html_src/interactive_mcmc.html) — Metropolis-Hastings fundamentals and diagnostics
   - [HMC Sampler](/html_src/interactive_hmc.html) — Hamiltonian dynamics for efficient exploration 
 
