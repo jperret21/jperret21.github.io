@@ -24,6 +24,8 @@ My research combines statistical inference, deep learning, and Hamiltonian-based
 
 - **Vanilla HMC**: A simple 2-dimensional Hamiltonian Monte Carlo, primarily used for outreach and teaching purposes. The code is available [here](./404.html) in my GitHub repository.
 
+-**interactive MCMC**:[MCMC](mcmc) 
+
 
 
 

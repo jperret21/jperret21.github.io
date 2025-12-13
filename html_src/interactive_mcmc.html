@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>2D MCMC – Metropolis–Hastings (step by step)</title>
+
+  <style>
+    body {
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      background: #ffffff;
+      color: #111827;
+      margin: 0;
+      padding: 2rem;
+    }
+
+    h1, h2 { font-weight: 500; }
+
+    p {
+      max-width: 900px;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: auto;
+    }
+
+    .controls {
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+      margin: 1.5rem 0;
+    }
+
+    button {
+      background: #111827;
+      color: #ffffff;
+      border: none;
+      padding: 0.45rem 1.1rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+
+    button:hover { background: #374151; }
+
+    input[type=range] { width: 140px; }
+
+    canvas {
+      border: 1px solid #e5e7eb;
+      background: #ffffff;
+    }
+
+    .plots {
+      display: grid;
+      grid-template-columns: 3fr 1fr;
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    .histograms {
+      display: grid;
+      grid-template-rows: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .info {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      border: 1px solid #e5e7eb;
+      background: #f9fafb;
+      font-size: 0.9rem;
+      max-width: 900px;
+    }
+
+    .caption {
+      font-size: 0.8rem;
+      color: #4b5563;
+    }
+  </style>
+</head>
+
+<body>
+<div class="container">
+
+<h1>Metropolis–Hastings sampling of a 2D posterior</h1>
+
+<p>
+Interactive illustration of the Metropolis–Hastings algorithm.
+Each step explicitly shows the proposal, acceptance ratio, random draw,
+and decision.
+</p>
+
+<!-- ===================== CONTROLS ===================== -->
+<div class="controls">
+  <label>
+    Proposal width σ
+    <input type="range" min="0.05" max="2" step="0.05" value="0.6" id="sigma">
+    <span id="sigmaVal">0.6</span>
+  </label>
+
+  <label>
+    Speed (ms)
+    <input type="range" min="10" max="300" step="10" value="60" id="speed">
+    <span id="speedVal">60</span>
+  </label>
+
+  <label>
+    Target
+    <select id="dist">
+      <option value="gaussian">Gaussian</option>
+      <option value="mixture">Gaussian mixture</option>
+    </select>
+  </label>
+
+  <button onclick="start()">Run</button>
+  <button onclick="singleStep()">Single step</button>
+  <button onclick="reset()">Reset</button>
+</div>
+
+<!-- ===================== PLOTS ===================== -->
+<div class="plots">
+  <canvas id="posterior" width="650" height="650"></canvas>
+
+  <div class="histograms">
+    <div>
+      <canvas id="histX" width="220" height="300"></canvas>
+      <div class="caption">Marginal posterior of x</div>
+    </div>
+    <div>
+      <canvas id="histY" width="220" height="300"></canvas>
+      <div class="caption">Marginal posterior of y</div>
+    </div>
+  </div>
+</div>
+
+<div class="info" id="info"></div>
+
+<h2>Metropolis–Hastings algorithm</h2>
+<ol>
+  <li>Propose (x′, y′) ∼ q(· | x, y)</li>
+  <li>Compute r = π(x′, y′) / π(x, y)</li>
+  <li>Accept if u &lt; min(1, r), with u ∼ U(0,1)</li>
+</ol>
+
+</div>
+
+<script>
+/***************************************************
+ * CANVAS & UI
+ ***************************************************/
+const canvas = document.getElementById("posterior");
+const ctx = canvas.getContext("2d");
+const hx = document.getElementById("histX").getContext("2d");
+const hy = document.getElementById("histY").getContext("2d");
+const info = document.getElementById("info");
+
+const sigmaSlider = document.getElementById("sigma");
+const speedSlider = document.getElementById("speed");
+const sigmaVal = document.getElementById("sigmaVal");
+const speedVal = document.getElementById("speedVal");
+
+sigmaSlider.oninput = () => sigmaVal.textContent = sigmaSlider.value;
+speedSlider.oninput = () => speedVal.textContent = speedSlider.value;
+
+/***************************************************
+ * DOMAIN
+ ***************************************************/
+const xmin = -4, xmax = 4;
+const ymin = -4, ymax = 4;
+
+const samplesX = [];
+const samplesY = [];
+
+/***************************************************
+ * TARGET DISTRIBUTIONS π(x,y)
+ ***************************************************/
+function target(x,y){
+  const type = document.getElementById("dist").value;
+  return type === "mixture" ? targetMixture(x,y) : targetGaussian(x,y);
+}
+
+function targetGaussian(x,y){
+  const rho = 0.7;
+  const z = (x*x - 2*rho*x*y + y*y)/(1-rho*rho);
+  return Math.exp(-0.5*z);
+}
+
+function targetMixture(x,y){
+  const g1 = Math.exp(-0.5*((x-1.5)**2 + (y-1.5)**2));
+  const g2 = Math.exp(-0.5*((x+1.5)**2 + (y+1.5)**2));
+  return 0.5*(g1 + g2);
+}
+
+/***************************************************
+ * COORDINATES
+ ***************************************************/
+function toCanvas(x,y){
+  return [
+    (x-xmin)/(xmax-xmin)*canvas.width,
+    canvas.height - (y-ymin)/(ymax-ymin)*canvas.height
+  ];
+}
+
+/***************************************************
+ * DRAW POSTERIOR
+ ***************************************************/
+function drawDensity(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  const n = 180;
+
+  for(let i=0;i<n;i++){
+    for(let j=0;j<n;j++){
+      const x = xmin + (xmax-xmin)*i/n;
+      const y = ymin + (ymax-ymin)*j/n;
+      const p = target(x,y);
+      ctx.fillStyle = `rgba(59,130,246,${Math.min(1,6*p)})`;
+      ctx.fillRect(
+        i*canvas.width/n,
+        canvas.height-j*canvas.height/n,
+        canvas.width/n,
+        canvas.height/n
+      );
+    }
+  }
+}
+
+/***************************************************
+ * MH STATE
+ ***************************************************/
+let x=0, y=0;
+let p = target(0,0);
+let accepted=0, total=0;
+let timer=null;
+
+/***************************************************
+ * SINGLE MH STEP
+ ***************************************************/
+function mhStep(){
+  const sigma = parseFloat(sigmaSlider.value);
+
+  const xp = x + sigma*randn();
+  const yp = y + sigma*randn();
+
+  const pp = target(xp,yp);
+  const ratio = pp/p;
+  const u = Math.random();
+
+  let acc=false;
+  if(u < Math.min(1,ratio)){
+    x=xp; y=yp; p=pp;
+    acc=true; accepted++;
+  }
+
+  total++;
+  samplesX.push(x);
+  samplesY.push(y);
+
+  const [px,py] = toCanvas(x,y);
+  ctx.fillStyle = acc ? "#16a34a" : "#f97316";
+  ctx.beginPath();
+  ctx.arc(px,py,4,0,2*Math.PI);
+  ctx.fill();
+
+  drawHistograms();
+
+  info.innerHTML = `
+    <strong>Current state</strong><br>
+    x = ${x.toFixed(3)}, y = ${y.toFixed(3)}<br><br>
+
+    <strong>Proposal</strong><br>
+    x′ = ${xp.toFixed(3)}, y′ = ${yp.toFixed(3)}<br><br>
+
+    <strong>Target density</strong><br>
+    π(x,y) = ${p.toExponential(3)}<br>
+    π(x′,y′) = ${pp.toExponential(3)}<br><br>
+
+    <strong>MH ratio</strong><br>
+    r = ${ratio.toFixed(3)}, u = ${u.toFixed(3)}<br><br>
+
+    <strong>Decision</strong><br>
+    ${acc ? "Accepted" : "Rejected"}<br><br>
+
+    Acceptance rate: ${(accepted/total).toFixed(2)} (${accepted}/${total})
+  `;
+}
+
+/***************************************************
+ * HISTOGRAMS
+ ***************************************************/
+function drawHistograms(){
+  drawHistogram(hx,samplesX);
+  drawHistogram(hy,samplesY);
+}
+
+function drawHistogram(ctx,data){
+  ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
+  const bins=30;
+  const hist=Array(bins).fill(0);
+
+  data.forEach(v=>{
+    const i=Math.floor((v-xmin)/(xmax-xmin)*bins);
+    if(i>=0 && i<bins) hist[i]++;
+  });
+
+  const hmax=Math.max(...hist);
+  hist.forEach((h,i)=>{
+    const w=ctx.canvas.width/bins;
+    const bh=(h/hmax)*ctx.canvas.height;
+    ctx.fillStyle="#6b7280";
+    ctx.fillRect(i*w,ctx.canvas.height-bh,w-1,bh);
+  });
+}
+
+/***************************************************
+ * CONTROLS
+ ***************************************************/
+function start(){
+  if(timer) return;
+  timer=setInterval(mhStep,parseInt(speedSlider.value));
+}
+
+function singleStep(){ mhStep(); }
+
+function reset(){
+  clearInterval(timer);
+  timer=null;
+  samplesX.length=0;
+  samplesY.length=0;
+  x=0; y=0;
+  p=target(0,0);
+  accepted=0; total=0;
+  drawDensity();
+  hx.clearRect(0,0,hx.canvas.width,hx.canvas.height);
+  hy.clearRect(0,0,hy.canvas.width,hy.canvas.height);
+  info.innerHTML="";
+}
+
+/***************************************************
+ * GAUSSIAN RNG
+ ***************************************************/
+function randn(){
+  let u=0,v=0;
+  while(u===0) u=Math.random();
+  while(v===0) v=Math.random();
+  return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);
+}
+
+drawDensity();
+</script>
+</body>
+</html>
