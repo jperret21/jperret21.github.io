@@ -76,6 +76,25 @@ By simulating the motion of a particle with momentum through the posterior lands
 
 ---
 
+### 🔹 Nested sampling 
+
+➡️ **[Explore Nested sampling](/html_src/interactive_nested_sampling.html)** 
+*Tags:* HMC, gradients, high-dimensional inference, Hamiltonian dynamics
+
+---
+
+### 🔹 MCMC Parralel tempering
+
+➡️ **[Explore MCMC parralel tempering](/html_src/interactive_parralel_tempering.html)** 
+*Tags:* HMC, gradients, high-dimensional inference, Hamiltonian dynamics
+
+---
+
+
+
+
+
+
 ## 🔧 Implementation Notes
 
 All samplers are implemented with:
