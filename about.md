@@ -9,8 +9,7 @@ title: Curriculum Vitae
 
 # Summary
 
-I am Jules Perret, a PhD candidate in gravitational astrophysics at the Laboratoire Astroparticule et Cosmologie (APC, CNRS). My research focuses on Bayesian methods for the parameter estimation of gravitational waves originating from binary compact object systems, including Binary Neutron Stars (BNS), Binary Black Holes (BBH), and Neutron Star-Black Hole (NSBH) binaries. I am also a member of the LIGO-Virgo-KAGRA (LVK) collaboration and part of the collaboration Einstein Telescope to prepare the futur parameter estimation methods for the third generation of gravitationnal waves. 
-
+I am **Jules Perret**, a PhD researcher and research engineer in gravitational astrophysics at the Astroparticle and Cosmology Laboratory (APC, CNRS). My work focuses on data analysis for the **LISA space mission**, combining Bayesian inference and advanced computational methods to extract astrophysical insights from gravitational-wave signals.
 
 I am particularly interested in numerical simulations applied to astrophysics. With my Master's degree from École Normale Supérieure Paris-Saclay - Université Paris-Saclay, I developed a strong interest in High-Performance Computing (HPC) and massive parallel development on CPU/GPU.
 

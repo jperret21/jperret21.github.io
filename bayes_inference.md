@@ -1,3 +1,8 @@
+---
+layout: default
+title: Introduction to Bayesian Inference
+---
+
 # Introduction: Bayesian Inference
 
 At the heart of Bayesian statistics lies **Bayes' theorem**, which describes how we update our beliefs about parameters θ given observed data D:
@@ -7,8 +12,8 @@ P(\theta \mid D) = \frac{P(D \mid \theta) \cdot P(\theta)}{P(D)}
 $$
 
 Where:
-- **P(θ | D)** is the *posterior distribution* — what we want to learn
-- **P(D | θ)** is the *likelihood* — how probable the data is given the parameters
+- **P(θ \| D)** is the *posterior distribution* — what we want to learn
+- **P(D \| θ)** is the *likelihood* — how probable the data is given the parameters
 - **P(θ)** is the *prior distribution* — our initial beliefs about the parameters
 - **P(D)** is the *marginal likelihood* or evidence — a normalizing constant
 
@@ -24,7 +29,7 @@ For most real-world problems, this integral is **intractable** — impossible to
 
 ### Why We Need Samplers
 
-Instead of computing the posterior distribution directly, samplers generate representative samples from P(θ | D). With enough samples, we can:
+Instead of computing the posterior distribution directly, samplers generate representative samples from P(θ \| D). With enough samples, we can:
 - Estimate posterior means, medians, and credible intervals
 - Visualize the posterior distribution
 - Make predictions on new data
@@ -66,7 +71,7 @@ HMC leverages Hamiltonian dynamics to propose distant states with high acceptanc
 
 By simulating the motion of a particle with momentum through the posterior landscape, HMC can traverse the distribution much more efficiently than random-walk methods.
 
-➡️ **[Explore the HMC sampler](/html_src/interactive_hmc.html)**  
+➡️ *Interactive page under construction*  
 *Tags:* HMC, gradients, high-dimensional inference, Hamiltonian dynamics
 
 ---
