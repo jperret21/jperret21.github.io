@@ -2,350 +2,1779 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>2D MCMC – Metropolis–Hastings (step by step)</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive MCMC Demo - Metropolis–Hastings | Jules Perret</title>
+  <meta name="description" content="Interactive visualization of the Metropolis–Hastings MCMC algorithm" />
+
+  <!-- MathJax for LaTeX rendering -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js"></script>
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+      }
+    };
+  </script>
 
   <style>
-    body {
-      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-      background: #ffffff;
-      color: #111827;
-      margin: 0;
-      padding: 2rem;
+    * {
+      box-sizing: border-box;
     }
 
-    h1, h2 { font-weight: 500; }
-
-    p {
-      max-width: 900px;
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: #fafafa;
+      color: #1a1a1a;
+      margin: 0;
+      padding: 0;
       line-height: 1.6;
+    }
+
+    /* Jekyll-compatible header navigation */
+    .site-header {
+      border-top: 5px solid #424242;
+      border-bottom: 1px solid #e8e8e8;
+      min-height: 55.95px;
+      position: relative;
+      background-color: white;
+    }
+
+    .site-header .wrapper {
+      max-width: calc(1200px - (30px * 2));
+      margin-right: auto;
+      margin-left: auto;
+      padding-right: 30px;
+      padding-left: 30px;
+    }
+
+    .site-title {
+      font-size: 26px;
+      font-weight: 300;
+      line-height: 54px;
+      letter-spacing: -1px;
+      margin-bottom: 0;
+      float: left;
+      text-decoration: none;
+      color: #424242;
+    }
+
+    .site-title:hover {
+      text-decoration: none;
+      color: #111;
+    }
+
+    .site-nav {
+      float: right;
+      line-height: 54px;
+    }
+
+    .site-nav .nav-trigger {
+      display: none;
+    }
+
+    .site-nav .menu-icon {
+      display: none;
+    }
+
+    .site-nav .page-link {
+      color: #111;
+      line-height: 1.5;
+      text-decoration: none;
+      margin-left: 20px;
+    }
+
+    .site-nav .page-link:hover {
+      text-decoration: underline;
+    }
+
+    .site-nav .page-link.active {
+      font-weight: 600;
+    }
+
+    @media screen and (max-width: 600px) {
+      .site-nav {
+        position: absolute;
+        top: 9px;
+        right: 15px;
+        background-color: white;
+        border: 1px solid #e8e8e8;
+        border-radius: 5px;
+        text-align: right;
+      }
+
+      .site-nav label[for="nav-trigger"] {
+        display: block;
+        float: right;
+        width: 36px;
+        height: 36px;
+        z-index: 2;
+        cursor: pointer;
+      }
+
+      .site-nav .menu-icon {
+        display: block;
+        float: right;
+        width: 36px;
+        height: 26px;
+        line-height: 0;
+        padding-top: 10px;
+        text-align: center;
+      }
+
+      .site-nav .menu-icon > svg {
+        fill: #424242;
+      }
+
+      .site-nav input ~ .trigger {
+        clear: both;
+        display: none;
+      }
+
+      .site-nav input:checked ~ .trigger {
+        display: block;
+        padding-bottom: 5px;
+      }
+
+      .site-nav .page-link {
+        display: block;
+        padding: 5px 10px;
+        margin-left: 20px;
+      }
+    }
+
+    .page-content {
+      padding: 0;
+    }
+
+    .wrapper {
+      max-width: calc(1200px - (30px * 2));
+      margin-right: auto;
+      margin-left: auto;
+      padding-right: 30px;
+      padding-left: 30px;
+    }
+
+    .page-heading {
+      font-size: 2rem;
+      font-weight: 600;
+      margin: 2rem 0 1rem;
+      color: #1a1a1a;
+    }
+
+    .page-subtitle {
+      font-size: 1.1rem;
+      color: #4a5568;
+      margin-bottom: 2rem;
     }
 
     .container {
       max-width: 1200px;
-      margin: auto;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    
+
+    .section {
+      background: white;
+      border-radius: 8px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
     }
 
-    .controls {
-      display: flex;
+    .section-title {
+      font-size: 1.4rem;
+      font-weight: 600;
+      margin: 0 0 1.5rem 0;
+      color: #1a1a1a;
+      border-bottom: 2px solid #111827;
+      padding-bottom: 0.5rem;
+    }
+
+    .controls-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .control-group label {
+      font-weight: 500;
+      font-size: 0.9rem;
+      color: #4a5568;
+      display: flex;
       align-items: center;
-      margin: 1.5rem 0;
+      gap: 0.5rem;
+    }
+
+    .control-value {
+      font-weight: 600;
+      color: #111827;
+      font-size: 1rem;
+    }
+
+    input[type=range] {
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: #e2e8f0;
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #111827;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    input[type=range]::-webkit-slider-thumb:hover {
+      background: #374151;
+      transform: scale(1.1);
+    }
+
+    select {
+      padding: 0.5rem;
+      border: 1px solid #cbd5e0;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      background: white;
+      cursor: pointer;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
     }
 
     button {
       background: #111827;
-      color: #ffffff;
+      color: white;
       border: none;
-      padding: 0.45rem 1.1rem;
-      font-size: 0.9rem;
+      padding: 0.6rem 1.3rem;
+      font-size: 0.95rem;
+      font-weight: 500;
       cursor: pointer;
+      border-radius: 6px;
+      transition: all 0.2s;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
-    button:hover { background: #374151; }
+    button:hover {
+      background: #374151;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
 
-    input[type=range] { width: 140px; }
+    button:active {
+      transform: translateY(0);
+    }
+
+    button.secondary {
+      background: #4b5563;
+    }
+
+    button.secondary:hover {
+      background: #6b7280;
+    }
+
+    button.tertiary {
+      background: #9ca3af;
+    }
+
+    button.tertiary:hover {
+      background: #6b7280;
+    }
+
+    .visualization-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .canvas-container {
+      position: relative;
+    }
+
+    .canvas-label {
+      font-weight: 600;
+      font-size: 1rem;
+      margin-bottom: 0.75rem;
+      color: #2d3748;
+    }
 
     canvas {
-      border: 1px solid #e5e7eb;
-      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      background: white;
+      border-radius: 4px;
+      display: block;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
 
-    .plots {
-      display: grid;
-      grid-template-columns: 3fr 1fr;
-      gap: 1.5rem;
-      align-items: start;
+    .marginal-plots {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
     }
 
-    .histograms {
+    .marginal-plot {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stats-panel {
+      background: linear-gradient(135deg, #f6f8fc 0%, #eef2f7 100%);
+      border-radius: 8px;
+      padding: 1.5rem;
+      border: 1px solid #e2e8f0;
+    }
+
+    .stats-grid {
       display: grid;
-      grid-template-rows: 1fr 1fr;
+      grid-template-columns: 1fr 1fr;
       gap: 1rem;
+      margin-top: 1rem;
     }
 
-    .info {
-      margin-top: 1.5rem;
-      padding: 1rem;
-      border: 1px solid #e5e7eb;
-      background: #f9fafb;
-      font-size: 0.9rem;
-      max-width: 900px;
+    .stat-item {
+      background: white;
+      padding: 0.75rem;
+      border-radius: 4px;
+      border-left: 3px solid #111827;
     }
 
-    .caption {
+    .stat-label {
       font-size: 0.8rem;
-      color: #4b5563;
+      color: #718096;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-value {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #2d3748;
+      margin-top: 0.25rem;
+    }
+
+    .algorithm-box {
+      background: #f7fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 1.5rem;
+      margin-top: 1rem;
+      overflow-x: auto;
+    }
+
+    .algorithm-box ol {
+      margin: 0.5rem 0 0 0;
+      padding-left: 1.5rem;
+    }
+
+    .algorithm-box li {
+      margin: 0.5rem 0;
+      font-family: 'Courier New', monospace;
+      font-size: 0.95rem;
+    }
+
+    .step-info {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 1.25rem;
+      font-size: 0.9rem;
+      margin-top: 1rem;
+    }
+
+    .step-info strong {
+      color: #111827;
+      font-size: 0.95rem;
+    }
+
+    .status-accepted {
+      color: #38a169;
+      font-weight: 600;
+    }
+
+    .status-rejected {
+      color: #e53e3e;
+      font-weight: 600;
+    }
+
+    .info-note {
+      background: #fef5e7;
+      border-left: 4px solid #f39c12;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 4px;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 768px) {
+      .visualization-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .controls-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .section {
+        padding: 1.5rem 1rem;
+      }
+
+      .container {
+        padding: 1rem;
+      }
+
+      .header {
+        padding: 1.5rem 1rem;
+      }
+
+      .header h1 {
+        font-size: 1.5rem;
+      }
+
+      .header p {
+        font-size: 0.9rem;
+      }
+
+      canvas#posterior {
+        width: 100% !important;
+        height: auto !important;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
 
 <body>
+
+<header class="site-header">
+  <div class="wrapper">
+    <a class="site-title" rel="author" href="/">Jules Perret</a>
+    <nav class="site-nav">
+      <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+      <label for="nav-trigger">
+        <span class="menu-icon">
+          <svg viewBox="0 0 18 15" width="18px" height="15px">
+            <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+          </svg>
+        </span>
+      </label>
+      <div class="trigger">
+        <a class="page-link" href="/about.html">Curriculum Vitae</a>
+        <a class="page-link" href="/publications.html">Publications</a>
+        <a class="page-link" href="/research.html">Research</a>
+        <a class="page-link active" href="/mcmc.html">Interactive MCMC Demo</a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main class="page-content" aria-label="Content">
+  <div class="wrapper">
+    <h1 class="page-heading">Metropolis–Hastings MCMC Algorithm</h1>
+    <p class="page-subtitle">
+      Interactive visualization of Markov Chain Monte Carlo sampling from 2D posterior distributions<br>
+      <span style="font-size: 0.9rem; color: #718096;">Part 1 of the MCMC Samplers Series | Coming soon: Hamiltonian Monte Carlo (HMC) & Nested Sampling</span>
+    </p>
+  </div>
+</main>
+
 <div class="container">
 
-<h1>Metropolis–Hastings sampling of a 2D posterior</h1>
-
-<p>
-Interactive illustration of the Metropolis–Hastings algorithm.
-Each step explicitly shows the proposal, acceptance ratio, random draw,
-and decision.
-</p>
-
-<!-- ===================== CONTROLS ===================== -->
-<div class="controls">
-  <label>
-    Proposal width σ
-    <input type="range" min="0.05" max="2" step="0.05" value="0.6" id="sigma">
-    <span id="sigmaVal">0.6</span>
-  </label>
-
-  <label>
-    Speed (ms)
-    <input type="range" min="10" max="300" step="10" value="60" id="speed">
-    <span id="speedVal">60</span>
-  </label>
-
-  <label>
-    Target
-    <select id="dist">
-      <option value="gaussian">Gaussian</option>
-      <option value="mixture">Gaussian mixture</option>
-    </select>
-  </label>
-
-  <button onclick="start()">Run</button>
-  <button onclick="singleStep()">Single step</button>
-  <button onclick="reset()">Reset</button>
-</div>
-
-<!-- ===================== PLOTS ===================== -->
-<div class="plots">
-  <canvas id="posterior" width="650" height="650"></canvas>
-
-  <div class="histograms">
-    <div>
-      <canvas id="histX" width="220" height="300"></canvas>
-      <div class="caption">Marginal posterior of x</div>
-    </div>
-    <div>
-      <canvas id="histY" width="220" height="300"></canvas>
-      <div class="caption">Marginal posterior of y</div>
+  <!-- INTRODUCTION -->
+  <div class="section">
+    <h2 class="section-title">Introduction to MCMC</h2>
+    <p>
+      <strong>Markov Chain Monte Carlo (MCMC)</strong> is a family of algorithms for sampling from probability 
+      distributions that are difficult or impossible to sample from directly. These methods are fundamental in 
+      Bayesian inference, statistical physics, computational biology, and machine learning.
+    </p>
+    <p>
+      The key idea is to construct a <strong>Markov chain</strong> that has the target distribution \(\pi(\mathbf{x})\) 
+      as its stationary distribution. By running the chain long enough, samples from the chain will approximate 
+      samples from \(\pi(\mathbf{x})\).
+    </p>
+    
+    <div class="algorithm-box" style="margin-top: 1.5rem;">
+      <strong>Why MCMC?</strong>
+      <ul style="margin: 0.5rem 0; padding-left: 1.5rem;">
+        <li>Sample from complex, high-dimensional distributions where direct sampling is intractable</li>
+        <li>Only requires ability to <em>evaluate</em> the target density \(\pi(\mathbf{x})\) (up to a normalizing constant)</li>
+        <li>Asymptotically exact: given infinite time, samples converge to the true distribution</li>
+        <li>Widely applicable: works for continuous, discrete, or mixed parameter spaces</li>
+      </ul>
     </div>
   </div>
-</div>
 
-<div class="info" id="info"></div>
+  <!-- ALGORITHM DESCRIPTION -->
+  <div class="section">
+    <h2 class="section-title">The Metropolis–Hastings Algorithm</h2>
+    <p>
+      The <strong>Metropolis–Hastings (MH)</strong> algorithm is one of the most fundamental MCMC methods. 
+      It was introduced by Metropolis et al. (1953) and generalized by Hastings (1970). The algorithm generates 
+      a sequence of samples \(\mathbf{x}_0, \mathbf{x}_1, \mathbf{x}_2, \ldots\) where each sample depends only 
+      on the previous one (Markov property).
+    </p>
+    
+    <div class="algorithm-box">
+      <strong>Algorithm Steps:</strong>
+      <ol style="margin: 0.5rem 0 0.5rem 0; padding-left: 1.5rem;">
+        <li style="margin: 0.75rem 0;">
+          <strong>Initialize:</strong> Start with an initial state \(\mathbf{x}_0\)
+        </li>
+        <li style="margin: 0.75rem 0;">
+          <strong>Propose:</strong> Generate a candidate state \(\mathbf{x}' \sim q(\cdot \mid \mathbf{x}_t)\) 
+          from a proposal distribution
+          <div style="margin-left: 1.5rem; margin-top: 0.5rem; font-family: inherit;">
+            In this demo: \(q(\mathbf{x}' \mid \mathbf{x}_t) = \mathcal{N}(\mathbf{x}_t, \sigma^2 \mathbf{I})\) 
+            (Gaussian random walk)
+          </div>
+        </li>
+        <li style="margin: 0.75rem 0;">
+          <strong>Compute acceptance ratio:</strong>
+          $$\alpha = \min\left(1, \frac{\pi(\mathbf{x}') \, q(\mathbf{x}_t \mid \mathbf{x}')}{\pi(\mathbf{x}_t) \, q(\mathbf{x}' \mid \mathbf{x}_t)}\right)$$
+          For symmetric proposals (like our Gaussian random walk), this simplifies to:
+          $$\alpha = \min\left(1, \frac{\pi(\mathbf{x}')}{\pi(\mathbf{x}_t)}\right)$$
+        </li>
+        <li style="margin: 0.75rem 0;">
+          <strong>Accept or reject:</strong> Generate \(u \sim \text{Uniform}(0,1)\)
+          $$\mathbf{x}_{t+1} = \begin{cases}
+          \mathbf{x}' & \text{if } u < \alpha \\
+          \mathbf{x}_t & \text{otherwise}
+          \end{cases}$$
+        </li>
+      </ol>
+    </div>
 
-<h2>Metropolis–Hastings algorithm</h2>
-<ol>
-  <li>Propose (x′, y′) ∼ q(· | x, y)</li>
-  <li>Compute r = π(x′, y′) / π(x, y)</li>
-  <li>Accept if u &lt; min(1, r), with u ∼ U(0,1)</li>
-</ol>
+    <div class="info-note" style="margin-top: 1.5rem;">
+      <strong>Key Insight:</strong> The algorithm always accepts moves to higher probability regions 
+      (\(\pi(\mathbf{x}') > \pi(\mathbf{x}_t)\)), but also sometimes accepts moves to lower probability 
+      regions. This ensures the chain doesn't get stuck in local modes and properly explores the entire 
+      distribution.
+    </div>
+  </div>
+
+  <!-- TARGET DISTRIBUTIONS -->
+  <div class="section">
+    <h2 class="section-title">Target Distributions</h2>
+    <p>
+      This demonstration provides three target distributions ranging from simple to challenging, 
+      illustrating different aspects of MCMC performance:
+    </p>
+    
+    <div style="display: grid; grid-template-columns: 1fr; gap: 1.5rem; margin-top: 1rem;">
+      <div class="algorithm-box">
+        <strong>Bivariate Gaussian (Default)</strong>
+        <p style="margin: 0.5rem 0;">
+          A standard correlated 2D Gaussian with correlation coefficient \(\rho = 0.8\):
+        </p>
+        <div style="overflow-x: auto;">
+          $$\pi(x_1, x_2) \propto \exp\left(-\frac{1}{2(1-\rho^2)}(x_1^2 - 2\rho x_1 x_2 + x_2^2)\right)$$
+        </div>
+        <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem; color: #4a5568;">
+          This distribution has elliptical contours aligned with the correlation structure. 
+          With strong correlation (\(\rho = 0.8\)), random-walk proposals struggle because they explore 
+          axis-by-axis when parameters should move together along the correlation direction.
+        </p>
+      </div>
+
+      <div class="algorithm-box">
+        <strong>Rosenbrock's Banana Distribution</strong>
+        <p style="margin: 0.5rem 0;">
+          A transformed Gaussian that creates a curved, banana-shaped density (Haario et al., 1999):
+        </p>
+        <div style="overflow-x: auto;">
+          $$\pi(x_1, x_2) \propto \exp\left(-\frac{1}{200}(x_1^2 + 100(x_2 - x_1^2)^2)\right)$$
+        </div>
+        <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem; color: #4a5568;">
+          This distribution is strongly correlated along a curved manifold, making it difficult for 
+          random-walk samplers to explore efficiently. The "banana" shape arises from the nonlinear 
+          transformation \(x_2 - x_1^2\), creating regions where standard proposals are inefficient.
+        </p>
+      </div>
+      
+      <div class="algorithm-box">
+        <strong>Neal's Funnel Distribution</strong>
+        <p style="margin: 0.5rem 0;">
+          A hierarchical model that exhibits strong scale variations (Neal, 2003):
+        </p>
+        <div style="overflow-x: auto;">
+          $$\begin{aligned}
+          x_1 &\sim \mathcal{N}(0, 3^2) \\
+          x_2 \mid x_1 &\sim \mathcal{N}(0, \exp(x_1)^2)
+          \end{aligned}$$
+        </div>
+        <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem; color: #4a5568;">
+          The joint density is \(\pi(x_1, x_2) \propto \exp(-x_1^2/18 - x_2^2/(2e^{2x_1}))\). 
+          This creates a "funnel" where the scale of \(x_2\) depends exponentially on \(x_1\), 
+          challenging for fixed-width proposals. Common in hierarchical Bayesian models with variance parameters.
+        </p>
+      </div>
+    </div>
+    
+    <div class="info-note" style="margin-top: 1rem;">
+      <strong>Why these distributions?</strong> The Gaussian provides a baseline to understand basic behavior. 
+      Rosenbrock's banana and Neal's funnel are standard benchmarks in the MCMC literature—the banana tests 
+      handling of strong nonlinear correlations, while the funnel tests adaptation to varying scales. 
+      These challenges motivate advanced methods like HMC and adaptive MCMC.
+    </div>
+  </div>
+
+  <!-- CONTROLS -->
+  <div class="section">
+    <h2 class="section-title">Simulation Controls</h2>
+    <p>
+      Adjust the parameters below to see how they affect the sampler's behavior. The <strong>proposal width</strong> 
+      is particularly important: too small and the chain explores slowly; too large and most proposals are rejected.
+    </p>
+    
+    <div class="controls-grid">
+      <div class="control-group">
+        <label>
+          Proposal Standard Deviation (\(\sigma\))
+          <span class="control-value" id="sigmaVal">0.60</span>
+        </label>
+        <input type="range" min="0.05" max="2" step="0.05" value="0.6" id="sigma">
+        <div style="font-size: 0.85rem; color: #4a5568; margin-top: 0.25rem;">
+          Step size for proposals. Larger \(\sigma\) → larger jumps. Tune to balance exploration vs. acceptance.
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label>
+          Iteration Speed (ms)
+          <span class="control-value" id="speedVal">60</span>
+        </label>
+        <input type="range" min="10" max="500" step="10" value="60" id="speed">
+        <div style="font-size: 0.85rem; color: #4a5568; margin-top: 0.25rem;">
+          Delay between iterations. Slower speeds help visualize individual steps.
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label>
+          Target Distribution
+        </label>
+        <select id="dist">
+          <option value="gaussian">Bivariate Gaussian</option>
+          <option value="banana">Rosenbrock's Banana</option>
+          <option value="funnel">Neal's Funnel</option>
+        </select>
+        <div style="font-size: 0.85rem; color: #4a5568; margin-top: 0.25rem;">
+          Switch between different target distributions to test sampler behavior.
+        </div>
+      </div>
+    </div>
+
+    <div class="button-group">
+      <button onclick="start()">▶ Start Sampling</button>
+      <button class="secondary" onclick="singleStep()">→ Single Step</button>
+      <button class="tertiary" onclick="reset()">⟲ Reset</button>
+    </div>
+  </div>
+
+  <!-- VISUALIZATION -->
+  <div class="section">
+    <h2 class="section-title">MCMC Chain Visualization</h2>
+    <p>
+      The main plot shows the joint posterior \(\pi(x_1, x_2)\) with darker regions indicating higher probability. 
+      Each point represents a sample in the chain: <span style="color: #38a169; font-weight: 600;">green</span> 
+      for accepted proposals and <span style="color: #ed8936; font-weight: 600;">orange</span> for rejected proposals.
+      The plot axes automatically adjust to each distribution's natural range.
+    </p>
+    
+    <div class="visualization-grid">
+      <!-- Main posterior plot -->
+      <div class="canvas-container">
+        <div class="canvas-label">Joint Posterior Distribution π(x₁, x₂)</div>
+        <canvas id="posterior" width="650" height="650"></canvas>
+        <p style="font-size: 0.85rem; color: #4a5568; margin-top: 0.5rem;">
+          The chain should explore the high-density regions (darker areas) while maintaining enough 
+          randomness to avoid getting trapped in any single location.
+        </p>
+      </div>
+
+      <!-- Marginal plots -->
+      <div class="marginal-plots">
+        <div class="marginal-plot">
+          <div class="canvas-label">Marginal Distribution of x₁</div>
+          <canvas id="histX" width="300" height="280"></canvas>
+          <p style="font-size: 0.85rem; color: #4a5568; margin-top: 0.5rem;">
+            Histogram of \(x_1\) samples. Should converge to the true marginal \(\pi(x_1) = \int \pi(x_1, x_2) dx_2\).
+          </p>
+        </div>
+        <div class="marginal-plot">
+          <div class="canvas-label">Marginal Distribution of x₂</div>
+          <canvas id="histY" width="300" height="280"></canvas>
+          <p style="font-size: 0.85rem; color: #4a5568; margin-top: 0.5rem;">
+            Histogram of \(x_2\) samples. With enough samples, this approximates the true marginal distribution.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Current step info -->
+    <div class="stats-panel">
+      <strong>Current Iteration Details</strong>
+      <div id="stepInfo" class="step-info">
+        Click "Start Sampling" or "Single Step" to begin the MCMC algorithm.
+      </div>
+    </div>
+  </div>
+
+  <!-- TRACE PLOTS -->
+  <div class="section">
+    <h2 class="section-title">Chain Trace Plots</h2>
+    <p>
+      <strong>Trace plots</strong> show the evolution of each parameter value over iterations. They are essential 
+      for diagnosing convergence and mixing of the MCMC chain.
+    </p>
+    
+    <div class="algorithm-box" style="margin-bottom: 1.5rem;">
+      <strong>What to look for in trace plots:</strong>
+      <ul style="margin: 0.5rem 0; padding-left: 1.5rem;">
+        <li><strong>Good mixing:</strong> The trace should look like "fuzzy caterpillar" - random fluctuations 
+        around a stable mean with no obvious patterns or trends</li>
+        <li><strong>Stationarity:</strong> The mean and variance should remain constant over time (after burn-in)</li>
+        <li><strong>No trends:</strong> The trace shouldn't show long-term upward or downward trends</li>
+        <li><strong>No getting stuck:</strong> The chain shouldn't remain at the same value for extended periods</li>
+      </ul>
+    </div>
+    
+    <div style="display: grid; grid-template-columns: 1fr; gap: 1.5rem;">
+      <div>
+        <div class="canvas-label">Trace Plot: x₁ Evolution</div>
+        <canvas id="traceX" width="100%" height="200" style="width: 100%;"></canvas>
+        <p style="font-size: 0.85rem; color: #4a5568; margin-top: 0.5rem;">
+          Time series of \(x_1\) values. Rapid fluctuations indicate good exploration; long periods at similar 
+          values suggest poor mixing.
+        </p>
+      </div>
+      <div>
+        <div class="canvas-label">Trace Plot: x₂ Evolution</div>
+        <canvas id="traceY" width="100%" height="200" style="width: 100%;"></canvas>
+        <p style="font-size: 0.85rem; color: #4a5568; margin-top: 0.5rem;">
+          Time series of \(x_2\) values. Compare with \(x_1\) trace to check if both parameters mix at similar rates.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- DIAGNOSTICS -->
+  <div class="section">
+    <h2 class="section-title">Chain Diagnostics</h2>
+    
+    <h3 style="font-size: 1.1rem; font-weight: 600; margin: 0 0 1rem 0;">Autocorrelation Function (ACF)</h3>
+    <p>
+      The <strong>autocorrelation function</strong> measures the correlation between samples separated by 
+      \(\tau\) iterations (the lag). For a well-mixing chain, the ACF should decay rapidly to zero.
+    </p>
+    
+    <div class="algorithm-box" style="margin-bottom: 1.5rem;">
+      <strong>Mathematical Definition:</strong>
+      <p style="margin: 0.75rem 0;">
+        For a chain \(\{x_t\}\) with sample mean \(\bar{x}\) and sample variance \(s^2\), the sample ACF at lag \(\tau\) is:
+      </p>
+      $$\hat{\rho}(\tau) = \frac{\sum_{t=1}^{n-\tau} (x_t - \bar{x})(x_{t+\tau} - \bar{x})}{\sum_{t=1}^{n} (x_t - \bar{x})^2}$$
+      <p style="margin: 0.75rem 0 0.25rem 0;">
+        <strong>Interpretation:</strong>
+      </p>
+      <ul style="margin: 0; padding-left: 1.5rem;">
+        <li>\(\hat{\rho}(0) = 1\): Perfect correlation with itself</li>
+        <li>\(\hat{\rho}(\tau) \to 0\) as \(\tau \to \infty\): Samples become independent (for ergodic chains)</li>
+        <li><strong>Slow decay:</strong> High autocorrelation indicates the chain mixes slowly</li>
+        <li><strong>Fast decay:</strong> Low autocorrelation indicates efficient exploration</li>
+      </ul>
+    </div>
+    
+    <div class="canvas-label">Autocorrelation Function (ACF)</div>
+    <canvas id="acfXY" width="100%" height="350" style="width: 100%;"></canvas>
+    
+    <p style="margin-top: 1rem; color: #4a5568; font-size: 0.9rem;">
+      <strong>Blue line:</strong> ACF for \(x_1\) parameter. 
+      <strong>Red line:</strong> ACF for \(x_2\) parameter.
+      The lag range adapts automatically—showing where the ACF crosses zero plus 33% additional lags 
+      to verify convergence to independence.
+    </p>
+
+    <h3 style="font-size: 1.1rem; font-weight: 600; margin: 2rem 0 1rem 0;">Performance Metrics</h3>
+    <div class="stats-grid" style="margin-top: 1rem;">
+      <div class="stat-item">
+        <div class="stat-label">Total Iterations</div>
+        <div class="stat-value" id="totalIter">0</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Acceptance Rate</div>
+        <div class="stat-value" id="acceptRate">—</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Accepted Proposals</div>
+        <div class="stat-value" id="acceptCount">0</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Effective Sample Size (est.)</div>
+        <div class="stat-value" id="essValue">—</div>
+      </div>
+    </div>
+    
+    <div class="algorithm-box" style="margin-top: 1.5rem;">
+      <strong>Effective Sample Size (ESS)</strong>
+      <p style="margin: 0.75rem 0;">
+        Due to autocorrelation, MCMC samples are not independent. The ESS estimates how many independent 
+        samples our correlated chain is equivalent to:
+      </p>
+      $$\text{ESS} \approx \frac{n}{1 + 2\sum_{\tau=1}^{\infty} \rho(\tau)}$$
+      <p style="margin: 0.75rem 0 0 0; font-size: 0.9rem;">
+        where \(n\) is the total number of samples and \(\rho(\tau)\) is the ACF. Higher ESS means more 
+        efficient sampling. The ratio ESS/\(n\) is called the <strong>sampling efficiency</strong>.
+      </p>
+    </div>
+    
+    <div class="info-note" style="margin-top: 1.5rem;">
+      <strong>Tuning the Proposal Width:</strong> The proposal standard deviation \(\sigma\) directly affects 
+      both the acceptance rate and the autocorrelation. For random-walk Metropolis in high dimensions, 
+      the asymptotically optimal acceptance rate is approximately 0.234 (Roberts et al., 1997; Roberts & Rosenthal, 2001). 
+      For low-dimensional problems (2D), acceptance rates between 40-60% are typically more efficient, 
+      though the optimal rate depends on the target distribution's geometry.
+    </div>
+  </div>
+
+  <!-- STRENGTHS AND LIMITATIONS -->
+  <div class="section">
+    <h2 class="section-title">Strengths & Limitations of Metropolis–Hastings</h2>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1rem;">
+      <div class="algorithm-box">
+        <strong style="color: #059669;">✓ Strengths</strong>
+        <ul style="margin: 0.75rem 0 0 0; padding-left: 1.5rem;">
+          <li style="margin: 0.5rem 0;"><strong>Generality:</strong> Works for any distribution where you can evaluate $\pi(\mathbf{x})$</li>
+          <li style="margin: 0.5rem 0;"><strong>Simplicity:</strong> Easy to implement and understand</li>
+          <li style="margin: 0.5rem 0;"><strong>Flexibility:</strong> Can be adapted with different proposal distributions</li>
+          <li style="margin: 0.5rem 0;"><strong>Theoretical guarantees:</strong> Provably converges to the target distribution</li>
+          <li style="margin: 0.5rem 0;"><strong>No gradients needed:</strong> Only requires density evaluation</li>
+        </ul>
+      </div>
+      
+      <div class="algorithm-box">
+        <strong style="color: #dc2626;">✗ Limitations</strong>
+        <ul style="margin: 0.75rem 0 0 0; padding-left: 1.5rem;">
+          <li style="margin: 0.5rem 0;"><strong>Random walk behavior:</strong> Inefficient in high dimensions</li>
+          <li style="margin: 0.5rem 0;"><strong>Tuning required:</strong> Proposal width must be carefully chosen</li>
+          <li style="margin: 0.5rem 0;"><strong>Slow mixing:</strong> Can take many iterations to explore the distribution</li>
+          <li style="margin: 0.5rem 0;"><strong>Correlated samples:</strong> High autocorrelation reduces effective sample size</li>
+          <li style="margin: 0.5rem 0;"><strong>Mode jumping:</strong> Struggles with multimodal distributions</li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="info-note" style="margin-top: 1.5rem;">
+      <strong>Common Challenges:</strong>
+      <ul style="margin: 0.5rem 0 0 0; padding-left: 1.5rem;">
+        <li><strong>Curse of dimensionality:</strong> In high dimensions, the acceptance rate drops dramatically 
+        unless \(\sigma\) is very small, leading to slow exploration</li>
+        <li><strong>Correlated parameters:</strong> When parameters have strong posterior correlations 
+        (like the banana distribution), axis-aligned proposals are inefficient—each dimension explored independently 
+        when they should move together</li>
+        <li><strong>Varying scales:</strong> When different regions have vastly different scales 
+        (like Neal's funnel), fixed-width proposals perform poorly—too large in narrow regions, too small in wide regions</li>
+        <li><strong>Convergence assessment:</strong> It's difficult to know when the chain has converged to 
+        the stationary distribution</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- BEYOND METROPOLIS-HASTINGS -->
+  <div class="section">
+    <h2 class="section-title">Beyond Metropolis–Hastings</h2>
+    <p>
+      While MH is foundational, modern MCMC methods have been developed to address its limitations. 
+      Future tutorials in this series will cover:
+    </p>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem;">
+      <div class="algorithm-box">
+        <strong>Hamiltonian Monte Carlo (HMC)</strong>
+        <p style="margin: 0.75rem 0; font-size: 0.9rem;">
+          Uses gradient information to propose distant states while maintaining high acceptance rates. 
+          HMC can traverse the parameter space much more efficiently than random-walk MH, especially in 
+          high dimensions. The key insight is to treat sampling as simulating Hamiltonian dynamics in an 
+          augmented space.
+        </p>
+        <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem; color: #4a5568;">
+          <strong>Key advantage:</strong> Explores parameter space coherently rather than randomly, 
+          dramatically reducing autocorrelation.
+        </p>
+      </div>
+      
+      <div class="algorithm-box">
+        <strong>Nested Sampling</strong>
+        <p style="margin: 0.75rem 0; font-size: 0.9rem;">
+          A fundamentally different approach that simultaneously computes samples from the posterior 
+          <em>and</em> the model evidence (marginal likelihood). Instead of evolving a Markov chain, 
+          nested sampling progressively samples from constrained priors with increasing likelihood thresholds.
+        </p>
+        <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem; color: #4a5568;">
+          <strong>Key advantage:</strong> Natural computation of Bayesian evidence for model comparison, 
+          robust exploration of multimodal distributions.
+        </p>
+      </div>
+    </div>
+    
+    <div style="background: #f9fafb; border: 1px solid #e2e8f0; border-radius: 6px; padding: 1.5rem; margin-top: 1.5rem;">
+      <strong>Practical Recommendations:</strong>
+      <ul style="margin: 0.5rem 0; padding-left: 1.5rem;">
+        <li>For <strong>low-dimensional, well-behaved</strong> posteriors: Metropolis–Hastings is often sufficient</li>
+        <li>For <strong>high-dimensional</strong> problems with smooth posteriors: Use HMC (implemented in Stan, PyMC)</li>
+        <li>For <strong>multimodal</strong> distributions or <strong>model comparison</strong>: Consider nested sampling (implemented in dynesty, MultiNest)</li>
+        <li>For <strong>complex, structured</strong> problems: Specialized variants like Gibbs sampling, NUTS, or adaptive MH</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- REFERENCES -->
+  <div class="section">
+    <h2 class="section-title">References & Further Reading</h2>
+    <div style="font-size: 0.9rem; line-height: 1.8;">
+      <p><strong>Key Papers:</strong></p>
+      <ul style="padding-left: 1.5rem; margin: 0.5rem 0;">
+        <li>Metropolis, N., Rosenbluth, A.W., Rosenbluth, M.N., Teller, A.H., & Teller, E. (1953). 
+        "Equation of State Calculations by Fast Computing Machines." 
+        <em>Journal of Chemical Physics</em>, 21(6), 1087-1092.</li>
+        <li>Hastings, W.K. (1970). "Monte Carlo Sampling Methods Using Markov Chains and Their Applications." 
+        <em>Biometrika</em>, 57(1), 97-109.</li>
+        <li>Roberts, G.O., Gelman, A., & Gilks, W.R. (1997). "Weak Convergence and Optimal Scaling of 
+        Random Walk Metropolis Algorithms." <em>The Annals of Applied Probability</em>, 7(1), 110-120.</li>
+        <li>Haario, H., Saksman, E., & Tamminen, J. (1999). "Adaptive Proposal Distribution for Random Walk Metropolis Algorithm." 
+        <em>Computational Statistics</em>, 14, 375-395.</li>
+        <li>Neal, R.M. (2003). "Slice Sampling." <em>The Annals of Statistics</em>, 31(3), 705-767.</li>
+        <li>Roberts, G.O., & Rosenthal, J.S. (2001). "Optimal Scaling for Various Metropolis-Hastings Algorithms." 
+        <em>Statistical Science</em>, 16(4), 351-367.</li>
+      </ul>
+      
+      <p style="margin-top: 1rem;"><strong>Books:</strong></p>
+      <ul style="padding-left: 1.5rem; margin: 0.5rem 0;">
+        <li>Robert, C.P., & Casella, G. (2004). <em>Monte Carlo Statistical Methods</em> (2nd ed.). Springer.</li>
+        <li>Brooks, S., Gelman, A., Jones, G., & Meng, X.-L. (2011). <em>Handbook of Markov Chain Monte Carlo</em>. CRC Press.</li>
+        <li>Gelman, A., Carlin, J.B., Stern, H.S., Dunson, D.B., Vehtari, A., & Rubin, D.B. (2013). 
+        <em>Bayesian Data Analysis</em> (3rd ed.). CRC Press.</li>
+      </ul>
+    </div>
+  </div>
 
 </div>
 
 <script>
 /***************************************************
- * CANVAS & UI
+ * CANVAS & UI SETUP
  ***************************************************/
 const canvas = document.getElementById("posterior");
 const ctx = canvas.getContext("2d");
-const hx = document.getElementById("histX").getContext("2d");
-const hy = document.getElementById("histY").getContext("2d");
-const info = document.getElementById("info");
+const hxCanvas = document.getElementById("histX");
+const hyCanvas = document.getElementById("histY");
+const hx = hxCanvas.getContext("2d");
+const hy = hyCanvas.getContext("2d");
+const acfCanvas = document.getElementById("acfXY");
+const acfXY = acfCanvas.getContext("2d");
+const traceXCanvas = document.getElementById("traceX");
+const traceYCanvas = document.getElementById("traceY");
+const traceX = traceXCanvas.getContext("2d");
+const traceY = traceYCanvas.getContext("2d");
 
+// Set canvas widths to actual container width
+acfCanvas.width = acfCanvas.offsetWidth;
+traceXCanvas.width = traceXCanvas.offsetWidth;
+traceYCanvas.width = traceYCanvas.offsetWidth;
+
+const stepInfo = document.getElementById("stepInfo");
 const sigmaSlider = document.getElementById("sigma");
 const speedSlider = document.getElementById("speed");
 const sigmaVal = document.getElementById("sigmaVal");
 const speedVal = document.getElementById("speedVal");
 
-sigmaSlider.oninput = () => sigmaVal.textContent = sigmaSlider.value;
-speedSlider.oninput = () => speedVal.textContent = speedSlider.value;
+sigmaSlider.oninput = () => {
+  sigmaVal.textContent = parseFloat(sigmaSlider.value).toFixed(2);
+};
+
+speedSlider.oninput = () => {
+  speedVal.textContent = speedSlider.value;
+  if (timer) {
+    clearInterval(timer);
+    timer = setInterval(mhStep, parseInt(speedSlider.value));
+  }
+};
 
 /***************************************************
- * DOMAIN
+ * DOMAIN & STATE
  ***************************************************/
-const xmin = -4, xmax = 4;
-const ymin = -4, ymax = 4;
+// Domain will be set based on distribution
+let xmin, xmax, ymin, ymax;
+
+function setDomain() {
+  const type = document.getElementById("dist").value;
+  if (type === "funnel") {
+    // Neal's funnel: x ~ N(0, 3^2), y|x ~ N(0, exp(x)^2)
+    // x covers ±3 std devs = ±9, use ±10 to be safe
+    // For y: when x is large, exp(x) is huge. At x=5, exp(5)≈150
+    // So y needs range of about ±3*150 = ±450, but let's use ±50 for visualization
+    xmin = -10; xmax = 10;
+    ymin = -50; ymax = 50;
+  } else if (type === "banana") {
+    // Rosenbrock banana: x² + 100(y - x²)² ≤ C
+    // For 95% probability mass, C ≈ 200 * 5.99 ≈ 1200
+    // So x² ≤ 1200 → x ∈ [-35, 35], but main mass is closer
+    // The banana curves upward: when x=±2, y ≈ x² = 4
+    // Most mass is in x ∈ [-2.5, 2.5], y ∈ [-1, 7]
+    xmin = -3; xmax = 3;
+    ymin = -1; ymax = 8;
+  } else {
+    // Gaussian: bivariate with ρ=0.8, unit variance
+    // ±4 standard deviations covers 99.99%
+    xmin = -4; xmax = 4;
+    ymin = -4; ymax = 4;
+  }
+}
+
+// Initialize domain
+setDomain();
 
 const samplesX = [];
 const samplesY = [];
 
+let x = 0, y = 0;
+let p = 0;
+let accepted = 0, total = 0;
+let timer = null;
+
 /***************************************************
- * TARGET DISTRIBUTIONS π(x,y)
+ * TARGET DISTRIBUTIONS
  ***************************************************/
-function target(x,y){
+function target(x, y) {
   const type = document.getElementById("dist").value;
-  return type === "mixture" ? targetMixture(x,y) : targetGaussian(x,y);
+  if (type === "funnel") return targetFunnel(x, y);
+  if (type === "banana") return targetBanana(x, y);
+  return targetGaussian(x, y);
 }
 
-function targetGaussian(x,y){
-  const rho = 0.7;
-  const z = (x*x - 2*rho*x*y + y*y)/(1-rho*rho);
-  return Math.exp(-0.5*z);
+function targetGaussian(x, y) {
+  // Bivariate Gaussian with correlation rho = 0.8
+  const rho = 0.8;
+  const exponent = (x*x - 2*rho*x*y + y*y) / (2 * (1 - rho*rho));
+  return Math.exp(-exponent);
 }
 
-function targetMixture(x,y){
-  const g1 = Math.exp(-0.5*((x-1.5)**2 + (y-1.5)**2));
-  const g2 = Math.exp(-0.5*((x+1.5)**2 + (y+1.5)**2));
-  return 0.5*(g1 + g2);
+function targetBanana(x, y) {
+  // Rosenbrock's banana distribution
+  // π(x,y) ∝ exp(-1/200 * (x² + 100(y - x²)²))
+  const exponent = (x*x + 100 * (y - x*x)**2) / 200;
+  return Math.exp(-exponent);
+}
+
+function targetFunnel(x, y) {
+  // Neal's funnel distribution
+  // x ~ N(0, 3²), y|x ~ N(0, exp(x)²)
+  // π(x,y) ∝ exp(-x²/18 - y²/(2*exp(2x)))
+  const ex = Math.exp(x);
+  const exponent = x*x / 18 + y*y / (2 * ex * ex);
+  return Math.exp(-exponent);
 }
 
 /***************************************************
- * COORDINATES
+ * COORDINATE TRANSFORMATION
  ***************************************************/
-function toCanvas(x,y){
-  return [
-    (x-xmin)/(xmax-xmin)*canvas.width,
-    canvas.height - (y-ymin)/(ymax-ymin)*canvas.height
-  ];
+function toCanvas(x, y) {
+  const px = (x - xmin) / (xmax - xmin) * canvas.width;
+  const py = canvas.height - (y - ymin) / (ymax - ymin) * canvas.height;
+  return [px, py];
 }
 
 /***************************************************
- * DRAW POSTERIOR
+ * DRAW DENSITY WITH PROPER AXES
  ***************************************************/
-function drawDensity(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  const n = 180;
+function drawDensity() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  for(let i=0;i<n;i++){
-    for(let j=0;j<n;j++){
-      const x = xmin + (xmax-xmin)*i/n;
-      const y = ymin + (ymax-ymin)*j/n;
-      const p = target(x,y);
-      ctx.fillStyle = `rgba(59,130,246,${Math.min(1,6*p)})`;
+  // Compute density grid
+  const n = 200;
+  const density = [];
+  let maxP = 0;
+  
+  for (let i = 0; i < n; i++) {
+    density[i] = [];
+    for (let j = 0; j < n; j++) {
+      const xVal = xmin + (xmax - xmin) * i / n;
+      const yVal = ymin + (ymax - ymin) * j / n;
+      const pVal = target(xVal, yVal);
+      density[i][j] = pVal;
+      if (pVal > maxP) maxP = pVal;
+    }
+  }
+
+  // Draw density heatmap
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < n; j++) {
+      const alpha = Math.min(0.9, Math.max(0.05, 8 * density[i][j] / maxP));
+      ctx.fillStyle = `rgba(17, 24, 39, ${alpha})`;
       ctx.fillRect(
-        i*canvas.width/n,
-        canvas.height-j*canvas.height/n,
-        canvas.width/n,
-        canvas.height/n
+        i * canvas.width / n,
+        canvas.height - j * canvas.height / n,
+        canvas.width / n + 1,
+        canvas.height / n + 1
       );
     }
   }
+
+  // Grid lines
+  ctx.strokeStyle = "#e0e0e0";
+  ctx.lineWidth = 0.5;
+  const gridN = 8;
+  for (let i = 0; i <= gridN; i++) {
+    const pos = i / gridN * canvas.width;
+    ctx.beginPath();
+    ctx.moveTo(pos, 0);
+    ctx.lineTo(pos, canvas.height);
+    ctx.stroke();
+    
+    ctx.beginPath();
+    ctx.moveTo(0, pos);
+    ctx.lineTo(canvas.width, pos);
+    ctx.stroke();
+  }
+
+  // Axes
+  ctx.strokeStyle = "#2d3748";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(0, canvas.height);
+  ctx.lineTo(canvas.width, canvas.height);
+  ctx.moveTo(0, 0);
+  ctx.lineTo(0, canvas.height);
+  ctx.stroke();
+
+  // Ticks and labels
+  ctx.fillStyle = "#2d3748";
+  ctx.font = "13px -apple-system, sans-serif";
+  ctx.textAlign = "center";
+  
+  const nTicks = 8;
+  for (let i = 0; i <= nTicks; i++) {
+    const xPos = i / nTicks * canvas.width;
+    const yPos = canvas.height - i / nTicks * canvas.height;
+    const xLabel = (xmin + (xmax - xmin) * i / nTicks).toFixed(1);
+    const yLabel = (ymin + (ymax - ymin) * i / nTicks).toFixed(1);
+    
+    // X-axis ticks
+    ctx.beginPath();
+    ctx.moveTo(xPos, canvas.height);
+    ctx.lineTo(xPos, canvas.height - 8);
+    ctx.stroke();
+    ctx.fillText(xLabel, xPos, canvas.height + 20);
+    
+    // Y-axis ticks
+    ctx.textAlign = "right";
+    ctx.beginPath();
+    ctx.moveTo(0, yPos);
+    ctx.lineTo(8, yPos);
+    ctx.stroke();
+    ctx.fillText(yLabel, -12, yPos + 4);
+    ctx.textAlign = "center";
+  }
+
+  // Axis labels
+  ctx.font = "bold 16px -apple-system, sans-serif";
+  ctx.fillStyle = "#1a1a1a";
+  ctx.fillText("x₁", canvas.width / 2, canvas.height + 45);
+  
+  ctx.save();
+  ctx.translate(15, canvas.height / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.fillText("x₂", 0, 0);
+  ctx.restore();
 }
 
 /***************************************************
- * MH STATE
+ * MH STEP
  ***************************************************/
-let x=0, y=0;
-let p = target(0,0);
-let accepted=0, total=0;
-let timer=null;
-
-/***************************************************
- * SINGLE MH STEP
- ***************************************************/
-function mhStep(){
+function mhStep() {
   const sigma = parseFloat(sigmaSlider.value);
 
-  const xp = x + sigma*randn();
-  const yp = y + sigma*randn();
+  // Proposal
+  const xp = x + sigma * randn();
+  const yp = y + sigma * randn();
+  const pp = target(xp, yp);
 
-  const pp = target(xp,yp);
-  const ratio = pp/p;
+  // Acceptance ratio
+  const ratio = pp / p;
   const u = Math.random();
 
-  let acc=false;
-  if(u < Math.min(1,ratio)){
-    x=xp; y=yp; p=pp;
-    acc=true; accepted++;
+  let acc = false;
+  if (u < Math.min(1, ratio)) {
+    x = xp;
+    y = yp;
+    p = pp;
+    acc = true;
+    accepted++;
   }
 
   total++;
   samplesX.push(x);
   samplesY.push(y);
 
-  const [px,py] = toCanvas(x,y);
-  ctx.fillStyle = acc ? "#16a34a" : "#f97316";
+  // Draw point on canvas
+  const [px, py] = toCanvas(x, y);
+  ctx.fillStyle = acc ? "#38a169" : "#ed8936";
   ctx.beginPath();
-  ctx.arc(px,py,4,0,2*Math.PI);
+  ctx.arc(px, py, 3.5, 0, 2 * Math.PI);
   ctx.fill();
+  ctx.strokeStyle = "white";
+  ctx.lineWidth = 0.5;
+  ctx.stroke();
 
+  // Update displays
   drawHistograms();
+  updateStepInfo(xp, yp, pp, ratio, u, acc);
+  updateStats();
+}
 
-  info.innerHTML = `
-    <strong>Current state</strong><br>
-    x = ${x.toFixed(3)}, y = ${y.toFixed(3)}<br><br>
-
-    <strong>Proposal</strong><br>
-    x′ = ${xp.toFixed(3)}, y′ = ${yp.toFixed(3)}<br><br>
-
-    <strong>Target density</strong><br>
-    π(x,y) = ${p.toExponential(3)}<br>
-    π(x′,y′) = ${pp.toExponential(3)}<br><br>
-
-    <strong>MH ratio</strong><br>
-    r = ${ratio.toFixed(3)}, u = ${u.toFixed(3)}<br><br>
-
-    <strong>Decision</strong><br>
-    ${acc ? "Accepted" : "Rejected"}<br><br>
-
-    Acceptance rate: ${(accepted/total).toFixed(2)} (${accepted}/${total})
+/***************************************************
+ * UPDATE STEP INFO
+ ***************************************************/
+function updateStepInfo(xp, yp, pp, ratio, u, acc) {
+  const statusClass = acc ? 'status-accepted' : 'status-rejected';
+  const statusText = acc ? 'ACCEPTED ✓' : 'REJECTED ✗';
+  
+  stepInfo.innerHTML = `
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+      <div>
+        <strong>Current State (t)</strong><br>
+        x₁ = ${x.toFixed(4)}<br>
+        x₂ = ${y.toFixed(4)}<br>
+        π(x<sub>t</sub>) = ${p.toExponential(4)}
+      </div>
+      <div>
+        <strong>Proposed State (t+1)</strong><br>
+        x₁′ = ${xp.toFixed(4)}<br>
+        x₂′ = ${yp.toFixed(4)}<br>
+        π(x′) = ${pp.toExponential(4)}
+      </div>
+    </div>
+    <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e2e8f0;">
+      <strong>Acceptance Calculation</strong><br>
+      Ratio: r = π(x′)/π(x<sub>t</sub>) = ${ratio.toFixed(4)}<br>
+      Random draw: u = ${u.toFixed(4)}<br>
+      Criterion: u < min(1, r) = ${Math.min(1, ratio).toFixed(4)}<br>
+      <span style="font-size: 1.1rem; margin-top: 0.5rem; display: inline-block;" class="${statusClass}">
+        ${statusText}
+      </span>
+    </div>
   `;
+}
+
+/***************************************************
+ * UPDATE STATISTICS
+ ***************************************************/
+function updateStats() {
+  document.getElementById("totalIter").textContent = total.toLocaleString();
+  document.getElementById("acceptCount").textContent = accepted.toLocaleString();
+  
+  const rate = accepted / total;
+  document.getElementById("acceptRate").textContent = 
+    (rate * 100).toFixed(1) + "% (" + accepted + "/" + total + ")";
+  
+  // Estimate ESS from ACF
+  if (samplesX.length > 50) {
+    const acfX = autocorr(samplesX, 100);
+    let sumACF = 0;
+    for (let i = 1; i < acfX.length && acfX[i] > 0; i++) {
+      sumACF += acfX[i];
+    }
+    const ess = samplesX.length / (1 + 2 * sumACF);
+    document.getElementById("essValue").textContent = Math.round(ess).toLocaleString();
+  }
 }
 
 /***************************************************
  * HISTOGRAMS
  ***************************************************/
-function drawHistograms(){
-  drawHistogram(hx,samplesX);
-  drawHistogram(hy,samplesY);
+function drawHistograms() {
+  drawHistogram(hx, samplesX, "x₁", hxCanvas);
+  drawHistogram(hy, samplesY, "x₂", hyCanvas);
+  drawACFXY(acfXY, samplesX, samplesY);
+  drawTracePlot(traceX, samplesX, "x₁", traceXCanvas);
+  drawTracePlot(traceY, samplesY, "x₂", traceYCanvas);
 }
 
-function drawHistogram(ctx,data){
-  ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
-  const bins=30;
-  const hist=Array(bins).fill(0);
+function drawHistogram(ctx, data, label, canvas) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  if (data.length === 0) return;
 
-  data.forEach(v=>{
-    const i=Math.floor((v-xmin)/(xmax-xmin)*bins);
-    if(i>=0 && i<bins) hist[i]++;
+  const bins = 40;
+  const hist = Array(bins).fill(0);
+  const binWidth = (xmax - xmin) / bins;
+
+  data.forEach(v => {
+    const i = Math.floor((v - xmin) / (xmax - xmin) * bins);
+    if (i >= 0 && i < bins) hist[i]++;
   });
 
-  const hmax=Math.max(...hist);
-  hist.forEach((h,i)=>{
-    const w=ctx.canvas.width/bins;
-    const bh=(h/hmax)*ctx.canvas.height;
-    ctx.fillStyle="#6b7280";
-    ctx.fillRect(i*w,ctx.canvas.height-bh,w-1,bh);
+  const hmax = Math.max(...hist, 1);
+  
+  // Normalize histogram to approximate density
+  const normalized = hist.map(h => h / (data.length * binWidth));
+  const ymax = Math.max(...normalized, 0.01);
+
+  const margin = {top: 20, right: 20, bottom: 50, left: 55};
+  const plotWidth = canvas.width - margin.left - margin.right;
+  const plotHeight = canvas.height - margin.top - margin.bottom;
+
+  // Draw bars
+  hist.forEach((h, i) => {
+    const x = margin.left + i * plotWidth / bins;
+    const barHeight = (h / hmax) * plotHeight;
+    ctx.fillStyle = "#374151";
+    ctx.fillRect(x, margin.top + plotHeight - barHeight, plotWidth / bins - 1, barHeight);
   });
+
+  // Axes
+  ctx.strokeStyle = "#2d3748";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(margin.left, margin.top);
+  ctx.lineTo(margin.left, margin.top + plotHeight);
+  ctx.lineTo(margin.left + plotWidth, margin.top + plotHeight);
+  ctx.stroke();
+
+  // X-axis ticks
+  ctx.fillStyle = "#2d3748";
+  ctx.font = "12px -apple-system, sans-serif";
+  ctx.textAlign = "center";
+  const xTicks = 8;
+  for (let i = 0; i <= xTicks; i++) {
+    const xPos = margin.left + i / xTicks * plotWidth;
+    const xLabel = (xmin + (xmax - xmin) * i / xTicks).toFixed(1);
+    ctx.beginPath();
+    ctx.moveTo(xPos, margin.top + plotHeight);
+    ctx.lineTo(xPos, margin.top + plotHeight + 5);
+    ctx.stroke();
+    ctx.fillText(xLabel, xPos, margin.top + plotHeight + 20);
+  }
+
+  // Y-axis ticks
+  ctx.textAlign = "right";
+  const yTicks = 5;
+  for (let i = 0; i <= yTicks; i++) {
+    const yPos = margin.top + plotHeight - i / yTicks * plotHeight;
+    const yLabel = (ymax * i / yTicks).toFixed(2);
+    ctx.beginPath();
+    ctx.moveTo(margin.left - 5, yPos);
+    ctx.lineTo(margin.left, yPos);
+    ctx.stroke();
+    ctx.fillText(yLabel, margin.left - 10, yPos + 4);
+  }
+
+  // Labels
+  ctx.font = "bold 14px -apple-system, sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText(label, margin.left + plotWidth / 2, canvas.height - 10);
+  
+  ctx.save();
+  ctx.translate(15, margin.top + plotHeight / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.fillText("Density", 0, 0);
+  ctx.restore();
+}
+
+/***************************************************
+ * TRACE PLOTS
+ ***************************************************/
+function drawTracePlot(ctx, data, label, canvas) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  if (data.length < 2) return;
+
+  const margin = {top: 20, right: 50, bottom: 50, left: 70};
+  const plotWidth = canvas.width - margin.left - margin.right;
+  const plotHeight = canvas.height - margin.top - margin.bottom;
+
+  // Find data range
+  const yMin = Math.min(...data, -4);
+  const yMax = Math.max(...data, 4);
+  const yRange = yMax - yMin;
+  const yPadding = yRange * 0.1;
+
+  // Grid
+  ctx.strokeStyle = "#e5e7eb";
+  ctx.lineWidth = 1;
+  const xTicks = 10;
+  const yTicks = 6;
+  
+  for (let i = 0; i <= xTicks; i++) {
+    const x = margin.left + i / xTicks * plotWidth;
+    ctx.beginPath();
+    ctx.moveTo(x, margin.top);
+    ctx.lineTo(x, margin.top + plotHeight);
+    ctx.stroke();
+  }
+  
+  for (let i = 0; i <= yTicks; i++) {
+    const y = margin.top + i / yTicks * plotHeight;
+    ctx.beginPath();
+    ctx.moveTo(margin.left, y);
+    ctx.lineTo(margin.left + plotWidth, y);
+    ctx.stroke();
+  }
+
+  // Draw trace line - use different color based on label
+  ctx.strokeStyle = label === "x₁" ? "#1e40af" : "#dc2626";
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  
+  for (let i = 0; i < data.length; i++) {
+    const xPos = margin.left + i / (data.length - 1) * plotWidth;
+    const yPos = margin.top + plotHeight - (data[i] - (yMin - yPadding)) / (yMax - yMin + 2 * yPadding) * plotHeight;
+    
+    if (i === 0) ctx.moveTo(xPos, yPos);
+    else ctx.lineTo(xPos, yPos);
+  }
+  ctx.stroke();
+
+  // Axes
+  ctx.strokeStyle = "#2d3748";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(margin.left, margin.top);
+  ctx.lineTo(margin.left, margin.top + plotHeight);
+  ctx.lineTo(margin.left + plotWidth, margin.top + plotHeight);
+  ctx.stroke();
+
+  // X-axis ticks and labels
+  ctx.fillStyle = "#2d3748";
+  ctx.font = "12px -apple-system, sans-serif";
+  ctx.textAlign = "center";
+  
+  for (let i = 0; i <= xTicks; i++) {
+    const x = margin.left + i / xTicks * plotWidth;
+    const iterLabel = Math.round(i / xTicks * (data.length - 1));
+    ctx.beginPath();
+    ctx.moveTo(x, margin.top + plotHeight);
+    ctx.lineTo(x, margin.top + plotHeight + 6);
+    ctx.stroke();
+    ctx.fillText(iterLabel, x, margin.top + plotHeight + 20);
+  }
+  
+  ctx.font = "bold 13px -apple-system, sans-serif";
+  ctx.fillText("Iteration", margin.left + plotWidth / 2, canvas.height - 10);
+
+  // Y-axis ticks and labels
+  ctx.textAlign = "right";
+  ctx.font = "12px -apple-system, sans-serif";
+  
+  for (let i = 0; i <= yTicks; i++) {
+    const y = margin.top + plotHeight - i / yTicks * plotHeight;
+    const val = (yMin - yPadding) + i / yTicks * (yMax - yMin + 2 * yPadding);
+    ctx.beginPath();
+    ctx.moveTo(margin.left - 6, y);
+    ctx.lineTo(margin.left, y);
+    ctx.stroke();
+    ctx.fillText(val.toFixed(2), margin.left - 10, y + 4);
+  }
+  
+  ctx.font = "bold 13px -apple-system, sans-serif";
+  ctx.save();
+  ctx.translate(20, margin.top + plotHeight / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.textAlign = "center";
+  ctx.fillText(label + " value", 0, 0);
+  ctx.restore();
+}
+
+/***************************************************
+ * AUTOCORRELATION
+ ***************************************************/
+function autocorr(data, lagMax = 100) {
+  const n = data.length;
+  if (n === 0) return [];
+  
+  const mean = data.reduce((a, b) => a + b, 0) / n;
+  const totalVar = data.reduce((a, b) => a + (b - mean)**2, 0);
+  
+  if (totalVar === 0) return Array(lagMax + 1).fill(0);
+  
+  const acf = [];
+  for (let lag = 0; lag <= lagMax; lag++) {
+    let c = 0;
+    for (let i = 0; i < n - lag; i++) {
+      c += (data[i] - mean) * (data[i + lag] - mean);
+    }
+    acf.push(c / totalVar);
+  }
+  return acf;
+}
+
+function drawACFXY(ctx, dataX, dataY) {
+  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  
+  if (dataX.length < 10) return;
+
+  // Start with a reasonable max lag
+  const initialLagMax = Math.min(300, Math.floor(dataX.length / 2));
+  const acfX = autocorr(dataX, initialLagMax);
+  const acfY = autocorr(dataY, initialLagMax);
+  
+  // Find where ACF crosses zero for both chains
+  function findZeroCrossing(acf) {
+    for (let i = 1; i < acf.length; i++) {
+      if (acf[i] <= 0) return i;
+    }
+    return acf.length - 1;
+  }
+  
+  const zeroCrossX = findZeroCrossing(acfX);
+  const zeroCrossY = findZeroCrossing(acfY);
+  const maxZeroCross = Math.max(zeroCrossX, zeroCrossY);
+  
+  // Show zero crossing + 1/3 more, but at least 50 lags and at most initialLagMax
+  const adaptiveLagMax = Math.min(initialLagMax, Math.max(50, Math.floor(maxZeroCross * 1.33)));
+  
+  // Trim ACF arrays to adaptive length
+  const acfXTrimmed = acfX.slice(0, adaptiveLagMax + 1);
+  const acfYTrimmed = acfY.slice(0, adaptiveLagMax + 1);
+  const n = acfXTrimmed.length;
+
+  const margin = {top: 30, right: 100, bottom: 60, left: 70};
+  const plotWidth = ctx.canvas.width - margin.left - margin.right;
+  const plotHeight = ctx.canvas.height - margin.top - margin.bottom;
+
+  const yMin = -0.2;
+  const yMax = 1.0;
+
+  // Grid
+  ctx.strokeStyle = "#e5e7eb";
+  ctx.lineWidth = 1;
+  const xTicks = 10;
+  const yTicks = 6;
+  
+  for (let i = 0; i <= xTicks; i++) {
+    const x = margin.left + i / xTicks * plotWidth;
+    ctx.beginPath();
+    ctx.moveTo(x, margin.top);
+    ctx.lineTo(x, margin.top + plotHeight);
+    ctx.stroke();
+  }
+  
+  for (let i = 0; i <= yTicks; i++) {
+    const y = margin.top + i / yTicks * plotHeight;
+    ctx.beginPath();
+    ctx.moveTo(margin.left, y);
+    ctx.lineTo(margin.left + plotWidth, y);
+    ctx.stroke();
+  }
+
+  // Zero line
+  const zeroY = margin.top + (yMax - 0) / (yMax - yMin) * plotHeight;
+  ctx.strokeStyle = "#94a3b8";
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([5, 5]);
+  ctx.beginPath();
+  ctx.moveTo(margin.left, zeroY);
+  ctx.lineTo(margin.left + plotWidth, zeroY);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Draw ACF for x₁
+  ctx.strokeStyle = "#1e40af";
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  for (let i = 0; i < n; i++) {
+    const xPos = margin.left + i / (n - 1) * plotWidth;
+    const yPos = margin.top + (yMax - acfXTrimmed[i]) / (yMax - yMin) * plotHeight;
+    if (i === 0) ctx.moveTo(xPos, yPos);
+    else ctx.lineTo(xPos, yPos);
+  }
+  ctx.stroke();
+
+  // Draw ACF for x₂
+  ctx.strokeStyle = "#dc2626";
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  for (let i = 0; i < n; i++) {
+    const xPos = margin.left + i / (n - 1) * plotWidth;
+    const yPos = margin.top + (yMax - acfYTrimmed[i]) / (yMax - yMin) * plotHeight;
+    if (i === 0) ctx.moveTo(xPos, yPos);
+    else ctx.lineTo(xPos, yPos);
+  }
+  ctx.stroke();
+
+  // Axes
+  ctx.strokeStyle = "#2d3748";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(margin.left, margin.top);
+  ctx.lineTo(margin.left, margin.top + plotHeight);
+  ctx.lineTo(margin.left + plotWidth, margin.top + plotHeight);
+  ctx.stroke();
+
+  // X-axis ticks and labels
+  ctx.fillStyle = "#2d3748";
+  ctx.font = "13px -apple-system, sans-serif";
+  ctx.textAlign = "center";
+  
+  for (let i = 0; i <= xTicks; i++) {
+    const x = margin.left + i / xTicks * plotWidth;
+    const lag = Math.round(i / xTicks * adaptiveLagMax);
+    ctx.beginPath();
+    ctx.moveTo(x, margin.top + plotHeight);
+    ctx.lineTo(x, margin.top + plotHeight + 6);
+    ctx.stroke();
+    ctx.fillText(lag, x, margin.top + plotHeight + 22);
+  }
+  
+  ctx.font = "bold 14px -apple-system, sans-serif";
+  ctx.fillText("Lag τ", margin.left + plotWidth / 2, ctx.canvas.height - 15);
+
+  // Y-axis ticks and labels
+  ctx.textAlign = "right";
+  ctx.font = "13px -apple-system, sans-serif";
+  const yLabels = [-0.2, 0, 0.2, 0.4, 0.6, 0.8, 1.0];
+  
+  yLabels.forEach(val => {
+    const y = margin.top + (yMax - val) / (yMax - yMin) * plotHeight;
+    ctx.beginPath();
+    ctx.moveTo(margin.left - 6, y);
+    ctx.lineTo(margin.left, y);
+    ctx.stroke();
+    ctx.fillText(val.toFixed(1), margin.left - 12, y + 4);
+  });
+  
+  ctx.font = "bold 14px -apple-system, sans-serif";
+  ctx.save();
+  ctx.translate(20, margin.top + plotHeight / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.textAlign = "center";
+  ctx.fillText("ACF", 0, 0);
+  ctx.restore();
+
+  // Legend
+  ctx.textAlign = "left";
+  ctx.font = "13px -apple-system, sans-serif";
+  
+  ctx.fillStyle = "#1e40af";
+  ctx.fillRect(ctx.canvas.width - 85, 20, 15, 3);
+  ctx.fillStyle = "#2d3748";
+  ctx.fillText("x₁ chain", ctx.canvas.width - 65, 25);
+  
+  ctx.fillStyle = "#dc2626";
+  ctx.fillRect(ctx.canvas.width - 85, 40, 15, 3);
+  ctx.fillStyle = "#2d3748";
+  ctx.fillText("x₂ chain", ctx.canvas.width - 65, 45);
 }
 
 /***************************************************
  * CONTROLS
  ***************************************************/
-function start(){
-  if(timer) return;
-  timer=setInterval(mhStep,parseInt(speedSlider.value));
+function start() {
+  if (timer) {
+    clearInterval(timer);
+    timer = null;
+    return;
+  }
+  timer = setInterval(mhStep, parseInt(speedSlider.value));
 }
 
-function singleStep(){ mhStep(); }
+function singleStep() {
+  mhStep();
+}
 
-function reset(){
-  clearInterval(timer);
-  timer=null;
-  samplesX.length=0;
-  samplesY.length=0;
-  x=0; y=0;
-  p=target(0,0);
-  accepted=0; total=0;
+function reset() {
+  if (timer) {
+    clearInterval(timer);
+    timer = null;
+  }
+  
+  // Update domain based on selected distribution
+  setDomain();
+  
+  samplesX.length = 0;
+  samplesY.length = 0;
+  
+  // Set initial position based on distribution
+  const type = document.getElementById("dist").value;
+  if (type === "funnel") {
+    // Start near the neck of the funnel
+    x = 0;
+    y = 0;
+  } else if (type === "banana") {
+    // Start near the banana center
+    x = 0;
+    y = 0;
+  } else {
+    // Gaussian - start at origin
+    x = 0;
+    y = 0;
+  }
+  
+  p = target(x, y);
+  accepted = 0;
+  total = 0;
+  
   drawDensity();
-  hx.clearRect(0,0,hx.canvas.width,hx.canvas.height);
-  hy.clearRect(0,0,hy.canvas.width,hy.canvas.height);
-  info.innerHTML="";
+  hx.clearRect(0, 0, hxCanvas.width, hxCanvas.height);
+  hy.clearRect(0, 0, hyCanvas.width, hyCanvas.height);
+  acfXY.clearRect(0, 0, acfCanvas.width, acfCanvas.height);
+  traceX.clearRect(0, 0, traceXCanvas.width, traceXCanvas.height);
+  traceY.clearRect(0, 0, traceYCanvas.width, traceYCanvas.height);
+  
+  stepInfo.innerHTML = "Click 'Start Sampling' or 'Single Step' to begin the MCMC algorithm.";
+  
+  document.getElementById("totalIter").textContent = "0";
+  document.getElementById("acceptCount").textContent = "0";
+  document.getElementById("acceptRate").textContent = "—";
+  document.getElementById("essValue").textContent = "—";
 }
 
 /***************************************************
- * GAUSSIAN RNG
+ * GAUSSIAN RNG (Box-Muller)
  ***************************************************/
-function randn(){
-  let u=0,v=0;
-  while(u===0) u=Math.random();
-  while(v===0) v=Math.random();
-  return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);
+function randn() {
+  let u = 0, v = 0;
+  while (u === 0) u = Math.random();
+  while (v === 0) v = Math.random();
+  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
 }
 
+/***************************************************
+ * INITIALIZATION
+ ***************************************************/
+p = target(x, y);
 drawDensity();
+
+// Add event listener to distribution selector to auto-reset on change
+document.getElementById("dist").addEventListener("change", function() {
+  reset();
+});
 </script>
+
 </body>
 </html>
