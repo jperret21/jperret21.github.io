@@ -61,7 +61,7 @@ While not the most efficient for complex posteriors, MCMC remains invaluable for
 
 ### 🔹 Hamiltonian Monte Carlo (HMC)
 
-**Coming soon** — A gradient-based sampler that treats sampling as a physics simulation problem.
+ A gradient-based sampler that treats sampling as a physics simulation problem.
 
 HMC leverages Hamiltonian dynamics to propose distant states with high acceptance probability, making it particularly effective for:
 
@@ -71,7 +71,7 @@ HMC leverages Hamiltonian dynamics to propose distant states with high acceptanc
 
 By simulating the motion of a particle with momentum through the posterior landscape, HMC can traverse the distribution much more efficiently than random-walk methods.
 
-➡️ *Interactive page under construction*  
+➡️ **[Explore the HMC sampler](/html_src/interactive_hmc.html)** 
 *Tags:* HMC, gradients, high-dimensional inference, Hamiltonian dynamics
 
 ---
