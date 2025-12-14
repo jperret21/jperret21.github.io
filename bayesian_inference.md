@@ -45,9 +45,9 @@ Instead of computing $P(\theta \mid D)$ directly, modern Bayesian inference reli
 
 $$
 P(D_{\text{new}} \mid D) = \int P(D_{\text{new}} \mid \theta) P(\theta \mid D) d\theta
-$$,
+$$
 
- and they facilitate model comparison through Bayes factors and model selection.
+and they facilitate model comparison through Bayes factors and model selection.
 
 
 ## The Sampling Zoo: Different Algorithms for Different Problems
