@@ -30,9 +30,11 @@ The beauty of this formula lies in its interpretability:
 ## The Fundamental Challenge
 
 The marginal likelihood requires integrating over the entire parameter space:
+
 $$
 P(D) = \int P(D \mid \theta) \cdot P(\theta) \, d\theta
 $$
+
 For most real-world problems, this integral is intractable. Consider the challenges: high-dimensional parameter spaces where we must integrate over hundreds or thousands of dimensions; complex, multimodal posterior landscapes with multiple peaks and valleys; non-conjugate prior-likelihood pairs that don't yield closed-form solutions; and implicit models where the likelihood itself requires solving differential equations or running expensive simulations. This is where computational methods become essential. We cannot compute the posterior analytically, so we must approximate it.
 
 
