@@ -12,10 +12,19 @@ P(\theta \mid D) = \frac{P(D \mid \theta) \cdot P(\theta)}{P(D)}
 $$
 
 Where:
-- **P(θ \| D)** is the *posterior distribution* — what we want to learn
-- **P(D \| θ)** is the *likelihood* — how probable the data is given the parameters
-- **P(θ)** is the *prior distribution* — our initial beliefs about the parameters
-- **P(D)** is the *marginal likelihood* or evidence — a normalizing constant
+- $P(\theta \mid D)$ — *Posterior distribution*  
+  The probability distribution of the parameters $\theta$ given the observed data $D$.  
+  This is the quantity we aim to infer.
+
+- $P(D \mid \theta)$ — *Likelihood*  
+  The probability of observing the data $D$ assuming the parameters take the value $\theta$.
+
+- $P(\theta)$ — *Prior distribution*  
+  Encodes prior knowledge or assumptions about the parameters before observing the data.
+
+- $P(D)$ — *Marginal likelihood* (or *evidence*)  
+  A normalization constant ensuring that the posterior integrates to one
+  
 
 ### The Challenge
 
