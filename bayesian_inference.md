@@ -1,121 +1,113 @@
 ---
+
 layout: default
 title: Introduction to Bayesian Inference
+
 ---
 
 # Introduction: Bayesian Inference
 
-At the heart of Bayesian statistics lies **Bayes' theorem**, which describes how we update our beliefs about parameters θ given observed data D:
+Bayesian inference provides a principled framework for reasoning under uncertainty. Unlike frequentist approaches that treat parameters as fixed unknowns, Bayesian methods treat them as random variables with probability distributions that we update as we observe data.
 
+## The Core Principle: Bayes' Theorem
+
+At the heart of Bayesian statistics lies Bayes' theorem,, which formalizes how we update our beliefs about parameters θ given observed data D:
 $$
 P(\theta \mid D) = \frac{P(D \mid \theta) \cdot P(\theta)}{P(D)}
 $$
 
-Where:
-- $P(\theta \mid D)$ — *Posterior distribution*  
-  The probability distribution of the parameters $\theta$ given the observed data $D$.  
-  This is the quantity we aim to infer.
+The posterior distribution $P(\theta \mid D)$ represents our updated beliefs about the parameters after observing the data—this is what we seek to infer. The likelihood $P(D \mid \theta)$ quantifies how probable our observed data is under different parameter values, connecting our mathematical model to empirical reality. Our prior distribution $P(\theta)$ encodes initial beliefs or constraints on the parameters before seeing the data, which can incorporate physical constraints, domain expertise, or regularization preferences. Finally, the marginal likelihood  $P(D)$ (also called the evidence) serves as a normalization constant ensuring the posterior is a proper probability distribution. The beauty of this formula lies in its interpretability: the posterior is proportional to how well the parameters explain the data (likelihood) weighted by how plausible those parameters were a priori (prior).
 
-- $P(D \mid \theta)$ — *Likelihood*  
-  The probability of observing the data $D$ assuming the parameters take the value $\theta$.
 
-- $P(\theta)$ — *Prior distribution*  
-  Encodes prior knowledge or assumptions about the parameters before observing the data.
+## The Fundamental Challenge
 
-- $P(D)$ — *Marginal likelihood* (or *evidence*)  
-  A normalization constant ensuring that the posterior integrates to one
-  
-
-### The Challenge
-
-The denominator P(D) requires integrating over all possible parameter values:
-
+The marginal likelihood requires integrating over the entire parameter space:
 $$
 P(D) = \int P(D \mid \theta) \cdot P(\theta) \, d\theta
 $$
+For most real-world problems, this integral is intractable. Consider the challenges: high-dimensional parameter spaces where we must integrate over hundreds or thousands of dimensions; complex, multimodal posterior landscapes with multiple peaks and valleys; non-conjugate prior-likelihood pairs that don't yield closed-form solutions; and implicit models where the likelihood itself requires solving differential equations or running expensive simulations. This is where computational methods become essential. We cannot compute the posterior analytically, so we must approximate it.
 
-For most real-world problems, this integral is **intractable** — impossible to compute analytically. This is where **sampling algorithms** come in.
 
-### Why We Need Samplers
+## Why Sampling?
 
-Instead of computing the posterior distribution directly, samplers generate representative samples from P(θ \| D). With enough samples, we can:
-- Estimate posterior means, medians, and credible intervals
-- Visualize the posterior distribution
-- Make predictions on new data
-- Perform model comparison
+Instead of computing $P(\theta \mid D)$ directly, modern Bayesian inference relies on  Monte Carlo sampling
+: we generate a collection of samples $\{\theta_1, \theta_2, ..., \theta_N\}$ that are distributed according to the posterior. With enough representative samples, we can estimate posterior statistics like means, medians, standard deviations, and quantiles. We can construct credible intervals—Bayesian confidence regions with direct probabilistic interpretation. These samples allow us to visualize marginal distributions and understand correlations and constraints between parameters. Perhaps most importantly, they enable us to make predictions by propagating posterior uncertainty to new data via the integral $P(D_{\text{new}} \mid D) = \int P(D_{\text{new}} \mid \theta) P(\theta \mid D) d\theta$, and they facilitate model comparison through Bayes factors and model selection.
 
----
 
-## 📌 Available Samplers
+## The Sampling Zoo: Different Algorithms for Different Problems
 
-This page gathers different sampling algorithms I experiment with, mostly in the context of Bayesian inference and high-dimensional problems. Each sampler has its own dedicated page with interactive visualizations, implementation details, and diagnostics.
+No single sampling algorithm dominates all scenarios. Each method makes different trade-offs in efficiency (how many samples are needed for reliable inference?), scalability (how does performance degrade in high dimensions?), robustness (does it work on multimodal, heavy-tailed, or pathological distributions?), automation (how much tuning is required from the user?), and specialization (does it provide additional information like evidence estimates?). Understanding these trade-offs is essential for choosing the right tool for your specific problem.
+Below, I present several sampling algorithms I've implemented and explored, each with interactive demonstrations showing their strengths, limitations, and appropriate use cases.
 
----
+### Markov Chain Monte Carlo (MCMC)
 
-### 🔹 Markov Chain Monte Carlo (MCMC)
+**The foundation of computational Bayesian inference.**
 
-A foundational Metropolis–Hastings sampler that forms the basis for understanding modern sampling methods. This implementation serves as a reference for exploring fundamental concepts like:
+MCMC constructs a Markov chain whose stationary distribution is the target posterior. The Metropolis-Hastings algorithm is the canonical example: propose a new state, accept or reject based on the posterior density ratio.
+The method shines in low-dimensional problems (typically fewer than 10-20 dimensions) with unimodal, well-behaved posteriors. It remains invaluable for teaching and building intuition about sampling, and serves as a diagnostic baseline for comparing more sophisticated methods.
 
-- **Convergence diagnostics** — How to know when your chain has reached the posterior
-- **Autocorrelation** — Understanding sample dependencies and effective sample size
-- **Acceptance rates** — Tuning proposals for efficient exploration
-- **Scaling behavior** — Why vanilla MCMC struggles in high dimensions
 
-While not the most efficient for complex posteriors, MCMC remains invaluable for building intuition and as a diagnostic baseline.
-
-➡️ **[Explore the MCMC sampler](/html_src/interactive_mcmc.html)**  
-*Tags:* Bayesian inference, Metropolis-Hastings, diagnostics, autocorrelation
+Understanding MCMC requires grasping several key concepts. First is the question of burn-in and convergence: how long must the chain run until it "forgets" its initialization? Autocorrelation between successive samples means the effective sample size is less than the raw sample count—samples aren't truly independent. Proposal tuning matters enormously; acceptance rates around 20-40% are often optimal (Roberts & Rosenthal, 2001). Most critically, the curse of dimensionality strikes hard: random-walk proposals become exponentially inefficient as dimension increases.
+While not competitive for complex modern problems, understanding MCMC is essential for grasping why gradient-based and adaptive methods were developed.
+➡️ [Explore the MCMC sampler](/html_src/interactive_mcmc.html)
+  
+*Includes: trace plots, autocorrelation analysis, effective sample size computation, proposal scaling experiments*
 
 ---
 
-### 🔹 Hamiltonian Monte Carlo (HMC)
+### Hamiltonian Monte Carlo (HMC)
 
- A gradient-based sampler that treats sampling as a physics simulation problem.
+**Geometry-aware sampling via Hamiltonian dynamics.**
 
-HMC leverages Hamiltonian dynamics to propose distant states with high acceptance probability, making it particularly effective for:
+HMC exploits gradient information to propose distant states that follow the posterior's geometry, dramatically improving on random-walk MCMC. The key idea: treat sampling as simulating a frictionless particle moving through the log-posterior landscape.
+Why does this work so well? Gradient guidance means proposals move along level sets of the posterior rather than wandering randomly. Momentum allows the particle to traverse large distances without random drift. The volume-preserving nature of Hamiltonian dynamics enables high acceptance rates even for distant proposals—a particle that travels far through phase space under Hamiltonian evolution naturally lands in regions of similar probability density.
 
-- **High-dimensional posteriors** — Efficient exploration where MCMC fails
-- **Complex geometries** — Following curved posterior landscapes
-- **Reduced autocorrelation** — Longer jumps mean fewer correlated samples
 
-By simulating the motion of a particle with momentum through the posterior landscape, HMC can traverse the distribution much more efficiently than random-walk methods.
+The method excels for high-dimensional smooth posteriors, handling hundreds or even thousands of dimensions where MCMC fails catastrophically. It's particularly effective for problems where gradients are available (or can be approximated) and for exploring complex geometries with curved correlations. Modern probabilistic programming systems like Stan and PyMC have made HMC the workhorse of contemporary Bayesian computation.
+However, challenges remain. The method requires tuning both step size and the number of leapfrog steps. It can be sensitive to stiff directions and pathological geometries like funnels. Gradient computation carries its own cost, and periodic orbits can emerge in pathological cases. HMC variants like NUTS (No-U-Turn Sampler) address many tuning issues automatically, which explains the method's widespread adoption.
 
-➡️ **[Explore the HMC sampler](/html_src/interactive_hmc.html)** 
-*Tags:* HMC, gradients, high-dimensional inference, Hamiltonian dynamics
 
----
-
-### 🔹 Nested sampling 
-
-➡️ **[Explore Nested sampling](/html_src/interactive_nested_sampling.html)** 
-*Tags:* HMC, gradients, high-dimensional inference, Hamiltonian dynamics
+➡️ [Explore the HMC sampler](/html_src/interactive_hmc.html)
+ 
+*Includes: trajectory visualization, leapfrog integration, energy diagnostics, comparison with MCMC*
 
 ---
 
-### 🔹 MCMC Parralel tempering
+### Nested Sampling
 
-➡️ **[Explore MCMC parralel tempering](/html_src/interactive_parralel_tempering.html)** 
-*Tags:* HMC, gradients, high-dimensional inference, Hamiltonian dynamics
+**Simultaneous sampling and evidence computation.**
 
----
-
+Unlike MCMC methods that target the posterior, nested sampling explores the likelihood-constrained prior: iteratively sample from regions of increasing likelihood. The algorithm starts by sampling N "live points" from the prior. At each iteration, it identifies the point with lowest likelihood, replaces it with a new point sampled from the prior with likelihood exceeding the removed point's, and repeats this process, shrinking the prior volume at each step. As a byproduct, this procedure naturally computes the marginal likelihood $P(D)$, making it invaluable for model comparison.
 
 
+This approach proves ideal for several scenarios. When model comparison and Bayes factor computation are as important as parameter inference, nested sampling excels. It naturally handles multimodal posteriors—think phase transitions or degenerate models—by its systematic exploration of the likelihood landscape. In low-to-moderate dimensions, when evidence estimation matters as much as posterior sampling, nested sampling provides both simultaneously.
 
 
+The trade-offs are worth understanding. For purely sampling tasks, nested sampling can be slower than MCMC or HMC. Its efficiency hinges critically on the "constrained prior sampling" step—drawing new samples from the prior that satisfy the likelihood constraint. The number of live points controls the accuracy-cost trade-off: more points mean better accuracy but higher computational cost. Despite these considerations, nested sampling has become increasingly popular in astronomy and cosmology where model selection is often the primary scientific question.
 
-## 🔧 Implementation Notes
 
-All samplers are implemented with:
-- **Interactive visualizations** — See the algorithms in action
-- **Step-by-step explanations** — Understand what's happening at each iteration
-- **Diagnostic tools** — Assess convergence and sample quality
-- **Comparative benchmarks** — Performance across different problem types
+➡️ 
+[Explore Nested Sampling](/html_src/interactive_nested_sampling.html)  
+
+*Includes: live point evolution, evidence computation, posterior reconstruction from nested samples*
 
 ---
 
-## 📚 Further Reading
+### MCMC Parallel Tempering
 
-- **Bayesian Data Analysis** (Gelman et al.) — Comprehensive treatment of Bayesian methods
-- **MCMC Handbook** (Brooks et al.) — Deep dive into sampling algorithms
-- **[Stan Documentation](https://mc-stan.org/docs/)** — Practical implementation patterns
+**Overcoming energy barriers via temperature ladder.**
+
+Parallel tempering (also called replica exchange MCMC) runs multiple chains at different "temperatures"—effectively flattening the posterior at high temperatures to escape local modes, then exchanging states between chains to transfer information. The mechanism is elegant. The algorithm runs M chains targeting $[P(\theta \mid D)]^{1/T_i}$ for temperatures $T_1 = 1 < T_2 < ... < T_M$. High-temperature chains explore freely across a flattened landscape, easily hopping between modes that would trap a standard MCMC chain. Low-temperature chains sample accurately from the true posterior. The magic happens when we periodically propose swapping states between adjacent temperature chains—information from high-temperature exploration gradually informs low-temperature sampling, allowing the cold chain to discover and properly weight all modes.
+
+
+The method excels at highly multimodal posteriors where standard MCMC would remain trapped in a single mode. Rugged likelihood surfaces with many local optima present no special difficulty. Phase transition problems, where the posterior splits between discrete regimes, are natural applications. Whenever you suspect your posterior has structure you haven't discovered yet, parallel tempering provides a systematic way to find it.
+
+
+Several practical considerations arise. The temperature schedule requires tuning—too few temperatures and swaps fail, too many wastes computation. The computational cost scales linearly with the number of chains, though these chains can run in parallel. Swap acceptance rates provide diagnostic information about whether the temperature spacing is appropriate. When properly configured, parallel tempering transforms impossible sampling problems into tractable ones.
+
+
+➡️ [Explore Parallel Tempering](/html_src/interactive_parralel_tempering.html) 
+*Includes: temperature ladder visualization, swap statistics, mode discovery demos*
+
+---
+
