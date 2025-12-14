@@ -65,6 +65,7 @@ The method shines in low-dimensional problems (typically fewer than 10-20 dimens
 
 Understanding MCMC requires grasping several key concepts. First is the question of burn-in and convergence: how long must the chain run until it "forgets" its initialization? Autocorrelation between successive samples means the effective sample size is less than the raw sample count—samples aren't truly independent. Proposal tuning matters enormously; acceptance rates around 20-40% are often optimal (Roberts & Rosenthal, 2001). Most critically, the curse of dimensionality strikes hard: random-walk proposals become exponentially inefficient as dimension increases.
 While not competitive for complex modern problems, understanding MCMC is essential for grasping why gradient-based and adaptive methods were developed.
+
 ➡️ [Explore the MCMC sampler](/html_src/interactive_mcmc.html)
   
 *Includes: trace plots, autocorrelation analysis, effective sample size computation, proposal scaling experiments*
@@ -102,8 +103,7 @@ This approach proves ideal for several scenarios. When model comparison and Baye
 The trade-offs are worth understanding. For purely sampling tasks, nested sampling can be slower than MCMC or HMC. Its efficiency hinges critically on the "constrained prior sampling" step—drawing new samples from the prior that satisfy the likelihood constraint. The number of live points controls the accuracy-cost trade-off: more points mean better accuracy but higher computational cost. Despite these considerations, nested sampling has become increasingly popular in astronomy and cosmology where model selection is often the primary scientific question.
 
 
-➡️ 
-[Explore Nested Sampling](/html_src/interactive_nested_sampling.html)  
+➡️ [Explore Nested Sampling](/html_src/interactive_nested_sampling.html)  
 
 *Includes: live point evolution, evidence computation, posterior reconstruction from nested samples*
 
