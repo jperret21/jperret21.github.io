@@ -183,6 +183,26 @@ body {
   padding-bottom: 0.5rem;
 }
 
+.algorithm-box {
+      background: #f7fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 1.5rem;
+      margin-top: 1rem;
+      overflow-x: auto;
+    }
+
+.algorithm-box ol {
+      margin: 0.5rem 0 0 0;
+      padding-left: 1.5rem;
+    }
+
+.algorithm-box li {
+      margin: 0.5rem 0;
+      font-family: 'Courier New', monospace;
+      font-size: 0.95rem;
+    }
+
 /* ====================================
    CONTROLS
    ==================================== */
@@ -331,6 +351,22 @@ canvas {
   background: white;
   border-radius: 4px;
   display: block;
+}
+
+.replica-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);  /* Change to 2 columns instead of 3 */
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.replica-canvas-container {
+  width: 100%;  /* Add this */
+}
+
+.replica-canvas-container canvas {
+  width: 100%;
+  height: auto;
 }
 
 /* ====================================

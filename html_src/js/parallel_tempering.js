@@ -233,9 +233,9 @@ function reset() {
     `;
     
     const canvas = document.createElement("canvas");
-    canvas.width = 280;
-    canvas.height = 280;
-    canvas.style.width = "100%";
+    canvas.width = 450;
+    canvas.height = 450;
+    canvas.style.width = "100%";   // Remove the maxWidth line
     canvas.style.height = "auto";
     
     container.appendChild(label);
