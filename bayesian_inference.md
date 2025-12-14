@@ -41,12 +41,18 @@ For most real-world problems, this integral is intractable. Consider the challen
 ## Why Sampling?
 
 Instead of computing $P(\theta \mid D)$ directly, modern Bayesian inference relies on  Monte Carlo sampling
-: we generate a collection of samples $\{\theta_1, \theta_2, ..., \theta_N\}$ that are distributed according to the posterior. With enough representative samples, we can estimate posterior statistics like means, medians, standard deviations, and quantiles. We can construct credible intervals—Bayesian confidence regions with direct probabilistic interpretation. These samples allow us to visualize marginal distributions and understand correlations and constraints between parameters. Perhaps most importantly, they enable us to make predictions by propagating posterior uncertainty to new data via the integral $P(D_{\text{new}} \mid D) = \int P(D_{\text{new}} \mid \theta) P(\theta \mid D) d\theta$, and they facilitate model comparison through Bayes factors and model selection.
+: we generate a collection of samples $\{\theta_1, \theta_2, ..., \theta_N\}$ that are distributed according to the posterior. With enough representative samples, we can estimate posterior statistics like means, medians, standard deviations, and quantiles. We can construct credible intervals—Bayesian confidence regions with direct probabilistic interpretation. These samples allow us to visualize marginal distributions and understand correlations and constraints between parameters. Perhaps most importantly, they enable us to make predictions by propagating posterior uncertainty to new data via the integral 
+
+$$
+P(D_{\text{new}} \mid D) = \int P(D_{\text{new}} \mid \theta) P(\theta \mid D) d\theta
+$$,
+
+ and they facilitate model comparison through Bayes factors and model selection.
 
 
 ## The Sampling Zoo: Different Algorithms for Different Problems
 
-No single sampling algorithm dominates all scenarios. Each method makes different trade-offs in efficiency (how many samples are needed for reliable inference?), scalability (how does performance degrade in high dimensions?), robustness (does it work on multimodal, heavy-tailed, or pathological distributions?), automation (how much tuning is required from the user?), and specialization (does it provide additional information like evidence estimates?). Understanding these trade-offs is essential for choosing the right tool for your specific problem.
+No single sampling algorithm dominates all scenarios. Each method makes different trade-offs in efficiency (how many samples are needed for reliable inference?), scalability (how does performance degrade in high dimensions?), robustness (does it work on multimodal, heavy-tailed, or pathological distributions?), automation (how much tuning is required from the user?), and specialization (does it provide additional information like evidence estimates, number of modes?). Understanding these trade-offs is essential for choosing the right tool for your specific problem.
 Below, I present several sampling algorithms I've implemented and explored, each with interactive demonstrations showing their strengths, limitations, and appropriate use cases.
 
 ### Markov Chain Monte Carlo (MCMC)
