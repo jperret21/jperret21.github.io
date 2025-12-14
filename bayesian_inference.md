@@ -107,7 +107,44 @@ Several practical considerations arise. The temperature schedule requires tuning
 
 
 ➡️ [Explore Parallel Tempering](/html_src/interactive_parralel_tempering.html) 
+
 *Includes: temperature ladder visualization, swap statistics, mode discovery demos*
 
 ---
 
+## 📚 Further Reading
+
+For those seeking a deeper understanding, several foundational texts stand out.
+
+- **Bayesian Data Analysis**  
+  *Gelman et al.*, 3rd edition — a definitive reference that is both comprehensive and accessible.
+
+- **Information Theory, Inference, and Learning Algorithms**  
+  *David J. C. MacKay* — offers deep insights from a physics perspective, particularly resonant for astrophysicists.
+
+- **Pattern Recognition and Machine Learning**  
+  *Christopher M. Bishop* — elegantly connects Bayesian inference with modern machine learning.
+
+For sampling-specific depth:
+
+- **Handbook of Markov Chain Monte Carlo**  
+  *Brooks et al.* — a comprehensive treatment of MCMC methods.
+
+- **A Conceptual Introduction to Hamiltonian Monte Carlo** (2017)  
+  *Michael Betancourt* — builds geometric intuition, rendering HMC both natural and inevitable.
+
+- **Nested Sampling for General Bayesian Computation** (2006)  
+  *John Skilling* — introduces nested sampling with characteristic clarity.
+
+Modern implementations have made these methods broadly accessible:
+
+- **[Stan](https://mc-stan.org/)**  
+  Production-quality Hamiltonian Monte Carlo with automatic differentiation.
+
+- **[PyMC](https://www.pymc.io/)**  
+  Pythonic probabilistic programming with excellent documentation.
+
+- **[Turing.jl](https://turing.ml/)**  
+  Brings Julia’s performance to probabilistic inference.
+
+Each framework has its own strengths; exploring multiple implementations can significantly deepen conceptual understanding.
