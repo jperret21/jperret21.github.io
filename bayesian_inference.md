@@ -12,11 +12,19 @@ Bayesian inference provides a principled framework for reasoning under uncertain
 ## The Core Principle: Bayes' Theorem
 
 At the heart of Bayesian statistics lies Bayes' theorem,, which formalizes how we update our beliefs about parameters θ given observed data D:
+
 $$
 P(\theta \mid D) = \frac{P(D \mid \theta) \cdot P(\theta)}{P(D)}
 $$
 
-The posterior distribution $P(\theta \mid D)$ represents our updated beliefs about the parameters after observing the data—this is what we seek to infer. The likelihood $P(D \mid \theta)$ quantifies how probable our observed data is under different parameter values, connecting our mathematical model to empirical reality. Our prior distribution $P(\theta)$ encodes initial beliefs or constraints on the parameters before seeing the data, which can incorporate physical constraints, domain expertise, or regularization preferences. Finally, the marginal likelihood  $P(D)$ (also called the evidence) serves as a normalization constant ensuring the posterior is a proper probability distribution. The beauty of this formula lies in its interpretability: the posterior is proportional to how well the parameters explain the data (likelihood) weighted by how plausible those parameters were a priori (prior).
+- The posterior distribution $P(\theta \mid D)$ represents our updated beliefs about the parameters after observing the data—this is what we seek to infer. 
+- The likelihood $P(D \mid \theta)$ quantifies how probable our observed data is under different parameter values, connecting our mathematical model to empirical reality. 
+- Our prior distribution $P(\theta)$ encodes initial beliefs or constraints on the parameters before seeing the data, which can incorporate physical constraints, domain expertise, or regularization preferences. 
+- The marginal likelihood  $P(D)$ (also called the evidence) serves as a normalization constant ensuring the posterior is a proper probability distribution. 
+
+The beauty of this formula lies in its interpretability: 
+
+**the posterior is proportional to how well the parameters explain the data (likelihood) weighted by how plausible those parameters were a priori (prior).**
 
 
 ## The Fundamental Challenge
