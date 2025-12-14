@@ -356,7 +356,7 @@ canvas {
 
 .replica-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);  /* Change to 2 columns instead of 3 */
+  grid-template-columns: repeat(3, 1fr);  /* Change to 2 columns instead of 3 */
   gap: 1rem;
   margin-top: 1rem;
 }
