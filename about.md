@@ -14,13 +14,55 @@ I am **Jules Perret**, a PhD researcher and research engineer in gravitational a
 I am particularly interested in numerical simulations applied to astrophysics. With my Master's degree from École Normale Supérieure Paris-Saclay - Université Paris-Saclay, I developed a strong interest in High-Performance Computing (HPC) and massive parallel development on CPU/GPU.
 
 
+
+---
+
+## Professional Experience
+
+### Researcher in Gravitational Wave Physics & Data Analysis (LISA mission)
+- **Institution:** Laboratoire Astroparticule & Cosmologie, Paris, CNRS, FR
+- **Duration:** 2026 - present
+- **Responsibilities:**
+ - Development of fast waveform and fast likelihood using JAX.
+ - Performance (speed and accuracy)Analsyis on MBHB sources in LISA dataset
+
+### PhD in Gravitational Wave Physics & Data Analysis
+- **Institution:** Laboratoire Astroparticule & Cosmologie, Paris, CNRS, FR
+- **Duration:** 2022 - 2025
+- **Responsibilities:**
+  - Devellopment of Deep Hamiltonian Monte-Carlo (DeepHMC) for Parameter Estimation (PE) of gravitaionnal waves data. 
+  - Bayesian statistics 
+  - General relativity and simulation
+  - Python devellopment using PE LVK's collaboration package : Bilby
+  - Simulation of Gravitationnal waves detection and analysis for the third generation of Graviationnal waves detector: Einstein Telescope.
+
+### Intern at Lawrence Berkeley National Laboratory (UC BERKELEY - LBNL )
+- **Position:** Astrophysics Internship
+- **Location:** Berkeley, CA, USA
+- **Duration:** 2020,2021 and 2022 (summer)
+- **Responsibilities:**
+    - Modelisation of Continious Gravitationnal Waves from pulsar.
+    - Data Analysis of data from the LIGO and VIRGO detectors.
+    - Development of parallel FFT algorithms on GPU.
+    - Python, C/C++ programming
+
+### Intern in Software Development (Université de Bourgogne )
+- **Position:** IT Internship
+- **Location:** Dijon, France
+- **Duration:** 2020
+- **Responsibilities:**
+    - Development of mixed reality applications for the Microsoft Hololens platform
+    - design, develop and test an application using : C#, Unity, Microsoft, MRTK.
+    - Using 3Dslicer to process tomography of brain image data.
+
+
 ---
 
 # Education
 
 ## PhD in Astrophysics
 - **Institution:** Laboratoire Astroparticule et Cosmologie APC-CNRS
-- **Duration:** 2022 - Present
+- **Duration:** 2022 - 2025
 - **Description:**
   - Development of Python package: Deep Hamiltonian Monte Carlo (DeepHMC) for parameter estimation of gravitational wave sources.git 
   - Bayesian statistics and numerical applications.
@@ -61,39 +103,3 @@ I am particularly interested in numerical simulations applied to astrophysics. W
     - Numerical physics, numerical modeling of physical phenomena, particle interaction
     - Environmental chemistry
  
-
----
-
-## Professional Experience
-
-
-### PhD in Gravitational Wave Physics & Data Analysis
-- **Institution:** Laboratoire Astroparticule & Cosmologie, Paris, CNRS, FR
-- **Duration:** 2022 - 2025
-- **Responsibilities:**
-  - Devellopment of Deep Hamiltonian Monte-Carlo (DeepHMC) for Parameter Estimation (PE) of gravitaionnal waves data. 
-  - Bayesian statistics 
-  - General relativity and simulation
-  - Python devellopment using PE LVK's collaboration package : Bilby
-  - Simulation of Gravitationnal waves detection and analysis for the third generation of Graviationnal waves detector: Einstein Telescope.
-
-### Intern at Lawrence Berkeley National Laboratory (UC BERKELEY - LBNL )
-- **Position:** Astrophysics Internship
-- **Location:** Berkeley, CA, USA
-- **Duration:** 2020,2021 and 2022 (summer)
-- **Responsibilities:**
-    - Modelisation of Continious Gravitationnal Waves from pulsar.
-    - Data Analysis of data from the LIGO and VIRGO detectors.
-    - Development of parallel FFT algorithms on GPU.
-    - Python, C/C++ programming
-
-### Intern in Software Development (Université de Bourgogne )
-- **Position:** IT Internship
-- **Location:** Dijon, France
-- **Duration:** 2020
-- **Responsibilities:**
-    - Development of mixed reality applications for the Microsoft Hololens platform
-    - design, develop and test an application using : C#, Unity, Microsoft, MRTK.
-    - Using 3Dslicer to process tomography of brain image data.
-
----
