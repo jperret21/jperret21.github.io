@@ -62,34 +62,33 @@
   <div class="section">
     <h2 class="section-title">Introduction to Hamiltonian Monte Carlo</h2>
     <p>
-      <strong>Hamiltonian Monte Carlo (HMC)</strong> is an advanced MCMC algorithm that uses gradient information 
-      and concepts from Hamiltonian dynamics to generate efficient proposals. Unlike random-walk methods 
-      (like Metropolis–Hastings), HMC proposes distant states while maintaining high acceptance rates by 
-      following the natural geometry of the posterior distribution.
+      <strong>Hamiltonian Monte Carlo (HMC)</strong> is an MCMC algorithm that uses gradient information
+      to generate efficient proposals via Hamiltonian dynamics. Unlike random-walk methods
+      (like Metropolis–Hastings), HMC makes distant proposals while maintaining high acceptance rates by
+      exploiting the geometry of the target distribution.
     </p>
     <p>
-      HMC addresses the two main challenges of random-walk MCMC: <strong>random walk behavior</strong> 
-      (slow, diffusive exploration) and <strong>sensitivity to correlations</strong> (inefficient axis-aligned 
-      proposals). By simulating Hamiltonian dynamics, HMC proposes states that move coherently along 
-      the posterior's contours, dramatically improving efficiency especially in high dimensions.
+      HMC addresses key limitations of random-walk MCMC: the diffusive nature of exploration and
+      poor performance with correlated parameters. By simulating Hamiltonian dynamics, HMC generates
+      coherent trajectories through parameter space, dramatically improving efficiency, especially in high dimensions.
     </p>
     
     <div class="algorithm-box" style="margin-top: 1.5rem;">
       <strong>Why HMC?</strong>
       <ul style="margin: 0.5rem 0; padding-left: 1.5rem;">
-        <li><strong>Efficient exploration:</strong> Uses gradient information to propose distant states with high acceptance probability</li>
-        <li><strong>Reduced autocorrelation:</strong> Makes large, coherent moves through parameter space instead of small random steps</li>
-        <li><strong>Handles correlations:</strong> Naturally adapts to the posterior geometry, efficient even with strong correlations</li>
-        <li><strong>Scalable:</strong> Performance often improves (relatively) as dimensionality increases, unlike random-walk methods</li>
-        <li><strong>Industry standard:</strong> Powers modern Bayesian software like Stan, PyMC, and NumPyro</li>
+        <li><strong>Efficient exploration:</strong> Generates distant proposals with high acceptance probability using gradient information</li>
+        <li><strong>Reduced autocorrelation:</strong> Produces nearly independent samples by making coherent moves through parameter space</li>
+        <li><strong>Handles correlations:</strong> Exploits geometric information from gradients, efficient even with strongly correlated parameters</li>
+        <li><strong>Scales to high dimensions:</strong> Convergence rate depends on condition number rather than dimensionality</li>
+        <li><strong>Industry standard:</strong> Powers modern probabilistic programming frameworks like Stan, PyMC, and NumPyro</li>
       </ul>
     </div>
 
     <div class="info-note" style="margin-top: 1.5rem;">
-      <strong>The Key Insight:</strong> HMC augments the parameter space with auxiliary momentum variables and 
-      simulates Hamiltonian dynamics. This transforms the sampling problem into a physics simulation where 
-      a particle explores the posterior by conserving total energy—naturally spending more time in 
-      high-probability regions while making efficient long-distance moves.
+      <strong>The Key Insight:</strong> HMC augments the target distribution with auxiliary momentum variables
+      and simulates Hamiltonian dynamics using a symplectic integrator. Energy conservation ensures the
+      sampler spends more time in high-probability regions, while the momentum enables efficient exploration
+      by carrying the trajectory across low-probability regions.
     </div>
   </div>
 
@@ -153,10 +152,10 @@
     </div>
 
     <div class="info-note" style="margin-top: 1.5rem;">
-      <strong>Why it works:</strong> The leapfrog integrator approximately conserves the Hamiltonian \(H\). 
-      Regions with low \(U(\mathbf{q})\) (high probability) correspond to low potential energy, where the 
-      particle naturally spends more time—just like a ball rolling in a valley. The momentum carries the 
-      particle across low-probability regions, enabling efficient exploration without getting trapped.
+      <strong>Why it works:</strong> The leapfrog integrator is symplectic and time-reversible, approximately
+      preserving the Hamiltonian \(H\). This volume-preserving property leads to high acceptance rates.
+      Regions of high probability (low \(U(\mathbf{q})\)) correspond to low potential energy where trajectories
+      naturally spend more time, while momentum enables coherent exploration across low-probability barriers.
     </div>
   </div>
 
@@ -291,10 +290,10 @@
     </div>
 
     <div class="info-note" style="margin-top: 1.5rem;">
-      <strong>Tuning advice:</strong> Optimal step size balances integration accuracy vs. efficiency. 
-      Too large → high rejection due to numerical error. Too small → inefficient short proposals. 
-      Aim for acceptance rates around 65-90% (much higher than MH's 23-40%!). Modern implementations 
-      like NUTS (No-U-Turn Sampler) automatically tune these parameters.
+      <strong>Tuning advice:</strong> Step size controls the trade-off between integration accuracy and
+      discretization error. Too large leads to high rejection rates; too small wastes computational resources.
+      Target acceptance rates of 60-90% (compared to ~23% for optimal random-walk MH in high dimensions).
+      The No-U-Turn Sampler (NUTS) automatically tunes both step size and trajectory length.
     </div>
   </div>
 
@@ -302,9 +301,9 @@
   <div class="section">
     <h2 class="section-title">HMC Trajectory Visualization</h2>
     <p>
-      The main plot shows the joint posterior \(\pi(q_1, q_2)\) with darker regions indicating higher probability. 
-      Unlike random-walk methods, HMC trajectories follow curved paths determined by the gradient of the log posterior.
-      <span style="color: #38a169; font-weight: 600;">Green points</span> indicate accepted proposals and 
+      The main plot shows the joint target distribution \(\pi(q_1, q_2)\) with darker regions indicating higher probability.
+      HMC trajectories follow curved paths determined by Hamilton's equations, guided by the gradient of the log density.
+      <span style="color: #38a169; font-weight: 600;">Green points</span> indicate accepted proposals and
       <span style="color: #ed8936; font-weight: 600;">orange points</span> indicate rejected proposals.
       The plot axes automatically adjust to each distribution's natural range.
     </p>
@@ -372,15 +371,15 @@
         <div class="canvas-label">Trace Plot: x₁ Evolution</div>
         <canvas id="traceX" width="100%" height="200" style="width: 100%;"></canvas>
         <p style="font-size: 0.85rem; color: #4a5568; margin-top: 0.5rem;">
-          Time series of \(x_1\) values. Rapid fluctuations indicate good exploration; long periods at similar 
-          values suggest poor mixing.
+          Chain trace for parameter \(x_1\). Rapid fluctuations indicate good mixing; long periods at similar
+          values suggest poor exploration.
         </p>
       </div>
       <div>
         <div class="canvas-label">Trace Plot: x₂ Evolution</div>
         <canvas id="traceY" width="100%" height="200" style="width: 100%;"></canvas>
         <p style="font-size: 0.85rem; color: #4a5568; margin-top: 0.5rem;">
-          Time series of \(x_2\) values. Compare with \(x_1\) trace to check if both parameters mix at similar rates.
+          Chain trace for parameter \(x_2\). Compare with \(x_1\) trace to assess if both parameters mix at similar rates.
         </p>
       </div>
     </div>
@@ -457,11 +456,10 @@
     </div>
     
     <div class="info-note" style="margin-top: 1.5rem;">
-      <strong>Tuning the Proposal Width:</strong> The proposal standard deviation \(\sigma\) directly affects 
-      both the acceptance rate and the autocorrelation. For random-walk Metropolis in high dimensions, 
-      the asymptotically optimal acceptance rate is approximately 0.234 (Roberts et al., 1997; Roberts & Rosenthal, 2001). 
-      For low-dimensional problems (2D), acceptance rates between 40-60% are typically more efficient, 
-      though the optimal rate depends on the target distribution's geometry.
+      <strong>Note on acceptance rates:</strong> Unlike random-walk Metropolis (optimal acceptance ~23% in high dimensions),
+      HMC maintains much higher acceptance rates (60-90%) due to the volume-preserving properties of symplectic integration.
+      This is possible because the leapfrog integrator approximately conserves the Hamiltonian, making proposals
+      follow surfaces of equal probability.
     </div>
   </div>
 
@@ -473,22 +471,22 @@
       <div class="algorithm-box">
         <strong style="color: #059669;">✓ Strengths</strong>
         <ul style="margin: 0.75rem 0 0 0; padding-left: 1.5rem;">
-          <li style="margin: 0.5rem 0;"><strong>Efficient exploration:</strong> Makes large, coherent moves instead of random walks</li>
-          <li style="margin: 0.5rem 0;"><strong>Reduced autocorrelation:</strong> Much lower correlation between samples than MH</li>
-          <li style="margin: 0.5rem 0;"><strong>Handles correlations naturally:</strong> Follows posterior geometry via gradients</li>
-          <li style="margin: 0.5rem 0;"><strong>High acceptance rates:</strong> Typically 65-90% (vs. 23-40% for MH)</li>
-          <li style="margin: 0.5rem 0;"><strong>Scales to high dimensions:</strong> Performance relatively better as \(d\) increases</li>
+          <li style="margin: 0.5rem 0;"><strong>Efficient exploration:</strong> Generates coherent trajectories rather than diffusive random walks</li>
+          <li style="margin: 0.5rem 0;"><strong>Low autocorrelation:</strong> Produces nearly independent samples, high effective sample size</li>
+          <li style="margin: 0.5rem 0;"><strong>Exploits geometry:</strong> Uses gradient information to navigate complex correlation structures</li>
+          <li style="margin: 0.5rem 0;"><strong>High acceptance probability:</strong> Typically 60-90% due to symplectic integration</li>
+          <li style="margin: 0.5rem 0;"><strong>Dimension-robust:</strong> Scales with condition number rather than dimensionality</li>
         </ul>
       </div>
       
       <div class="algorithm-box">
         <strong style="color: #dc2626;">✗ Limitations</strong>
         <ul style="margin: 0.75rem 0 0 0; padding-left: 1.5rem;">
-          <li style="margin: 0.5rem 0;"><strong>Requires gradients:</strong> Need \(\nabla \log \pi(\mathbf{q})\), which isn't always available</li>
-          <li style="margin: 0.5rem 0;"><strong>Tuning parameters:</strong> Step size \(\epsilon\) and trajectory length \(L\) need tuning</li>
-          <li style="margin: 0.5rem 0;"><strong>Computational cost:</strong> Each iteration requires \(L\) gradient evaluations</li>
-          <li style="margin: 0.5rem 0;"><strong>Numerical errors:</strong> Discretization of continuous dynamics introduces error</li>
-          <li style="margin: 0.5rem 0;"><strong>Still struggles with multimodality:</strong> Difficult to jump between well-separated modes</li>
+          <li style="margin: 0.5rem 0;"><strong>Requires differentiability:</strong> Needs \(\nabla \log \pi(\mathbf{q})\) to compute Hamiltonian dynamics</li>
+          <li style="margin: 0.5rem 0;"><strong>Tuning required:</strong> Step size \(\epsilon\) and trajectory length \(L\) affect performance</li>
+          <li style="margin: 0.5rem 0;"><strong>Computational cost:</strong> Each trajectory requires \(L\) gradient evaluations</li>
+          <li style="margin: 0.5rem 0;"><strong>Discretization error:</strong> Finite step size introduces numerical integration error</li>
+          <li style="margin: 0.5rem 0;"><strong>Mode transitions:</strong> Difficult to cross low-probability regions between well-separated modes</li>
         </ul>
       </div>
     </div>
@@ -496,11 +494,11 @@
     <div class="info-note" style="margin-top: 1.5rem;">
       <strong>When to use HMC:</strong>
       <ul style="margin: 0.5rem 0 0 0; padding-left: 1.5rem;">
-        <li><strong>Smooth posteriors:</strong> HMC excels when \(\pi(\mathbf{q})\) is differentiable and relatively smooth</li>
-        <li><strong>High dimensions:</strong> Particularly valuable for \(d > 10\), where random-walk methods struggle</li>
-        <li><strong>Strong correlations:</strong> Automatically adapts to correlation structure via gradient information</li>
-        <li><strong>Modern variants:</strong> NUTS (No-U-Turn Sampler) in Stan/PyMC automatically tunes \(\epsilon\) and \(L\), 
-        making HMC much more practical</li>
+        <li><strong>Smooth target distributions:</strong> Requires differentiable log-density \(\log \pi(\mathbf{q})\)</li>
+        <li><strong>Moderate to high dimensions:</strong> Particularly effective for \(d > 10\) where random-walk methods fail</li>
+        <li><strong>Correlated parameters:</strong> Gradient information naturally handles complex posterior geometry</li>
+        <li><strong>Practical implementations:</strong> NUTS (No-U-Turn Sampler) in Stan/PyMC automatically adapts
+        step size and trajectory length, making HMC accessible without manual tuning</li>
       </ul>
     </div>
   </div>

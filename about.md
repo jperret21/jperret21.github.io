@@ -66,9 +66,10 @@ I am particularly interested in numerical simulations applied to astrophysics. W
 
 ## Professional Experience
 
+
 ### PhD in Gravitational Wave Physics & Data Analysis
 - **Institution:** Laboratoire Astroparticule & Cosmologie, Paris, CNRS, FR
-- **Duration:** 2022 - Present
+- **Duration:** 2022 - 2025
 - **Responsibilities:**
   - Devellopment of Deep Hamiltonian Monte-Carlo (DeepHMC) for Parameter Estimation (PE) of gravitaionnal waves data. 
   - Bayesian statistics 
@@ -79,7 +80,7 @@ I am particularly interested in numerical simulations applied to astrophysics. W
 ### Intern at Lawrence Berkeley National Laboratory (UC BERKELEY - LBNL )
 - **Position:** Astrophysics Internship
 - **Location:** Berkeley, CA, USA
-- **Duration:** 2017 - 2018
+- **Duration:** 2020,2021 and 2022 (summer)
 - **Responsibilities:**
     - Modelisation of Continious Gravitationnal Waves from pulsar.
     - Data Analysis of data from the LIGO and VIRGO detectors.
@@ -89,7 +90,7 @@ I am particularly interested in numerical simulations applied to astrophysics. W
 ### Intern in Software Development (Université de Bourgogne )
 - **Position:** IT Internship
 - **Location:** Dijon, France
-- **Duration:** 2017 - 2018
+- **Duration:** 2020
 - **Responsibilities:**
     - Development of mixed reality applications for the Microsoft Hololens platform
     - design, develop and test an application using : C#, Unity, Microsoft, MRTK.

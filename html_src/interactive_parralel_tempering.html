@@ -76,10 +76,10 @@
     </div>
 
     <div class="info-note">
-      <strong>Why does this work?</strong> Hot chains can easily hop between modes because the energy barriers are reduced 
-      (think of heating a molecule to make it more mobile). When a hot chain discovers a new mode, it can swap states 
-      with cooler chains, eventually transferring this information to the cold chain that targets the true posterior. 
-      This creates an <strong>efficient exploration-exploitation trade-off</strong>.
+      <strong>Why does this work?</strong> Hot chains explore a flattened energy landscape where energy barriers between
+      modes are suppressed, enabling efficient mode-hopping. Replica exchange swaps allow information about newly
+      discovered modes to propagate from hot chains to the cold chain sampling the target distribution. This creates
+      an <strong>efficient exploration-exploitation trade-off</strong>.
     </div>
   </div>
 
@@ -116,9 +116,10 @@
     </div>
 
     <div class="info-note">
-      <strong>Key insight on the swap acceptance:</strong> The swap is more likely when states have similar posteriors, 
-      or when temperatures are close together. This motivates careful design of the temperature ladder to ensure 
-      good "communication" between chains. A common target is 20-40% swap acceptance between adjacent temperatures.
+      <strong>Key insight on replica exchange:</strong> Swaps are accepted when the energy difference between states
+      is comparable to the temperature gap. This motivates careful temperature ladder design to maintain sufficient
+      overlap between adjacent distributions. Target swap acceptance rates of 20-40% ensure efficient information
+      exchange while maintaining detailed balance.
     </div>
   </div>
 
@@ -392,9 +393,9 @@
         <ul style="margin: 0.75rem 0 0 0; padding-left: 1.5rem;">
           <li style="margin: 0.5rem 0;"><strong>Multimodality:</strong> Excellent for exploring multiple well-separated modes</li>
           <li style="margin: 0.5rem 0;"><strong>Mode discovery:</strong> Hot chains find modes; swaps propagate to cold chain</li>
-          <li style="margin: 0.5rem 0;"><strong>Correct weights:</strong> Unlike simulated annealing, maintains detailed balance</li>
-          <li style="margin: 0.5rem 0;"><strong>Embarrassingly parallel:</strong> Each chain runs independently between swaps</li>
-          <li style="margin: 0.5rem 0;"><strong>Gradient-free:</strong> Works when gradients unavailable (unlike HMC)</li>
+          <li style="margin: 0.5rem 0;"><strong>Proper sampling:</strong> Maintains detailed balance, produces correct posterior samples</li>
+          <li style="margin: 0.5rem 0;"><strong>Parallelizable:</strong> Chains evolve independently between replica exchange steps</li>
+          <li style="margin: 0.5rem 0;"><strong>Gradient-free:</strong> Only requires density evaluation (unlike HMC)</li>
         </ul>
       </div>
       
