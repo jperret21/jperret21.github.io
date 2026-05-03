@@ -20,6 +20,7 @@ nav:
   - About: /about
   - Research: /research
   - Publications: /publications
+  - Blog: /blog
 
 # Collections and outputs
 collections:
