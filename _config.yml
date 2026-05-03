@@ -16,11 +16,12 @@ kramdown:
   markdown: kramdown
 
 # Navigation links
-nav:
-  - About: /about
-  - Research: /research
-  - Publications: /publications
-  - Blog: /blog
+header_pages:
+  - about.md
+  - research.md
+  - bayesian_inference.md
+  - publications.md
+  - blog.md
 
 # Collections and outputs
 collections:

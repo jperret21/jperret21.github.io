@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Introduction to Bayesian Inference
+title: Bayesian Inference
 ---
 
 # Introduction to Bayesian Inference

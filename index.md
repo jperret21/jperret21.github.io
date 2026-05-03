@@ -17,23 +17,13 @@ On the inference side, I design and implement sampling algorithms — HMC varian
 
 ## Projects
 
-### DeepHMC 
-A Hamiltonian Monte Carlo sampler that uses a trained neural network to learn the geometry of the posterior before sampling. The idea is to precompute a good metric so that the sampler explores efficiently from the start, reducing the wall-clock time for gravitational-wave parameter estimation significantly.
-
-### JaxMBHB 
-A JAX library for computing the LISA instrument response and the time-domain likelihood for massive binary black holes. The time-domain formulation avoids the approximations of frequency-domain approaches, and the JAX backend makes the likelihood fully differentiable and hardware-agnostic, which is a prerequisite for gradient-based samplers at scale.
-
-### Parallel Tempering HMC
-A parallel tempering extension of HMC, implemented in JAX, designed for multimodal posteriors — the kind LISA will routinely produce for massive binary black holes. The JAX backend gives us autodiff for the Hamiltonian dynamics and makes GPU scaling straightforward.
-
-### GW Event Visualizer
-An interactive dashboard pulling live data from the Gravitational Wave Open Science Center (GWOSC). It displays the full catalog of detected events with scatter plots of component masses, SNR-weighted markers, KDE mass distributions, and per-event detail views. The catalog updates automatically via a daily GitHub Actions pipeline. [Explore the dashboard](https://perretjules.com/GW_event_viz/)
-
-### Bayesian Inference — An Interactive Introduction
-A set of educational materials I put together to make Bayesian methods more accessible:
-- **[Introduction to Bayesian Inference](bayesian_inference)** — From Bayes' theorem to posterior sampling
-  - [MCMC Sampler](/html_src/interactive_mcmc.html) — Metropolis-Hastings, visually
-  - [HMC Sampler](/html_src/interactive_hmc.html) — Hamiltonian dynamics, interactively
+| Project | Description | Stack |
+|---|---|---|
+| **JaxMBHB** *(current)* | Fast time-domain LISA likelihood for massive binary black holes | JAX, XLA, TDI |
+| **PT-HMC** | Parallel tempering HMC for multimodal posteriors on LISA sources | JAX, GPU |
+| **DeepHMC** *(PhD)* | Neural metric learning to accelerate HMC for GW parameter estimation | PyTorch, CUDA |
+| **[GW Event Visualizer](https://perretjules.com/GW_event_viz/)** | Interactive GWOSC catalog dashboard, auto-updated via CI | Python, GitHub Actions |
+| **[Bayesian Inference Guide](bayesian_inference)** | Interactive intro to Bayesian methods and sampling algorithms | MCMC, HMC, Nested Sampling |
 
 ## Beyond the Lab
 
