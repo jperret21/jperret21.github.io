@@ -3,103 +3,88 @@ layout: default
 title: Curriculum Vitae
 ---
 
-# Academic background & Professional Experiences
+# Curriculum Vitae
+
+<p style="margin-bottom: 2rem;"><a href="/assets/cv_jules_perret.pdf" style="display:inline-block; padding: 0.5rem 1.2rem; background:#111827; color:white; border-radius:6px; text-decoration:none; font-size:0.9rem;">Download PDF</a></p>
 
 ---
 
-# Summary
+## Summary
 
-I am **Jules Perret**, a PhD researcher and research engineer in gravitational astrophysics at the Astroparticle and Cosmology Laboratory (APC, CNRS). My work focuses on data analysis for the **LISA space mission**, combining Bayesian inference and advanced computational methods to extract astrophysical insights from gravitational-wave signals.
-
-I am particularly interested in numerical simulations applied to astrophysics. With my Master's degree from École Normale Supérieure Paris-Saclay - Université Paris-Saclay, I developed a strong interest in High-Performance Computing (HPC) and massive parallel development on CPU/GPU.
-
-
+Jules Perret is a research engineer in gravitational-wave astrophysics at the Astroparticle and Cosmology Laboratory (APC, CNRS, Paris). His current work focuses on the LISA space mission: building fast, differentiable likelihoods in JAX for massive black hole binary sources, with an emphasis on GPU performance and numerical accuracy. He completed his PhD at APC in 2025, where he developed DeepHMC, a Hamiltonian Monte Carlo sampler that uses a neural network to learn the geometry of the log-likelihood surface in high-dimensional parameter spaces, applied to gravitational-wave parameter estimation.
 
 ---
 
 ## Professional Experience
 
-### Researcher in Gravitational Wave Physics & Data Analysis (LISA mission)
-- **Institution:** Laboratoire Astroparticule & Cosmologie, Paris, CNRS, FR
-- **Duration:** 2026 - present
-- **Responsibilities:**
- - Development of fast waveform and fast likelihood using JAX.
- - Performance (speed and accuracy)Analsyis on MBHB sources in LISA dataset
+### Research Engineer, Gravitational-Wave Data Analysis
 
-### PhD in Gravitational Wave Physics & Data Analysis
-- **Institution:** Laboratoire Astroparticule & Cosmologie, Paris, CNRS, FR
-- **Duration:** 2022 - 2025
-- **Responsibilities:**
-  - Devellopment of Deep Hamiltonian Monte-Carlo (DeepHMC) for Parameter Estimation (PE) of gravitaionnal waves data. 
-  - Bayesian statistics 
-  - General relativity and simulation
-  - Python devellopment using PE LVK's collaboration package : Bilby
-  - Simulation of Gravitationnal waves detection and analysis for the third generation of Graviationnal waves detector: Einstein Telescope.
+<div style="padding-left: 1.25rem; border-left: 2px solid #e2e8f0;">
+<p style="color:#4a5568; font-size:0.9rem; margin:0.25rem 0 0.75rem;">Laboratoire Astroparticule et Cosmologie (APC), CNRS, Paris &nbsp;·&nbsp; 2025 to present</p>
 
-### Intern at Lawrence Berkeley National Laboratory (UC BERKELEY - LBNL )
-- **Position:** Astrophysics Internship
-- **Location:** Berkeley, CA, USA
-- **Duration:** 2020,2021 and 2022 (summer)
-- **Responsibilities:**
-    - Modelisation of Continious Gravitationnal Waves from pulsar.
-    - Data Analysis of data from the LIGO and VIRGO detectors.
-    - Development of parallel FFT algorithms on GPU.
-    - Python, C/C++ programming
+Development of JaxMBHB, a JAX library for computing the LISA instrument response and time-domain likelihood for massive black hole binary coalescences. The focus is on fully differentiable, JIT-compiled pipelines that run efficiently on GPU, enabling gradient-based samplers and fast parameter estimation at LISA sensitivity.
+</div>
 
-### Intern in Software Development (Université de Bourgogne )
-- **Position:** IT Internship
-- **Location:** Dijon, France
-- **Duration:** 2020
-- **Responsibilities:**
-    - Development of mixed reality applications for the Microsoft Hololens platform
-    - design, develop and test an application using : C#, Unity, Microsoft, MRTK.
-    - Using 3Dslicer to process tomography of brain image data.
+<br>
 
+### PhD in Gravitational-Wave Physics and Data Analysis
+
+<div style="padding-left: 1.25rem; border-left: 2px solid #e2e8f0;">
+<p style="color:#4a5568; font-size:0.9rem; margin:0.25rem 0 0.75rem;">Laboratoire Astroparticule et Cosmologie (APC), CNRS, Paris &nbsp;·&nbsp; 2022 to 2025</p>
+
+Thesis on Bayesian parameter estimation for gravitational-wave sources. Developed DeepHMC, a Python/PyTorch package that uses a neural network to learn the geometry of the log-likelihood surface in high-dimensional parameter spaces and uses it to precondition a Hamiltonian Monte Carlo sampler. Applied to ground-based detector signals with a focus on the Einstein Telescope. Member of the LIGO-Virgo-Kagra (LVK) collaboration.
+</div>
+
+<br>
+
+### Research Intern, Astrophysics
+
+<div style="padding-left: 1.25rem; border-left: 2px solid #e2e8f0;">
+<p style="color:#4a5568; font-size:0.9rem; margin:0.25rem 0 0.75rem;">Lawrence Berkeley National Laboratory (LBNL), UC Berkeley, CA &nbsp;·&nbsp; summers 2020, 2021, 2022</p>
+
+Three successive internships focused on continuous gravitational waves from pulsars. Worked on data analysis pipelines for LIGO and Virgo data and developed parallel FFT algorithms on GPU in Python and C/C++.
+</div>
+
+<br>
+
+### Software Development Intern
+
+<div style="padding-left: 1.25rem; border-left: 2px solid #e2e8f0;">
+<p style="color:#4a5568; font-size:0.9rem; margin:0.25rem 0 0.75rem;">Université de Bourgogne, Dijon &nbsp;·&nbsp; 2020</p>
+
+Developed mixed reality applications for the Microsoft HoloLens platform using C#, Unity, and the MRTK framework. Used 3D Slicer to process brain tomography images.
+</div>
 
 ---
 
-# Education
+## Education
 
-## PhD in Astrophysics
-- **Institution:** Laboratoire Astroparticule et Cosmologie APC-CNRS
-- **Duration:** 2022 - 2025
-- **Description:**
-  - Development of Python package: Deep Hamiltonian Monte Carlo (DeepHMC) for parameter estimation of gravitational wave sources.git 
-  - Bayesian statistics and numerical applications.
-  - Member of the Ligo-Virgo-Kagra (LVK) Collaboration.
+### PhD in Astrophysics
 
-## Master’s Degree in High Performance Computing & Numerical Simulation
-- **Institution:** Ecole Normale Supérieure Paris-Saclay, Paris, FR
-- **Duration:** 2020 - 2022
-- **Description:**
-  - Multiscale computing and domain decomposition method
-  - Simulation and modeling in fluid mechanics
-  - Classical mechanics
-  - Linear algebra for very large problems
-  - Programming for GPU architecture and supercomputing
+<div style="padding-left: 1.25rem; border-left: 2px solid #e2e8f0;">
+<p style="color:#4a5568; font-size:0.9rem; margin:0.25rem 0 0;">Université Paris Cité / APC-CNRS &nbsp;·&nbsp; 2022–2025</p>
+</div>
 
+<br>
 
-## Bachelor’s in Computer Science & Full Stack Web Development
-- **Institution:** Université de Bourgogne
-- **Duration:** 2016 - 2020
-- **Description:**
-    - Database (Oracle, SQL, PostgreSQL)
-    - Web development (PHP, HTML5/CSS, JavaScript, AJAX)
-    - Software engineering, graphic interface (JavaFX, MVC model)
-    - Using a GNU/Linux environment
-    - Java, C, C++, assembler programming
-    - Multithreading and networking
-    - Image analysis (Matlab, OpenCV)
-    - Image synthesis and Ray-Tracing technologies
+### M.Sc. High Performance Computing and Numerical Simulation
 
+<div style="padding-left: 1.25rem; border-left: 2px solid #e2e8f0;">
+<p style="color:#4a5568; font-size:0.9rem; margin:0.25rem 0 0;">ENS Paris-Saclay, Université Paris-Saclay &nbsp;·&nbsp; 2020–2022</p>
+</div>
 
+<br>
 
-## Preparatory Year / 1st Year Bachelor in Physics
-- **Institution:** Université de Montréal
-- **Duration:** 2014 - 2016
-- **Description:**
-    - Linear algebra, analysis, integral calculus
-    - Classical mechanics, electromagnetics, and astrophysics
-    - Numerical physics, numerical modeling of physical phenomena, particle interaction
-    - Environmental chemistry
- 
+### B.Sc. Computer Science and Full Stack Web Development
+
+<div style="padding-left: 1.25rem; border-left: 2px solid #e2e8f0;">
+<p style="color:#4a5568; font-size:0.9rem; margin:0.25rem 0 0;">Université de Bourgogne &nbsp;·&nbsp; 2016–2020</p>
+</div>
+
+<br>
+
+### Preparatory Year in Physics
+
+<div style="padding-left: 1.25rem; border-left: 2px solid #e2e8f0;">
+<p style="color:#4a5568; font-size:0.9rem; margin:0.25rem 0 0;">Université de Montréal &nbsp;·&nbsp; 2014–2016</p>
+</div>
