@@ -26,6 +26,9 @@ A JAX library for computing the LISA instrument response and the time-domain lik
 ### Parallel Tempering HMC
 A parallel tempering extension of HMC, implemented in JAX, designed for multimodal posteriors — the kind LISA will routinely produce for massive binary black holes. The JAX backend gives us autodiff for the Hamiltonian dynamics and makes GPU scaling straightforward.
 
+### GW Event Visualizer
+An interactive dashboard pulling live data from the Gravitational Wave Open Science Center (GWOSC). It displays the full catalog of detected events with scatter plots of component masses, SNR-weighted markers, KDE mass distributions, and per-event detail views. The catalog updates automatically via a daily GitHub Actions pipeline. [Explore the dashboard](https://perretjules.com/GW_event_viz/)
+
 ### Bayesian Inference — An Interactive Introduction
 A set of educational materials I put together to make Bayesian methods more accessible:
 - **[Introduction to Bayesian Inference](bayesian_inference)** — From Bayes' theorem to posterior sampling
@@ -42,4 +45,3 @@ Outside physics, I build things — drones, UAVs, whatever requires soldering an
 
 - [GitHub](https://github.com/jperret21) — open-source code and projects
 - [APC Laboratory](https://apc.u-paris.fr/APC_CS/) — research group
-- perretjules@gmail.com
