@@ -11,9 +11,9 @@ My current work is focused on **LISA**, the ESA-NASA space interferometer schedu
 
 ## Research
 
-My work sits at the intersection of Bayesian statistics, scientific computing, and gravitational-wave physics. The central bottleneck in gravitational-wave parameter estimation is the likelihood — evaluating it is expensive, and you need it millions of times. My current focus is on developing fast likelihood implementations for massive binary black holes in the LISA band, written in **JAX** to exploit autodifferentiation and run seamlessly on CPU and GPU.
+My work sits at the intersection of Bayesian statistics, scientific computing, and gravitational-wave physics. The central bottleneck in gravitational-wave parameter estimation is the likelihood: evaluating it is expensive, and you need it millions of times. My current focus is on developing fast likelihood implementations for massive binary black holes in the LISA band, written in **JAX** to exploit autodifferentiation and run seamlessly on CPU and GPU.
 
-On the inference side, I design and implement sampling algorithms — HMC variants and parallel tempering schemes — that can handle the multimodal, high-dimensional posteriors LISA will produce. During my PhD, I also worked on neural network-based approaches to accelerate sampling for ground-based detector sources.
+On the inference side, I design and implement sampling algorithms (HMC variants and parallel tempering schemes) that can handle the multimodal, high-dimensional posteriors LISA will produce. During my PhD, I also worked on neural network-based approaches to accelerate sampling for ground-based detector sources.
 
 ## Projects
 
@@ -29,9 +29,10 @@ On the inference side, I design and implement sampling algorithms — HMC varian
 
 I am a member of the **Société Astronomique de Bourgogne**, where I contribute to public outreach and astronomy education. Explaining orbital mechanics to a curious twelve-year-old is a surprisingly good test of whether you actually understand it.
 
-Outside physics, I build things — drones, UAVs, whatever requires soldering and patience. It is a useful counterweight to work that lives entirely in abstract probability spaces.
+Outside physics, I build things: drones, UAVs, whatever requires soldering and patience. It is a useful counterweight to work that lives entirely in abstract probability spaces.
 
 ## Contact
 
-- [GitHub](https://github.com/jperret21) — open-source code and projects
-- [APC Laboratory](https://apc.u-paris.fr/APC_CS/) — research group
+- [GitHub](https://github.com/jperret21)
+- [APC Laboratory](https://apc.u-paris.fr/APC_CS/)
+- perretjules@gmail.com

@@ -36,10 +36,10 @@
         </span>
       </label>
       <div class="trigger">
-        <a class="page-link" href="/about.html">Curriculum Vitae</a>
-        <a class="page-link" href="/bayesian_inference.html">Introduction to Bayesian Inference</a>
-        <a class="page-link" href="/publications.html">Publications</a>
-        <a class="page-link" href="/research.html">Research</a>
+        <a class="page-link" href="/about">Curriculum Vitae</a>
+        <a class="page-link" href="/bayesian_inference">Bayesian Inference</a>
+        <a class="page-link" href="/publications">Publications</a>
+        <a class="page-link" href="/research">Research</a>
       </div>
     </nav>
   </div>
@@ -51,7 +51,7 @@
     <h1 class="page-heading">Hamiltonian Monte Carlo (HMC)</h1>
     <p class="page-subtitle">
       Interactive visualization of gradient-based MCMC sampling from 2D posterior distributions<br>
-      <span style="font-size: 0.9rem; color: #718096;">Part 2 of the MCMC Samplers Series | See also: <a href="/mcmc.html" style="color: #667eea;">Metropolis–Hastings</a></span>
+      <span style="font-size: 0.9rem; color: #718096;">Part 2 of the MCMC Samplers Series | See also: <a href="/html_src/interactive_mcmc.html" style="color: #667eea;">Metropolis-Hastings</a></span>
     </p>
   </div>
 </main>
@@ -60,79 +60,62 @@
 
   <!-- INTRODUCTION -->
   <div class="section">
-    <h2 class="section-title">Introduction to Hamiltonian Monte Carlo</h2>
+    <h2 class="section-title">What is Hamiltonian Monte Carlo?</h2>
     <p>
-      <strong>Hamiltonian Monte Carlo (HMC)</strong> is an MCMC algorithm that uses gradient information
-      to generate efficient proposals via Hamiltonian dynamics. Unlike random-walk methods
-      (like Metropolis–Hastings), HMC makes distant proposals while maintaining high acceptance rates by
-      exploiting the geometry of the target distribution.
+      Hamiltonian Monte Carlo (HMC) is an MCMC algorithm that uses gradient information to propose new
+      states. Rather than taking random steps, it simulates the physics of a particle moving through
+      parameter space along trajectories shaped by the geometry of the log-density. The result is
+      large, directed moves that are accepted at high rates.
     </p>
     <p>
-      HMC addresses key limitations of random-walk MCMC: the diffusive nature of exploration and
-      poor performance with correlated parameters. By simulating Hamiltonian dynamics, HMC generates
-      coherent trajectories through parameter space, dramatically improving efficiency, especially in high dimensions.
+      The core idea is to augment the parameter vector \(\mathbf{q}\) with auxiliary momentum variables
+      \(\mathbf{p}\), then simulate Hamiltonian dynamics using a symplectic integrator. Energy conservation
+      keeps the sampler on surfaces of roughly constant probability, while the momentum carries it across
+      low-density regions that would trap a random-walk sampler.
     </p>
-    
-    <div class="algorithm-box" style="margin-top: 1.5rem;">
-      <strong>Why HMC?</strong>
-      <ul style="margin: 0.5rem 0; padding-left: 1.5rem;">
-        <li><strong>Efficient exploration:</strong> Generates distant proposals with high acceptance probability using gradient information</li>
-        <li><strong>Reduced autocorrelation:</strong> Produces nearly independent samples by making coherent moves through parameter space</li>
-        <li><strong>Handles correlations:</strong> Exploits geometric information from gradients, efficient even with strongly correlated parameters</li>
-        <li><strong>Scales to high dimensions:</strong> Convergence rate depends on condition number rather than dimensionality</li>
-        <li><strong>Industry standard:</strong> Powers modern probabilistic programming frameworks like Stan, PyMC, and NumPyro</li>
-      </ul>
-    </div>
 
-    <div class="info-note" style="margin-top: 1.5rem;">
-      <strong>The Key Insight:</strong> HMC augments the target distribution with auxiliary momentum variables
-      and simulates Hamiltonian dynamics using a symplectic integrator. Energy conservation ensures the
-      sampler spends more time in high-probability regions, while the momentum enables efficient exploration
-      by carrying the trajectory across low-probability regions.
+    <div class="algorithm-box" style="margin-top: 1.5rem;">
+      <p style="margin: 0;">
+        HMC was introduced by Duane et al. (1987) for lattice field theory and brought into statistics
+        by Neal (1996, 2011). Today it underlies most modern probabilistic programming systems, usually
+        in the form of the No-U-Turn Sampler (NUTS), which removes the need to hand-tune trajectory
+        length. Compared to random-walk Metropolis-Hastings, HMC produces far lower autocorrelation and
+        scales much better with the number of parameters.
+      </p>
     </div>
   </div>
 
   <!-- ALGORITHM DESCRIPTION -->
   <div class="section">
-    <h2 class="section-title">The Hamiltonian Monte Carlo Algorithm</h2>
+    <h2 class="section-title">The Algorithm</h2>
     <p>
-      <strong>HMC</strong> was introduced by Duane et al. (1987) for lattice field theory and popularized 
-      for statistics by Neal (1996, 2011). The algorithm augments the parameter vector \(\mathbf{q}\) 
-      (position) with a momentum vector \(\mathbf{p}\), defining a Hamiltonian system.
+      HMC defines a Hamiltonian over position \(\mathbf{q}\) (the parameters of interest) and
+      momentum \(\mathbf{p}\):
     </p>
 
     <div class="algorithm-box">
-      <strong>The Hamiltonian:</strong>
-      <p style="margin: 0.75rem 0;">
-        The total energy of the system combines potential energy (negative log posterior) and kinetic energy:
-      </p>
       $$H(\mathbf{q}, \mathbf{p}) = U(\mathbf{q}) + K(\mathbf{p})$$
-      <p style="margin: 0.5rem 0;">
-        where:
-      </p>
-      <ul style="margin: 0; padding-left: 1.5rem;">
-        <li>\(U(\mathbf{q}) = -\log \pi(\mathbf{q})\) is the potential energy (negative log target density)</li>
-        <li>\(K(\mathbf{p}) = \frac{1}{2}\mathbf{p}^T M^{-1} \mathbf{p}\) is the kinetic energy (mass matrix \(M\))</li>
-      </ul>
-      <p style="margin: 0.75rem 0 0 0;">
-        In this demo, we use \(M = I\) (identity matrix), so \(K(\mathbf{p}) = \frac{1}{2}\sum_i p_i^2\).
+      <p style="margin: 0.75rem 0 0.5rem 0;">
+        The potential energy \(U(\mathbf{q}) = -\log \pi(\mathbf{q})\) is the negative log target density.
+        The kinetic energy \(K(\mathbf{p}) = \frac{1}{2}\mathbf{p}^T M^{-1} \mathbf{p}\) comes from
+        an auxiliary Gaussian over \(\mathbf{p}\), with mass matrix \(M\). This demo uses \(M = I\),
+        so \(K(\mathbf{p}) = \frac{1}{2}\sum_i p_i^2\).
       </p>
     </div>
-    
+
     <div class="algorithm-box" style="margin-top: 1.5rem;">
-      <strong>HMC Algorithm Steps:</strong>
-      <ol style="margin: 0.5rem 0 0.5rem 0; padding-left: 1.5rem;">
+      <strong>Each HMC iteration:</strong>
+      <ol style="margin: 0.75rem 0 0.5rem 0; padding-left: 1.5rem;">
         <li style="margin: 0.75rem 0;">
-          <strong>Sample momentum:</strong> Draw \(\mathbf{p} \sim \mathcal{N}(0, M)\)
+          Sample fresh momentum: \(\mathbf{p} \sim \mathcal{N}(0, M)\).
         </li>
         <li style="margin: 0.75rem 0;">
-          <strong>Simulate Hamiltonian dynamics:</strong> Starting from \((\mathbf{q}, \mathbf{p})\), integrate 
-          Hamilton's equations for \(L\) steps of size \(\epsilon\):
+          Integrate Hamilton's equations for \(L\) steps of size \(\epsilon\) using the leapfrog
+          integrator (symplectic and time-reversible):
           $$\begin{aligned}
           \frac{d\mathbf{q}}{dt} &= \frac{\partial H}{\partial \mathbf{p}} = M^{-1}\mathbf{p}\\
           \frac{d\mathbf{p}}{dt} &= -\frac{\partial H}{\partial \mathbf{q}} = -\nabla U(\mathbf{q})
           \end{aligned}$$
-          We use the <strong>leapfrog integrator</strong> (symplectic, reversible):
           <div style="margin: 0.75rem 0 0 1.5rem; font-family: 'Courier New', monospace; font-size: 0.9rem;">
             \(\mathbf{p} \leftarrow \mathbf{p} - \frac{\epsilon}{2}\nabla U(\mathbf{q})\)<br>
             for \(i = 1\) to \(L\):<br>
@@ -141,21 +124,21 @@
           </div>
         </li>
         <li style="margin: 0.75rem 0;">
-          <strong>Metropolis acceptance:</strong> Propose \((\mathbf{q}^*, \mathbf{p}^*)\) from dynamics. Accept with probability:
+          Accept the proposed \((\mathbf{q}^*, \mathbf{p}^*)\) with probability:
           $$\alpha = \min\left(1, \exp(H(\mathbf{q}, \mathbf{p}) - H(\mathbf{q}^*, \mathbf{p}^*))\right)$$
-          Due to numerical errors, \(H\) is not perfectly conserved, but acceptance corrects for this.
+          The Metropolis correction handles the small numerical errors introduced by finite step sizes.
         </li>
         <li style="margin: 0.75rem 0;">
-          <strong>Return position:</strong> If accepted, set \(\mathbf{q}_{t+1} = \mathbf{q}^*\); else \(\mathbf{q}_{t+1} = \mathbf{q}_t\)
+          Set \(\mathbf{q}_{t+1} = \mathbf{q}^*\) if accepted, otherwise keep \(\mathbf{q}_{t+1} = \mathbf{q}_t\).
         </li>
       </ol>
     </div>
 
     <div class="info-note" style="margin-top: 1.5rem;">
-      <strong>Why it works:</strong> The leapfrog integrator is symplectic and time-reversible, approximately
-      preserving the Hamiltonian \(H\). This volume-preserving property leads to high acceptance rates.
-      Regions of high probability (low \(U(\mathbf{q})\)) correspond to low potential energy where trajectories
-      naturally spend more time, while momentum enables coherent exploration across low-probability barriers.
+      The leapfrog integrator is volume-preserving (symplectic) and time-reversible. Both properties
+      are needed for the Metropolis correction to be valid. Because the integrator approximately
+      conserves \(H\), proposals land near the same energy level as the current state, unlike a random
+      walk that diffuses freely into low-density regions.
     </div>
   </div>
 
@@ -163,65 +146,31 @@
   <div class="section">
     <h2 class="section-title">Target Distributions</h2>
     <p>
-      This demonstration provides three target distributions ranging from simple to challenging, 
-      illustrating different aspects of MCMC performance:
+      The demo includes three distributions that illustrate different challenges for MCMC samplers,
+      from well-behaved to genuinely difficult.
     </p>
-    
-    <div style="display: grid; grid-template-columns: 1fr; gap: 1.5rem; margin-top: 1rem;">
+
+    <div class="dist-grid">
       <div class="algorithm-box">
-        <strong>Bivariate Gaussian (Default)</strong>
-        <p style="margin: 0.5rem 0;">
-          A standard correlated 2D Gaussian with correlation coefficient \(\rho = 0.8\):
-        </p>
-        <div style="overflow-x: auto;">
-          $$\pi(x_1, x_2) \propto \exp\left(-\frac{1}{2(1-\rho^2)}(x_1^2 - 2\rho x_1 x_2 + x_2^2)\right)$$
-        </div>
-        <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem; color: #4a5568;">
-          This distribution has elliptical contours aligned with the correlation structure. 
-          With strong correlation (\(\rho = 0.8\)), random-walk proposals struggle because they explore 
-          axis-by-axis when parameters should move together along the correlation direction.
-        </p>
+        <strong>Bivariate Gaussian (default)</strong>
+        <div class="dist-formula">$$\pi(x_1, x_2) \propto \exp\left(-\frac{1}{2(1-\rho^2)}(x_1^2 - 2\rho x_1 x_2 + x_2^2)\right)$$</div>
+        <p class="dist-note">Correlated (\(\rho = 0.8\)): HMC follows the tilted ellipse naturally, where random walks struggle.</p>
       </div>
 
       <div class="algorithm-box">
-        <strong>Rosenbrock's Banana Distribution</strong>
-        <p style="margin: 0.5rem 0;">
-          A transformed Gaussian that creates a curved, banana-shaped density (Haario et al., 1999):
-        </p>
-        <div style="overflow-x: auto;">
-          $$\pi(x_1, x_2) \propto \exp\left(-\frac{1}{200}(x_1^2 + 100(x_2 - x_1^2)^2)\right)$$
-        </div>
-        <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem; color: #4a5568;">
-          This distribution is strongly correlated along a curved manifold, making it difficult for 
-          random-walk samplers to explore efficiently. The "banana" shape arises from the nonlinear 
-          transformation \(x_2 - x_1^2\), creating regions where standard proposals are inefficient.
-        </p>
+        <strong>Rosenbrock's Banana</strong>
+        <div class="dist-formula">$$\pi(x_1, x_2) \propto \exp\left(-\frac{1}{200}(x_1^2 + 100(x_2 - x_1^2)^2)\right)$$</div>
+        <p class="dist-note">Curved manifold from the nonlinear transformation \(x_2 - x_1^2\): fixed-width proposals are too wide in one direction and too narrow in the other.</p>
       </div>
-      
+
       <div class="algorithm-box">
-        <strong>Neal's Funnel Distribution</strong>
-        <p style="margin: 0.5rem 0;">
-          A hierarchical model that exhibits strong scale variations (Neal, 2003):
-        </p>
-        <div style="overflow-x: auto;">
-          $$\begin{aligned}
-          x_1 &\sim \mathcal{N}(0, 3^2) \\
-          x_2 \mid x_1 &\sim \mathcal{N}(0, \exp(x_1)^2)
-          \end{aligned}$$
-        </div>
-        <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem; color: #4a5568;">
-          The joint density is \(\pi(x_1, x_2) \propto \exp(-x_1^2/18 - x_2^2/(2e^{2x_1}))\). 
-          This creates a "funnel" where the scale of \(x_2\) depends exponentially on \(x_1\), 
-          challenging for fixed-width proposals. Common in hierarchical Bayesian models with variance parameters.
-        </p>
+        <strong>Neal's Funnel</strong>
+        <div class="dist-formula">$$\begin{aligned}
+        x_1 &\sim \mathcal{N}(0, 3^2) \\
+        x_2 \mid x_1 &\sim \mathcal{N}(0, \exp(x_1)^2)
+        \end{aligned}$$</div>
+        <p class="dist-note">Scale of \(x_2\) varies exponentially with \(x_1\): no single step size works everywhere, motivating adaptive methods and reparameterization.</p>
       </div>
-    </div>
-    
-    <div class="info-note" style="margin-top: 1rem;">
-      <strong>Why these distributions?</strong> The Gaussian provides a baseline to understand basic behavior. 
-      Rosenbrock's banana and Neal's funnel are standard benchmarks in the MCMC literature—the banana tests 
-      handling of strong nonlinear correlations, while the funnel tests adaptation to varying scales. 
-      These challenges motivate advanced methods like HMC and adaptive MCMC.
     </div>
   </div>
 
@@ -229,11 +178,11 @@
   <div class="section">
     <h2 class="section-title">Simulation Controls</h2>
     <p>
-      HMC has two key tuning parameters: the <strong>step size</strong> \(\epsilon\) (how large each 
-      leapfrog step is) and the <strong>number of steps</strong> \(L\) (how long the trajectory is). 
-      The product \(L \times \epsilon\) determines the trajectory length.
+      HMC has two tuning parameters: the step size \(\epsilon\) and the number of leapfrog steps \(L\).
+      Their product \(L \times \epsilon\) is the total trajectory length, which determines how far the
+      sampler can move in one iteration.
     </p>
-    
+
     <div class="controls-grid">
       <div class="control-group">
         <label>
@@ -242,7 +191,7 @@
         </label>
         <input type="range" min="0.01" max="0.5" step="0.01" value="0.10" id="epsilon">
         <div style="font-size: 0.85rem; color: #4a5568; margin-top: 0.25rem;">
-          Size of each leapfrog integration step. Smaller → more accurate, but slower.
+          Smaller steps integrate more accurately but require more gradient evaluations.
         </div>
       </div>
 
@@ -253,7 +202,7 @@
         </label>
         <input type="range" min="5" max="100" step="1" value="20" id="numSteps">
         <div style="font-size: 0.85rem; color: #4a5568; margin-top: 0.25rem;">
-          Length of trajectory. More steps → longer proposals, but can overshoot.
+          More steps mean longer trajectories and more distant proposals.
         </div>
       </div>
 
@@ -264,7 +213,7 @@
         </label>
         <input type="range" min="10" max="500" step="10" value="60" id="speed">
         <div style="font-size: 0.85rem; color: #4a5568; margin-top: 0.25rem;">
-          Delay between iterations. Slower speeds help visualize trajectories.
+          Slow down to watch individual trajectories unfold.
         </div>
       </div>
 
@@ -278,61 +227,60 @@
           <option value="funnel">Neal's Funnel</option>
         </select>
         <div style="font-size: 0.85rem; color: #4a5568; margin-top: 0.25rem;">
-          Same distributions as Metropolis–Hastings for direct comparison.
+          Same distributions as Metropolis-Hastings for direct comparison.
         </div>
       </div>
     </div>
 
     <div class="button-group">
-      <button onclick="start()">▶ Start Sampling</button>
-      <button class="secondary" onclick="singleStep()">→ Single Step</button>
-      <button class="tertiary" onclick="reset()">⟲ Reset</button>
+      <button onclick="start()">&#9654; Start Sampling</button>
+      <button class="secondary" onclick="singleStep()">&#8594; Single Step</button>
+      <button class="tertiary" onclick="reset()">&#10226; Reset</button>
     </div>
 
     <div class="info-note" style="margin-top: 1.5rem;">
-      <strong>Tuning advice:</strong> Step size controls the trade-off between integration accuracy and
-      discretization error. Too large leads to high rejection rates; too small wastes computational resources.
-      Target acceptance rates of 60-90% (compared to ~23% for optimal random-walk MH in high dimensions).
-      The No-U-Turn Sampler (NUTS) automatically tunes both step size and trajectory length.
+      A good starting point is \(\epsilon = 0.1\) and \(L = 20\). If acceptance drops below 60%,
+      reduce \(\epsilon\). If the sampler moves too slowly, increase \(L\). In practice, NUTS (used
+      in Stan and PyMC) tunes both parameters automatically during warmup.
     </div>
   </div>
 
   <!-- VISUALIZATION -->
   <div class="section">
-    <h2 class="section-title">HMC Trajectory Visualization</h2>
+    <h2 class="section-title">Trajectory Visualization</h2>
     <p>
-      The main plot shows the joint target distribution \(\pi(q_1, q_2)\) with darker regions indicating higher probability.
-      HMC trajectories follow curved paths determined by Hamilton's equations, guided by the gradient of the log density.
-      <span style="color: #38a169; font-weight: 600;">Green points</span> indicate accepted proposals and
-      <span style="color: #ed8936; font-weight: 600;">orange points</span> indicate rejected proposals.
-      The plot axes automatically adjust to each distribution's natural range.
+      The main plot shows the target density \(\pi(q_1, q_2)\), with darker regions indicating higher
+      density. Each iteration traces a curved path through parameter space, guided by the gradient of
+      the log density. <span style="color: #38a169; font-weight: 600;">Green points</span> are accepted
+      proposals; <span style="color: #ed8936; font-weight: 600;">orange points</span> are rejected.
+      Axes scale automatically to each distribution.
     </p>
-    
+
     <div class="visualization-grid">
       <!-- Main posterior plot -->
       <div class="canvas-container">
-        <div class="canvas-label">Joint Posterior Distribution π(x₁, x₂)</div>
+        <div class="canvas-label">Joint Posterior Distribution &#960;(x&#8321;, x&#8322;)</div>
         <canvas id="posterior" width="650" height="650"></canvas>
         <p style="font-size: 0.85rem; color: #4a5568; margin-top: 0.5rem;">
-          The chain should explore the high-density regions (darker areas) while maintaining enough 
-          randomness to avoid getting trapped in any single location.
+          A well-tuned chain covers the high-density region evenly without getting stuck or
+          retracing the same path.
         </p>
       </div>
 
       <!-- Marginal plots -->
       <div class="marginal-plots">
         <div class="marginal-plot">
-          <div class="canvas-label">Marginal Distribution of x₁</div>
+          <div class="canvas-label">Marginal Distribution of x&#8321;</div>
           <canvas id="histX" width="300" height="280"></canvas>
           <p style="font-size: 0.85rem; color: #4a5568; margin-top: 0.5rem;">
-            Histogram of \(x_1\) samples. Should converge to the true marginal \(\pi(x_1) = \int \pi(x_1, x_2) dx_2\).
+            Histogram of \(x_1\) samples, approximating the true marginal \(\pi(x_1) = \int \pi(x_1, x_2)\, dx_2\).
           </p>
         </div>
         <div class="marginal-plot">
-          <div class="canvas-label">Marginal Distribution of x₂</div>
+          <div class="canvas-label">Marginal Distribution of x&#8322;</div>
           <canvas id="histY" width="300" height="280"></canvas>
           <p style="font-size: 0.85rem; color: #4a5568; margin-top: 0.5rem;">
-            Histogram of \(x_2\) samples. With enough samples, this approximates the true marginal distribution.
+            Histogram of \(x_2\) samples. With enough iterations this approximates the true marginal.
           </p>
         </div>
       </div>
@@ -342,44 +290,34 @@
     <div class="stats-panel">
       <strong>Current Iteration Details</strong>
       <div id="stepInfo" class="step-info">
-        Click "Start Sampling" or "Single Step" to begin the MCMC algorithm.
+        Click "Start Sampling" or "Single Step" to begin.
       </div>
     </div>
   </div>
 
   <!-- TRACE PLOTS -->
   <div class="section">
-    <h2 class="section-title">Chain Trace Plots</h2>
+    <h2 class="section-title">Trace Plots</h2>
     <p>
-      <strong>Trace plots</strong> show the evolution of each parameter value over iterations. They are essential 
-      for diagnosing convergence and mixing of the MCMC chain.
+      Trace plots show each parameter's sampled value over iterations. A well-mixing chain looks
+      like a stationary noisy signal: rapid fluctuations around a stable mean with no long-term
+      trends. Long flat stretches mean the chain is stuck; slow drift means burn-in is still
+      ongoing.
     </p>
-    
-    <div class="algorithm-box" style="margin-bottom: 1.5rem;">
-      <strong>What to look for in trace plots:</strong>
-      <ul style="margin: 0.5rem 0; padding-left: 1.5rem;">
-        <li><strong>Good mixing:</strong> The trace should look like "fuzzy caterpillar" - random fluctuations 
-        around a stable mean with no obvious patterns or trends</li>
-        <li><strong>Stationarity:</strong> The mean and variance should remain constant over time (after burn-in)</li>
-        <li><strong>No trends:</strong> The trace shouldn't show long-term upward or downward trends</li>
-        <li><strong>No getting stuck:</strong> The chain shouldn't remain at the same value for extended periods</li>
-      </ul>
-    </div>
-    
+
     <div style="display: grid; grid-template-columns: 1fr; gap: 1.5rem;">
       <div>
-        <div class="canvas-label">Trace Plot: x₁ Evolution</div>
+        <div class="canvas-label">Trace Plot: x&#8321; Evolution</div>
         <canvas id="traceX" width="100%" height="200" style="width: 100%;"></canvas>
         <p style="font-size: 0.85rem; color: #4a5568; margin-top: 0.5rem;">
-          Chain trace for parameter \(x_1\). Rapid fluctuations indicate good mixing; long periods at similar
-          values suggest poor exploration.
+          Rapid fluctuations indicate good mixing; extended runs at similar values suggest poor exploration.
         </p>
       </div>
       <div>
-        <div class="canvas-label">Trace Plot: x₂ Evolution</div>
+        <div class="canvas-label">Trace Plot: x&#8322; Evolution</div>
         <canvas id="traceY" width="100%" height="200" style="width: 100%;"></canvas>
         <p style="font-size: 0.85rem; color: #4a5568; margin-top: 0.5rem;">
-          Chain trace for parameter \(x_2\). Compare with \(x_1\) trace to assess if both parameters mix at similar rates.
+          Compare with the \(x_1\) trace to check whether both parameters mix at similar rates.
         </p>
       </div>
     </div>
@@ -388,38 +326,31 @@
   <!-- DIAGNOSTICS -->
   <div class="section">
     <h2 class="section-title">Chain Diagnostics</h2>
-    
+
     <h3 style="font-size: 1.1rem; font-weight: 600; margin: 0 0 1rem 0;">Autocorrelation Function (ACF)</h3>
     <p>
-      The <strong>autocorrelation function</strong> measures the correlation between samples separated by 
-      \(\tau\) iterations (the lag). For a well-mixing chain, the ACF should decay rapidly to zero.
+      The ACF measures the correlation between samples separated by \(\tau\) iterations. For a
+      well-mixing chain it decays quickly to zero. Slow decay means successive samples carry
+      redundant information, reducing the effective sample size per iteration.
     </p>
-    
+
     <div class="algorithm-box" style="margin-bottom: 1.5rem;">
-      <strong>Mathematical Definition:</strong>
-      <p style="margin: 0.75rem 0;">
-        For a chain \(\{x_t\}\) with sample mean \(\bar{x}\) and sample variance \(s^2\), the sample ACF at lag \(\tau\) is:
+      <p style="margin: 0 0 0.75rem 0;">
+        For a chain \(\{x_t\}\) with sample mean \(\bar{x}\), the sample ACF at lag \(\tau\) is:
       </p>
       $$\hat{\rho}(\tau) = \frac{\sum_{t=1}^{n-\tau} (x_t - \bar{x})(x_{t+\tau} - \bar{x})}{\sum_{t=1}^{n} (x_t - \bar{x})^2}$$
-      <p style="margin: 0.75rem 0 0.25rem 0;">
-        <strong>Interpretation:</strong>
+      <p style="margin: 0.75rem 0 0 0; font-size: 0.9rem; color: #4a5568;">
+        By construction \(\hat{\rho}(0) = 1\). For an ergodic chain, \(\hat{\rho}(\tau) \to 0\) as
+        \(\tau \to \infty\). Fast decay means efficient exploration.
       </p>
-      <ul style="margin: 0; padding-left: 1.5rem;">
-        <li>\(\hat{\rho}(0) = 1\): Perfect correlation with itself</li>
-        <li>\(\hat{\rho}(\tau) \to 0\) as \(\tau \to \infty\): Samples become independent (for ergodic chains)</li>
-        <li><strong>Slow decay:</strong> High autocorrelation indicates the chain mixes slowly</li>
-        <li><strong>Fast decay:</strong> Low autocorrelation indicates efficient exploration</li>
-      </ul>
     </div>
-    
+
     <div class="canvas-label">Autocorrelation Function (ACF)</div>
     <canvas id="acfXY" width="100%" height="350" style="width: 100%;"></canvas>
-    
+
     <p style="margin-top: 1rem; color: #4a5568; font-size: 0.9rem;">
-      <strong>Blue line:</strong> ACF for \(x_1\) parameter. 
-      <strong>Red line:</strong> ACF for \(x_2\) parameter.
-      The lag range adapts automatically—showing where the ACF crosses zero plus 33% additional lags 
-      to verify convergence to independence.
+      Blue line: ACF for \(x_1\). Red line: ACF for \(x_2\). The lag range extends to where the ACF
+      first crosses zero, plus 33% more lags to confirm it stays near zero.
     </p>
 
     <h3 style="font-size: 1.1rem; font-weight: 600; margin: 2rem 0 1rem 0;">Performance Metrics</h3>
@@ -430,7 +361,7 @@
       </div>
       <div class="stat-item">
         <div class="stat-label">Acceptance Rate</div>
-        <div class="stat-value" id="acceptRate">—</div>
+        <div class="stat-value" id="acceptRate">&#8212;</div>
       </div>
       <div class="stat-item">
         <div class="stat-label">Accepted Proposals</div>
@@ -438,159 +369,128 @@
       </div>
       <div class="stat-item">
         <div class="stat-label">Effective Sample Size (est.)</div>
-        <div class="stat-value" id="essValue">—</div>
+        <div class="stat-value" id="essValue">&#8212;</div>
       </div>
     </div>
-    
+
     <div class="algorithm-box" style="margin-top: 1.5rem;">
       <strong>Effective Sample Size (ESS)</strong>
       <p style="margin: 0.75rem 0;">
-        Due to autocorrelation, MCMC samples are not independent. The ESS estimates how many independent 
-        samples our correlated chain is equivalent to:
+        Because MCMC samples are correlated, \(n\) iterations do not give \(n\) independent samples.
+        The ESS estimates the equivalent number of independent draws:
       </p>
       $$\text{ESS} \approx \frac{n}{1 + 2\sum_{\tau=1}^{\infty} \rho(\tau)}$$
       <p style="margin: 0.75rem 0 0 0; font-size: 0.9rem;">
-        where \(n\) is the total number of samples and \(\rho(\tau)\) is the ACF. Higher ESS means more 
-        efficient sampling. The ratio ESS/\(n\) is called the <strong>sampling efficiency</strong>.
+        Higher ESS means more information per iteration. The ratio ESS/\(n\) is the sampling
+        efficiency. HMC typically achieves much higher efficiency than random-walk methods on
+        the same target.
       </p>
     </div>
-    
+
     <div class="info-note" style="margin-top: 1.5rem;">
-      <strong>Note on acceptance rates:</strong> Unlike random-walk Metropolis (optimal acceptance ~23% in high dimensions),
-      HMC maintains much higher acceptance rates (60-90%) due to the volume-preserving properties of symplectic integration.
-      This is possible because the leapfrog integrator approximately conserves the Hamiltonian, making proposals
-      follow surfaces of equal probability.
+      HMC acceptance rates typically fall between 60% and 90%, far above the ~23% that is optimal
+      for random-walk Metropolis in high dimensions. This is because the leapfrog integrator keeps
+      proposals close to a surface of constant energy, making large moves easy to accept.
     </div>
   </div>
 
   <!-- STRENGTHS AND LIMITATIONS -->
   <div class="section">
-    <h2 class="section-title">Strengths & Limitations of HMC</h2>
-    
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1rem;">
-      <div class="algorithm-box">
-        <strong style="color: #059669;">✓ Strengths</strong>
-        <ul style="margin: 0.75rem 0 0 0; padding-left: 1.5rem;">
-          <li style="margin: 0.5rem 0;"><strong>Efficient exploration:</strong> Generates coherent trajectories rather than diffusive random walks</li>
-          <li style="margin: 0.5rem 0;"><strong>Low autocorrelation:</strong> Produces nearly independent samples, high effective sample size</li>
-          <li style="margin: 0.5rem 0;"><strong>Exploits geometry:</strong> Uses gradient information to navigate complex correlation structures</li>
-          <li style="margin: 0.5rem 0;"><strong>High acceptance probability:</strong> Typically 60-90% due to symplectic integration</li>
-          <li style="margin: 0.5rem 0;"><strong>Dimension-robust:</strong> Scales with condition number rather than dimensionality</li>
-        </ul>
-      </div>
-      
-      <div class="algorithm-box">
-        <strong style="color: #dc2626;">✗ Limitations</strong>
-        <ul style="margin: 0.75rem 0 0 0; padding-left: 1.5rem;">
-          <li style="margin: 0.5rem 0;"><strong>Requires differentiability:</strong> Needs \(\nabla \log \pi(\mathbf{q})\) to compute Hamiltonian dynamics</li>
-          <li style="margin: 0.5rem 0;"><strong>Tuning required:</strong> Step size \(\epsilon\) and trajectory length \(L\) affect performance</li>
-          <li style="margin: 0.5rem 0;"><strong>Computational cost:</strong> Each trajectory requires \(L\) gradient evaluations</li>
-          <li style="margin: 0.5rem 0;"><strong>Discretization error:</strong> Finite step size introduces numerical integration error</li>
-          <li style="margin: 0.5rem 0;"><strong>Mode transitions:</strong> Difficult to cross low-probability regions between well-separated modes</li>
-        </ul>
-      </div>
-    </div>
-    
-    <div class="info-note" style="margin-top: 1.5rem;">
-      <strong>When to use HMC:</strong>
-      <ul style="margin: 0.5rem 0 0 0; padding-left: 1.5rem;">
-        <li><strong>Smooth target distributions:</strong> Requires differentiable log-density \(\log \pi(\mathbf{q})\)</li>
-        <li><strong>Moderate to high dimensions:</strong> Particularly effective for \(d > 10\) where random-walk methods fail</li>
-        <li><strong>Correlated parameters:</strong> Gradient information naturally handles complex posterior geometry</li>
-        <li><strong>Practical implementations:</strong> NUTS (No-U-Turn Sampler) in Stan/PyMC automatically adapts
-        step size and trajectory length, making HMC accessible without manual tuning</li>
-      </ul>
-    </div>
+    <h2 class="section-title">Strengths and Limitations</h2>
+
+    <p>
+      HMC's main advantage is sampling efficiency. By following the geometry of the posterior, it
+      produces nearly independent draws in far fewer iterations than random-walk methods, and the
+      gap widens as dimension increases. Acceptance rates stay high because the symplectic integrator
+      approximately conserves energy.
+    </p>
+    <p>
+      The main constraint is differentiability: HMC needs \(\nabla \log \pi(\mathbf{q})\) at every
+      leapfrog step. Each trajectory costs \(L\) gradient evaluations, which is acceptable when
+      gradients are cheap but non-trivial otherwise. Finite step sizes introduce small integration
+      errors, corrected by the Metropolis step at the cost of occasional rejections. Step size and
+      trajectory length both need tuning, though NUTS removes this in practice. HMC also struggles
+      to cross wide low-density regions between well-separated modes, where specialized techniques
+      or parallel tempering are needed.
+    </p>
+    <p>
+      Use HMC when the log-density is smooth and differentiable, particularly for posteriors where
+      parameters are correlated and dimension is not negligible.
+    </p>
   </div>
 
   <!-- COMPARISON WITH MH -->
   <div class="section">
-    <h2 class="section-title">Comparison: HMC vs. Metropolis–Hastings</h2>
+    <h2 class="section-title">HMC vs. Metropolis-Hastings</h2>
     <p>
-      Direct comparison on the same target distributions reveals HMC's advantages:
+      Both algorithms target the same distributions and use Metropolis acceptance, but they differ
+      fundamentally in how proposals are generated.
     </p>
-    
+
     <div class="algorithm-box" style="margin-top: 1rem;">
-      <strong>Key Differences:</strong>
-      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-top: 0.5rem;">
         <div><strong>Property</strong></div>
-        <div><strong>Metropolis–Hastings</strong></div>
+        <div><strong>Metropolis-Hastings</strong></div>
         <div><strong>HMC</strong></div>
-        
+
         <div style="padding: 0.5rem 0; border-top: 1px solid #e2e8f0;">Proposal mechanism</div>
         <div style="padding: 0.5rem 0; border-top: 1px solid #e2e8f0;">Random walk</div>
         <div style="padding: 0.5rem 0; border-top: 1px solid #e2e8f0;">Hamiltonian dynamics</div>
-        
+
         <div style="padding: 0.5rem 0;">Gradients needed?</div>
         <div style="padding: 0.5rem 0;">No</div>
         <div style="padding: 0.5rem 0;">Yes</div>
-        
+
         <div style="padding: 0.5rem 0;">Typical acceptance rate</div>
         <div style="padding: 0.5rem 0;">23-40% (high-d)</div>
         <div style="padding: 0.5rem 0;">65-90%</div>
-        
+
         <div style="padding: 0.5rem 0;">Autocorrelation</div>
         <div style="padding: 0.5rem 0;">High</div>
         <div style="padding: 0.5rem 0;">Low</div>
-        
+
         <div style="padding: 0.5rem 0;">Effective sample size</div>
         <div style="padding: 0.5rem 0;">Much lower than \(n\)</div>
         <div style="padding: 0.5rem 0;">Closer to \(n\)</div>
-        
+
         <div style="padding: 0.5rem 0;">Best for</div>
         <div style="padding: 0.5rem 0;">Low-d, gradients unavailable</div>
-        <div style="padding: 0.5rem 0;">High-d, smooth posteriors</div>
+        <div style="padding: 0.5rem 0;">Higher-d, smooth posteriors</div>
       </div>
     </div>
-  </div>
-          <strong>Key advantage:</strong> Explores parameter space coherently rather than randomly, 
-          dramatically reducing autocorrelation.
-        </p>
-      </div>
-      
-      <div class="algorithm-box">
-        <strong>Nested Sampling</strong>
-        <p style="margin: 0.75rem 0; font-size: 0.9rem;">
-          A fundamentally different approach that simultaneously computes samples from the posterior 
-          <em>and</em> the model evidence (marginal likelihood). Instead of evolving a Markov chain, 
-          nested sampling progressively samples from constrained priors with increasing likelihood thresholds.
-        </p>
-        <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem; color: #4a5568;">
   </div>
 
   <!-- REFERENCES -->
   <div class="section">
-    <h2 class="section-title">References & Further Reading</h2>
+    <h2 class="section-title">References</h2>
     <div style="font-size: 0.9rem; line-height: 1.8;">
-      <p><strong>Key Papers:</strong></p>
+      <p><strong>Papers:</strong></p>
       <ul style="padding-left: 1.5rem; margin: 0.5rem 0;">
-        <li>Duane, S., Kennedy, A.D., Pendleton, B.J., & Roweth, D. (1987). 
+        <li>Duane, S., Kennedy, A.D., Pendleton, B.J., &amp; Roweth, D. (1987).
         "Hybrid Monte Carlo." <em>Physics Letters B</em>, 195(2), 216-222.</li>
         <li>Neal, R.M. (1996). "Bayesian Learning for Neural Networks." PhD Thesis, University of Toronto.</li>
-        <li>Neal, R.M. (2011). "MCMC Using Hamiltonian Dynamics." <em>Handbook of Markov Chain Monte Carlo</em> 
+        <li>Neal, R.M. (2011). "MCMC Using Hamiltonian Dynamics." <em>Handbook of Markov Chain Monte Carlo</em>
         (eds. Brooks et al.), CRC Press, 113-162.</li>
-        <li>Betancourt, M. (2017). "A Conceptual Introduction to Hamiltonian Monte Carlo." 
+        <li>Betancourt, M. (2017). "A Conceptual Introduction to Hamiltonian Monte Carlo."
         <em>arXiv:1701.02434</em>.</li>
-        <li>Hoffman, M.D., & Gelman, A. (2014). "The No-U-Turn Sampler: Adaptively Setting Path Lengths in Hamiltonian Monte Carlo." 
+        <li>Hoffman, M.D., &amp; Gelman, A. (2014). "The No-U-Turn Sampler: Adaptively Setting Path Lengths in Hamiltonian Monte Carlo."
         <em>Journal of Machine Learning Research</em>, 15(1), 1593-1623.</li>
-        <li>Haario, H., Saksman, E., & Tamminen, J. (1999). "Adaptive Proposal Distribution for Random Walk Metropolis Algorithm." 
+        <li>Haario, H., Saksman, E., &amp; Tamminen, J. (1999). "Adaptive Proposal Distribution for Random Walk Metropolis Algorithm."
         <em>Computational Statistics</em>, 14, 375-395.</li>
       </ul>
-      
+
       <p style="margin-top: 1rem;"><strong>Books:</strong></p>
       <ul style="padding-left: 1.5rem; margin: 0.5rem 0;">
-        <li>Brooks, S., Gelman, A., Jones, G., & Meng, X.-L. (2011). <em>Handbook of Markov Chain Monte Carlo</em>. CRC Press.</li>
-        <li>Gelman, A., Carlin, J.B., Stern, H.S., Dunson, D.B., Vehtari, A., & Rubin, D.B. (2013). 
+        <li>Brooks, S., Gelman, A., Jones, G., &amp; Meng, X.-L. (2011). <em>Handbook of Markov Chain Monte Carlo</em>. CRC Press.</li>
+        <li>Gelman, A., Carlin, J.B., Stern, H.S., Dunson, D.B., Vehtari, A., &amp; Rubin, D.B. (2013).
         <em>Bayesian Data Analysis</em> (3rd ed.). CRC Press.</li>
-        <li>Betancourt, M. (2018). <em>A Conceptual Introduction to Hamiltonian Monte Carlo</em>. 
-        arXiv preprint. (Excellent pedagogical resource)</li>
       </ul>
-      
-      <p style="margin-top: 1rem;"><strong>Software Implementations:</strong></p>
+
+      <p style="margin-top: 1rem;"><strong>Software:</strong></p>
       <ul style="padding-left: 1.5rem; margin: 0.5rem 0;">
-        <li><strong>Stan:</strong> <a href="https://mc-stan.org/" style="color: #667eea;">mc-stan.org</a> 
-        - Uses NUTS (No-U-Turn Sampler), an adaptive HMC variant</li>
-        <li><strong>PyMC:</strong> <a href="https://www.pymc.io/" style="color: #667eea;">pymc.io</a> 
+        <li><strong>Stan:</strong> <a href="https://mc-stan.org/" style="color: #667eea;">mc-stan.org</a>
+        - uses NUTS, an adaptive HMC variant</li>
+        <li><strong>PyMC:</strong> <a href="https://www.pymc.io/" style="color: #667eea;">pymc.io</a>
         - Python probabilistic programming with HMC/NUTS</li>
         <li><strong>NumPyro:</strong> JAX-based probabilistic programming with efficient HMC</li>
       </ul>

@@ -169,40 +169,76 @@ body {
 .section {
   background: white;
   border-radius: 8px;
-  padding: 2rem;
-  margin-bottom: 2rem;
+  padding: 1.5rem;
+  margin-bottom: 1.25rem;
   box-shadow: 0 1px 3px rgba(0,0,0,0.08);
 }
 
 .section-title {
-  font-size: 1.4rem;
+  font-size: 1.3rem;
   font-weight: 600;
-  margin: 0 0 1.5rem 0;
+  margin: 0 0 1rem 0;
   color: #1a1a1a;
   border-bottom: 2px solid #111827;
-  padding-bottom: 0.5rem;
+  padding-bottom: 0.4rem;
 }
 
-
 .algorithm-box {
-      background: #f7fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 6px;
-      padding: 1.5rem;
-      margin-top: 1rem;
-      overflow-x: auto;
-    }
+  background: #f7fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 1rem;
+  margin-top: 0.75rem;
+  overflow-x: auto;
+}
 
 .algorithm-box ol {
-      margin: 0.5rem 0 0 0;
-      padding-left: 1.5rem;
-    }
+  margin: 0.5rem 0 0 0;
+  padding-left: 1.5rem;
+}
 
 .algorithm-box li {
-      margin: 0.5rem 0;
-      font-family: 'Courier New', monospace;
-      font-size: 0.95rem;
-    }
+  margin: 0.4rem 0;
+  font-size: 0.95rem;
+}
+
+.info-note {
+  background: #f0f9ff;
+  border-left: 3px solid #3b82f6;
+  border-radius: 4px;
+  padding: 0.75rem 1rem;
+  margin-top: 0.75rem;
+  font-size: 0.92rem;
+  color: #1e3a5f;
+}
+
+.dist-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 0.75rem;
+}
+
+.dist-grid .algorithm-box {
+  margin-top: 0;
+}
+
+.dist-grid .dist-formula {
+  font-size: 0.88rem;
+  overflow-x: auto;
+}
+
+.dist-grid .dist-note {
+  font-size: 0.82rem;
+  color: #4a5568;
+  margin: 0.4rem 0 0 0;
+}
+
+@media screen and (max-width: 700px) {
+  .dist-grid {
+    grid-template-columns: 1fr;
+  }
+}
 
 /* ====================================
    CONTROLS

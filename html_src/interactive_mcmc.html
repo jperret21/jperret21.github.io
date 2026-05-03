@@ -36,10 +36,10 @@
         </span>
       </label>
       <div class="trigger">
-        <a class="page-link" href="/about.html">Curriculum Vitae</a>
-        <a class="page-link" href="/bayesian_inference.html">Introduction to Bayesian Inference</a>
-        <a class="page-link" href="/publications.html">Publications</a>
-        <a class="page-link" href="/research.html">Research</a>
+        <a class="page-link" href="/about">Curriculum Vitae</a>
+        <a class="page-link" href="/bayesian_inference">Bayesian Inference</a>
+        <a class="page-link" href="/publications">Publications</a>
+        <a class="page-link" href="/research">Research</a>
       </div>
     </nav>
   </div>
@@ -50,7 +50,7 @@
     <h1 class="page-heading">Metropolis–Hastings MCMC Algorithm</h1>
     <p class="page-subtitle">
       Interactive visualization of Markov Chain Monte Carlo sampling from 2D posterior distributions<br>
-      <span style="font-size: 0.9rem; color: #718096;">Part 1 of the MCMC Samplers Series | Coming soon: Hamiltonian Monte Carlo (HMC) & Nested Sampling</span>
+      <span style="font-size: 0.9rem; color: #718096;">Part 1 of the MCMC Samplers Series | Coming soon: Hamiltonian Monte Carlo (HMC) &amp; Nested Sampling</span>
     </p>
   </div>
 </main>
@@ -59,26 +59,24 @@
 
   <!-- INTRODUCTION -->
   <div class="section">
-    <h2 class="section-title">Introduction to MCMC</h2>
+    <h2 class="section-title">What is MCMC?</h2>
     <p>
-      <strong>Markov Chain Monte Carlo (MCMC)</strong> is a family of algorithms for sampling from probability 
-      distributions that are difficult or impossible to sample from directly. These methods are fundamental in 
-      Bayesian inference, statistical physics, computational biology, and machine learning.
+      Markov Chain Monte Carlo (MCMC) is a family of algorithms for sampling from probability
+      distributions that are too complex to sample from directly. They are central to
+      Bayesian inference, statistical physics, and computational biology.
     </p>
     <p>
-      The key idea is to construct a <strong>Markov chain</strong> that has the target distribution \(\pi(\mathbf{x})\) 
-      as its stationary distribution. By running the chain long enough, samples from the chain will approximate 
-      samples from \(\pi(\mathbf{x})\).
+      The idea is to build a Markov chain whose stationary distribution is the target \(\pi(\mathbf{x})\).
+      Run the chain long enough and its samples will approximate draws from \(\pi(\mathbf{x})\).
     </p>
-    
+
     <div class="algorithm-box" style="margin-top: 1.5rem;">
       <strong>Why MCMC?</strong>
-      <ul style="margin: 0.5rem 0; padding-left: 1.5rem;">
-        <li>Sample from complex, high-dimensional distributions where direct sampling is intractable</li>
-        <li>Only requires ability to <em>evaluate</em> the target density \(\pi(\mathbf{x})\) (up to a normalizing constant)</li>
-        <li>Asymptotically exact: given infinite time, samples converge to the true distribution</li>
-        <li>Widely applicable: works for continuous, discrete, or mixed parameter spaces</li>
-      </ul>
+      <p style="margin: 0.5rem 0 0 0;">
+        MCMC only requires you to <em>evaluate</em> \(\pi(\mathbf{x})\) up to a normalizing constant, which
+        makes it applicable to a vast range of problems where direct sampling or analytical integration
+        is out of reach. Given enough iterations, it is asymptotically exact.
+      </p>
     </div>
   </div>
 
@@ -86,12 +84,11 @@
   <div class="section">
     <h2 class="section-title">The Metropolis–Hastings Algorithm</h2>
     <p>
-      The <strong>Metropolis–Hastings (MH)</strong> algorithm is one of the most fundamental MCMC methods. 
-      It was introduced by Metropolis et al. (1953) and generalized by Hastings (1970). The algorithm generates 
-      a sequence of samples \(\mathbf{x}_0, \mathbf{x}_1, \mathbf{x}_2, \ldots\) where each sample depends only 
-      on the previous one (Markov property).
+      Metropolis–Hastings (MH) is the simplest and most widely used MCMC method. Introduced by
+      Metropolis et al. (1953) and generalized by Hastings (1970), it builds a sequence of samples
+      \(\mathbf{x}_0, \mathbf{x}_1, \mathbf{x}_2, \ldots\) where each state depends only on the previous one.
     </p>
-    
+
     <div class="algorithm-box">
       <strong>Algorithm Steps:</strong>
       <ol style="margin: 0.5rem 0 0.5rem 0; padding-left: 1.5rem;">
@@ -99,10 +96,10 @@
           <strong>Initialize:</strong> Start with an initial state \(\mathbf{x}_0\)
         </li>
         <li style="margin: 0.75rem 0;">
-          <strong>Propose:</strong> Generate a candidate state \(\mathbf{x}' \sim q(\cdot \mid \mathbf{x}_t)\) 
+          <strong>Propose:</strong> Generate a candidate state \(\mathbf{x}' \sim q(\cdot \mid \mathbf{x}_t)\)
           from a proposal distribution
           <div style="margin-left: 1.5rem; margin-top: 0.5rem; font-family: inherit;">
-            In this demo: \(q(\mathbf{x}' \mid \mathbf{x}_t) = \mathcal{N}(\mathbf{x}_t, \sigma^2 \mathbf{I})\) 
+            In this demo: \(q(\mathbf{x}' \mid \mathbf{x}_t) = \mathcal{N}(\mathbf{x}_t, \sigma^2 \mathbf{I})\)
             (Gaussian random walk)
           </div>
         </li>
@@ -123,10 +120,9 @@
     </div>
 
     <div class="info-note" style="margin-top: 1.5rem;">
-      <strong>Key Insight:</strong> The algorithm always accepts moves to higher probability regions 
-      (\(\pi(\mathbf{x}') > \pi(\mathbf{x}_t)\)), but also sometimes accepts moves to lower probability 
-      regions. This ensures the chain doesn't get stuck in local modes and properly explores the entire 
-      distribution.
+      The chain always accepts moves to higher log-density regions, but also sometimes accepts
+      moves to lower-density ones. Without these occasional downhill moves, the chain would collapse
+      onto a local mode and never explore the full distribution.
     </div>
   </div>
 
@@ -134,65 +130,28 @@
   <div class="section">
     <h2 class="section-title">Target Distributions</h2>
     <p>
-      This demonstration provides three target distributions ranging from simple to challenging, 
-      illustrating different aspects of MCMC performance:
+      The three distributions below range from easy to genuinely hard for a random-walk sampler.
+      They are standard benchmarks in the MCMC literature.
     </p>
-    
-    <div style="display: grid; grid-template-columns: 1fr; gap: 1.5rem; margin-top: 1rem;">
+
+    <div class="dist-grid">
       <div class="algorithm-box">
-        <strong>Bivariate Gaussian (Default)</strong>
-        <p style="margin: 0.5rem 0;">
-          A standard correlated 2D Gaussian with correlation coefficient \(\rho = 0.8\):
-        </p>
-        <div style="overflow-x: auto;">
-          $$\pi(x_1, x_2) \propto \exp\left(-\frac{1}{2(1-\rho^2)}(x_1^2 - 2\rho x_1 x_2 + x_2^2)\right)$$
-        </div>
-        <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem; color: #4a5568;">
-          This distribution has elliptical contours aligned with the correlation structure. 
-          With strong correlation (\(\rho = 0.8\)), random-walk proposals struggle because they explore 
-          axis-by-axis when parameters should move together along the correlation direction.
-        </p>
+        <strong>Bivariate Gaussian</strong>
+        <div class="dist-formula">$$\pi(x_1, x_2) \propto \exp\!\left(-\frac{x_1^2 - 2\rho x_1 x_2 + x_2^2}{2(1-\rho^2)}\right)$$</div>
+        <p class="dist-note">Correlated Gaussian (\(\rho = 0.8\)). Exposes the axis-by-axis weakness of random-walk proposals.</p>
       </div>
 
       <div class="algorithm-box">
-        <strong>Rosenbrock's Banana Distribution</strong>
-        <p style="margin: 0.5rem 0;">
-          A transformed Gaussian that creates a curved, banana-shaped density (Haario et al., 1999):
-        </p>
-        <div style="overflow-x: auto;">
-          $$\pi(x_1, x_2) \propto \exp\left(-\frac{1}{200}(x_1^2 + 100(x_2 - x_1^2)^2)\right)$$
-        </div>
-        <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem; color: #4a5568;">
-          This distribution is strongly correlated along a curved manifold, making it difficult for 
-          random-walk samplers to explore efficiently. The "banana" shape arises from the nonlinear 
-          transformation \(x_2 - x_1^2\), creating regions where standard proposals are inefficient.
-        </p>
+        <strong>Rosenbrock's Banana</strong>
+        <div class="dist-formula">$$\pi(x_1, x_2) \propto \exp\!\left(-\frac{x_1^2 + 100(x_2 - x_1^2)^2}{200}\right)$$</div>
+        <p class="dist-note">Mass on a curved manifold. A fixed proposal has no way to follow the geometry.</p>
       </div>
-      
+
       <div class="algorithm-box">
-        <strong>Neal's Funnel Distribution</strong>
-        <p style="margin: 0.5rem 0;">
-          A hierarchical model that exhibits strong scale variations (Neal, 2003):
-        </p>
-        <div style="overflow-x: auto;">
-          $$\begin{aligned}
-          x_1 &\sim \mathcal{N}(0, 3^2) \\
-          x_2 \mid x_1 &\sim \mathcal{N}(0, \exp(x_1)^2)
-          \end{aligned}$$
-        </div>
-        <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem; color: #4a5568;">
-          The joint density is \(\pi(x_1, x_2) \propto \exp(-x_1^2/18 - x_2^2/(2e^{2x_1}))\). 
-          This creates a "funnel" where the scale of \(x_2\) depends exponentially on \(x_1\), 
-          challenging for fixed-width proposals. Common in hierarchical Bayesian models with variance parameters.
-        </p>
+        <strong>Neal's Funnel</strong>
+        <div class="dist-formula">$$x_1 \sim \mathcal{N}(0,9),\quad x_2 \mid x_1 \sim \mathcal{N}(0, e^{2x_1})$$</div>
+        <p class="dist-note">Scale of \(x_2\) varies exponentially with \(x_1\). No single proposal width works everywhere.</p>
       </div>
-    </div>
-    
-    <div class="info-note" style="margin-top: 1rem;">
-      <strong>Why these distributions?</strong> The Gaussian provides a baseline to understand basic behavior. 
-      Rosenbrock's banana and Neal's funnel are standard benchmarks in the MCMC literature—the banana tests 
-      handling of strong nonlinear correlations, while the funnel tests adaptation to varying scales. 
-      These challenges motivate advanced methods like HMC and adaptive MCMC.
     </div>
   </div>
 
@@ -200,10 +159,10 @@
   <div class="section">
     <h2 class="section-title">Simulation Controls</h2>
     <p>
-      Adjust the parameters below to see how they affect the sampler's behavior. The <strong>proposal width</strong> 
-      is particularly important: too small and the chain explores slowly; too large and most proposals are rejected.
+      The proposal width \(\sigma\) is the most important parameter to tune: too small and the chain
+      barely moves; too large and almost every proposal is rejected.
     </p>
-    
+
     <div class="controls-grid">
       <div class="control-group">
         <label>
@@ -212,7 +171,7 @@
         </label>
         <input type="range" min="0.05" max="2" step="0.05" value="0.6" id="sigma">
         <div style="font-size: 0.85rem; color: #4a5568; margin-top: 0.25rem;">
-          Step size for proposals. Larger \(\sigma\) → larger jumps. Tune to balance exploration vs. acceptance.
+          Step size for proposals. Larger \(\sigma\) means larger jumps.
         </div>
       </div>
 
@@ -223,7 +182,7 @@
         </label>
         <input type="range" min="10" max="500" step="10" value="60" id="speed">
         <div style="font-size: 0.85rem; color: #4a5568; margin-top: 0.25rem;">
-          Delay between iterations. Slower speeds help visualize individual steps.
+          Delay between iterations. Slow it down to watch individual steps.
         </div>
       </div>
 
@@ -237,7 +196,7 @@
           <option value="funnel">Neal's Funnel</option>
         </select>
         <div style="font-size: 0.85rem; color: #4a5568; margin-top: 0.25rem;">
-          Switch between different target distributions to test sampler behavior.
+          Switch distributions to see how sampler behavior changes.
         </div>
       </div>
     </div>
@@ -253,20 +212,19 @@
   <div class="section">
     <h2 class="section-title">MCMC Chain Visualization</h2>
     <p>
-      The main plot shows the joint posterior \(\pi(x_1, x_2)\) with darker regions indicating higher probability. 
-      Each point represents a sample in the chain: <span style="color: #38a169; font-weight: 600;">green</span> 
-      for accepted proposals and <span style="color: #ed8936; font-weight: 600;">orange</span> for rejected proposals.
-      The plot axes automatically adjust to each distribution's natural range.
+      Darker regions correspond to higher density. Each point is one sample:
+      <span style="color: #38a169; font-weight: 600;">green</span> for accepted proposals and
+      <span style="color: #ed8936; font-weight: 600;">orange</span> for rejected ones.
+      Axes adjust automatically to each distribution's natural range.
     </p>
-    
+
     <div class="visualization-grid">
       <!-- Main posterior plot -->
       <div class="canvas-container">
         <div class="canvas-label">Joint Posterior Distribution π(x₁, x₂)</div>
         <canvas id="posterior" width="650" height="650"></canvas>
         <p style="font-size: 0.85rem; color: #4a5568; margin-top: 0.5rem;">
-          The chain should explore the high-density regions (darker areas) while maintaining enough 
-          randomness to avoid getting trapped in any single location.
+          Watch whether the chain covers the high-density regions or gets trapped in one area.
         </p>
       </div>
 
@@ -276,14 +234,14 @@
           <div class="canvas-label">Marginal Distribution of x₁</div>
           <canvas id="histX" width="300" height="280"></canvas>
           <p style="font-size: 0.85rem; color: #4a5568; margin-top: 0.5rem;">
-            Histogram of \(x_1\) samples. Should converge to the true marginal \(\pi(x_1) = \int \pi(x_1, x_2) dx_2\).
+            Histogram of \(x_1\) samples. With enough iterations it approximates the true marginal \(\pi(x_1) = \int \pi(x_1, x_2)\, dx_2\).
           </p>
         </div>
         <div class="marginal-plot">
           <div class="canvas-label">Marginal Distribution of x₂</div>
           <canvas id="histY" width="300" height="280"></canvas>
           <p style="font-size: 0.85rem; color: #4a5568; margin-top: 0.5rem;">
-            Histogram of \(x_2\) samples. With enough samples, this approximates the true marginal distribution.
+            Histogram of \(x_2\) samples. With enough iterations this approximates the true marginal.
           </p>
         </div>
       </div>
@@ -293,7 +251,7 @@
     <div class="stats-panel">
       <strong>Current Iteration Details</strong>
       <div id="stepInfo" class="step-info">
-        Click "Start Sampling" or "Single Step" to begin the MCMC algorithm.
+        Click "Start Sampling" or "Single Step" to begin.
       </div>
     </div>
   </div>
@@ -302,35 +260,26 @@
   <div class="section">
     <h2 class="section-title">Chain Trace Plots</h2>
     <p>
-      <strong>Trace plots</strong> show the evolution of each parameter value over iterations. They are essential 
-      for diagnosing convergence and mixing of the MCMC chain.
+      Trace plots show each parameter's sampled value at every iteration. A well-mixing chain looks
+      like a "fuzzy caterpillar": rapid fluctuations around a stable mean, no trends, no long flat
+      stretches where the chain sat still. Discard the initial burn-in period before drawing conclusions.
     </p>
-    
-    <div class="algorithm-box" style="margin-bottom: 1.5rem;">
-      <strong>What to look for in trace plots:</strong>
-      <ul style="margin: 0.5rem 0; padding-left: 1.5rem;">
-        <li><strong>Good mixing:</strong> The trace should look like "fuzzy caterpillar" - random fluctuations 
-        around a stable mean with no obvious patterns or trends</li>
-        <li><strong>Stationarity:</strong> The mean and variance should remain constant over time (after burn-in)</li>
-        <li><strong>No trends:</strong> The trace shouldn't show long-term upward or downward trends</li>
-        <li><strong>No getting stuck:</strong> The chain shouldn't remain at the same value for extended periods</li>
-      </ul>
-    </div>
-    
+
     <div style="display: grid; grid-template-columns: 1fr; gap: 1.5rem;">
       <div>
         <div class="canvas-label">Trace Plot: x₁ Evolution</div>
         <canvas id="traceX" width="100%" height="200" style="width: 100%;"></canvas>
         <p style="font-size: 0.85rem; color: #4a5568; margin-top: 0.5rem;">
-          Chain trace for parameter \(x_1\). Rapid fluctuations indicate good mixing; long periods at similar
-          values suggest poor exploration.
+          Rapid fluctuations indicate good mixing. Long stretches at similar values suggest the
+          chain is stuck.
         </p>
       </div>
       <div>
         <div class="canvas-label">Trace Plot: x₂ Evolution</div>
         <canvas id="traceY" width="100%" height="200" style="width: 100%;"></canvas>
         <p style="font-size: 0.85rem; color: #4a5568; margin-top: 0.5rem;">
-          Chain trace for parameter \(x_2\). Compare with \(x_1\) trace to assess if both parameters mix at similar rates.
+          Compare with the \(x_1\) trace: if one parameter mixes well and the other does not,
+          the proposal geometry or scale is likely mismatched.
         </p>
       </div>
     </div>
@@ -339,38 +288,32 @@
   <!-- DIAGNOSTICS -->
   <div class="section">
     <h2 class="section-title">Chain Diagnostics</h2>
-    
+
     <h3 style="font-size: 1.1rem; font-weight: 600; margin: 0 0 1rem 0;">Autocorrelation Function (ACF)</h3>
     <p>
-      The <strong>autocorrelation function</strong> measures the correlation between samples separated by 
-      \(\tau\) iterations (the lag). For a well-mixing chain, the ACF should decay rapidly to zero.
+      The autocorrelation function measures how correlated two samples are when separated by \(\tau\)
+      iterations. For a well-mixing chain, it should decay quickly to zero. Slow decay means
+      successive samples carry redundant information and the effective number of independent samples is small.
     </p>
-    
+
     <div class="algorithm-box" style="margin-bottom: 1.5rem;">
-      <strong>Mathematical Definition:</strong>
       <p style="margin: 0.75rem 0;">
-        For a chain \(\{x_t\}\) with sample mean \(\bar{x}\) and sample variance \(s^2\), the sample ACF at lag \(\tau\) is:
+        For a chain \(\{x_t\}\) with sample mean \(\bar{x}\), the ACF at lag \(\tau\) is:
       </p>
       $$\hat{\rho}(\tau) = \frac{\sum_{t=1}^{n-\tau} (x_t - \bar{x})(x_{t+\tau} - \bar{x})}{\sum_{t=1}^{n} (x_t - \bar{x})^2}$$
-      <p style="margin: 0.75rem 0 0.25rem 0;">
-        <strong>Interpretation:</strong>
+      <p style="margin: 0.75rem 0 0 0;">
+        By definition \(\hat{\rho}(0) = 1\), and for an ergodic chain \(\hat{\rho}(\tau) \to 0\) as
+        \(\tau \to \infty\). How fast it gets there is what matters in practice.
       </p>
-      <ul style="margin: 0; padding-left: 1.5rem;">
-        <li>\(\hat{\rho}(0) = 1\): Perfect correlation with itself</li>
-        <li>\(\hat{\rho}(\tau) \to 0\) as \(\tau \to \infty\): Samples become independent (for ergodic chains)</li>
-        <li><strong>Slow decay:</strong> High autocorrelation indicates the chain mixes slowly</li>
-        <li><strong>Fast decay:</strong> Low autocorrelation indicates efficient exploration</li>
-      </ul>
     </div>
-    
+
     <div class="canvas-label">Autocorrelation Function (ACF)</div>
     <canvas id="acfXY" width="100%" height="350" style="width: 100%;"></canvas>
-    
+
     <p style="margin-top: 1rem; color: #4a5568; font-size: 0.9rem;">
-      <strong>Blue line:</strong> ACF for \(x_1\) parameter. 
-      <strong>Red line:</strong> ACF for \(x_2\) parameter.
-      The lag range adapts automatically—showing where the ACF crosses zero plus 33% additional lags 
-      to verify convergence to independence.
+      <strong>Blue line:</strong> ACF for \(x_1\).
+      <strong>Red line:</strong> ACF for \(x_2\).
+      The lag axis extends to where the ACF first crosses zero, plus 33% extra to confirm it stays near zero.
     </p>
 
     <h3 style="font-size: 1.1rem; font-weight: 600; margin: 2rem 0 1rem 0;">Performance Metrics</h3>
@@ -392,146 +335,79 @@
         <div class="stat-value" id="essValue">—</div>
       </div>
     </div>
-    
+
     <div class="algorithm-box" style="margin-top: 1.5rem;">
       <strong>Effective Sample Size (ESS)</strong>
       <p style="margin: 0.75rem 0;">
-        Due to autocorrelation, MCMC samples are not independent. The ESS estimates how many independent 
-        samples our correlated chain is equivalent to:
+        Because MCMC samples are correlated, \(n\) iterations do not give you \(n\) independent
+        samples. The ESS estimates how many independent samples they are worth:
       </p>
       $$\text{ESS} \approx \frac{n}{1 + 2\sum_{\tau=1}^{\infty} \rho(\tau)}$$
       <p style="margin: 0.75rem 0 0 0; font-size: 0.9rem;">
-        where \(n\) is the total number of samples and \(\rho(\tau)\) is the ACF. Higher ESS means more 
-        efficient sampling. The ratio ESS/\(n\) is called the <strong>sampling efficiency</strong>.
+        The ratio ESS/\(n\) is the sampling efficiency. High autocorrelation drives it toward zero.
+        Maximizing ESS for a fixed computational budget is the central goal of MCMC tuning.
       </p>
     </div>
-    
+
     <div class="info-note" style="margin-top: 1.5rem;">
-      <strong>Tuning the Proposal Width:</strong> The proposal standard deviation \(\sigma\) directly affects 
-      both the acceptance rate and the autocorrelation. For random-walk Metropolis in high dimensions, 
-      the asymptotically optimal acceptance rate is approximately 0.234 (Roberts et al., 1997; Roberts & Rosenthal, 2001). 
-      For low-dimensional problems (2D), acceptance rates between 40-60% are typically more efficient, 
-      though the optimal rate depends on the target distribution's geometry.
+      For random-walk Metropolis in high dimensions, the asymptotically optimal acceptance rate
+      is approximately 0.234 (Roberts et al., 1997; Roberts &amp; Rosenthal, 2001). In 2D, rates
+      between 40% and 60% tend to work better in practice, though the right target depends on
+      the geometry of the posterior.
     </div>
   </div>
 
   <!-- STRENGTHS AND LIMITATIONS -->
   <div class="section">
-    <h2 class="section-title">Strengths & Limitations of Metropolis–Hastings</h2>
-    
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1rem;">
-      <div class="algorithm-box">
-        <strong style="color: #059669;">✓ Strengths</strong>
-        <ul style="margin: 0.75rem 0 0 0; padding-left: 1.5rem;">
-          <li style="margin: 0.5rem 0;"><strong>Generality:</strong> Works for any distribution where you can evaluate $\pi(\mathbf{x})$</li>
-          <li style="margin: 0.5rem 0;"><strong>Simplicity:</strong> Easy to implement and understand</li>
-          <li style="margin: 0.5rem 0;"><strong>Flexibility:</strong> Can be adapted with different proposal distributions</li>
-          <li style="margin: 0.5rem 0;"><strong>Theoretical guarantees:</strong> Provably converges to the target distribution</li>
-          <li style="margin: 0.5rem 0;"><strong>No gradients needed:</strong> Only requires density evaluation</li>
-        </ul>
-      </div>
-      
-      <div class="algorithm-box">
-        <strong style="color: #dc2626;">✗ Limitations</strong>
-        <ul style="margin: 0.75rem 0 0 0; padding-left: 1.5rem;">
-          <li style="margin: 0.5rem 0;"><strong>Random walk behavior:</strong> Inefficient in high dimensions</li>
-          <li style="margin: 0.5rem 0;"><strong>Tuning required:</strong> Proposal width must be carefully chosen</li>
-          <li style="margin: 0.5rem 0;"><strong>Slow mixing:</strong> Can take many iterations to explore the distribution</li>
-          <li style="margin: 0.5rem 0;"><strong>Correlated samples:</strong> High autocorrelation reduces effective sample size</li>
-          <li style="margin: 0.5rem 0;"><strong>Mode jumping:</strong> Struggles with multimodal distributions</li>
-        </ul>
-      </div>
-    </div>
-    
-    <div class="info-note" style="margin-top: 1.5rem;">
-      <strong>Common Challenges:</strong>
-      <ul style="margin: 0.5rem 0 0 0; padding-left: 1.5rem;">
-        <li><strong>Curse of dimensionality:</strong> In high dimensions, the acceptance rate drops dramatically 
-        unless \(\sigma\) is very small, leading to slow exploration</li>
-        <li><strong>Correlated parameters:</strong> When parameters have strong posterior correlations 
-        (like the banana distribution), axis-aligned proposals are inefficient—each dimension explored independently 
-        when they should move together</li>
-        <li><strong>Varying scales:</strong> When different regions have vastly different scales 
-        (like Neal's funnel), fixed-width proposals perform poorly—too large in narrow regions, too small in wide regions</li>
-        <li><strong>Convergence assessment:</strong> It's difficult to know when the chain has converged to 
-        the stationary distribution</li>
-      </ul>
-    </div>
+    <h2 class="section-title">Strengths and Limitations</h2>
+    <p>
+      MH works for any target where you can evaluate \(\pi(\mathbf{x})\) up to a constant, requires
+      no gradient information, and is easy to implement. Under mild conditions, the acceptance-rejection
+      step satisfies detailed balance, which ensures the correct stationary distribution.
+    </p>
+    <p>
+      The weaknesses become apparent in harder problems. The random-walk proposal is blind to
+      the geometry of the posterior, so mixing degrades in high dimensions, along curved manifolds,
+      and wherever the posterior has varying scales (as in Neal's funnel). The proposal width \(\sigma\)
+      must be hand-tuned: too small and the chain barely moves, too large and the acceptance rate
+      collapses. Multimodal distributions are a persistent problem, since the chain can spend arbitrarily
+      long confined to one mode. These limitations motivated Hamiltonian Monte Carlo and other
+      gradient-based methods.
+    </p>
   </div>
 
   <!-- BEYOND METROPOLIS-HASTINGS -->
   <div class="section">
     <h2 class="section-title">Beyond Metropolis–Hastings</h2>
     <p>
-      While MH is foundational, modern MCMC methods have been developed to address its limitations. 
-      Future tutorials in this series will cover:
+      The distributions above reveal where MH struggles: curved geometries, varying scales, and
+      high dimensionality. Hamiltonian Monte Carlo addresses all three by using gradient information
+      to propose distant states coherently rather than diffusing randomly. If you want to see how
+      that plays out on the same distributions, the
+      <a href="/interactive_hmc.html">HMC demo</a> is the natural next step.
     </p>
-    
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem;">
-      <div class="algorithm-box">
-        <strong>Hamiltonian Monte Carlo (HMC)</strong>
-        <p style="margin: 0.75rem 0; font-size: 0.9rem;">
-          Uses gradient information to propose distant states while maintaining high acceptance rates. 
-          HMC can traverse the parameter space much more efficiently than random-walk MH, especially in 
-          high dimensions. The key insight is to treat sampling as simulating Hamiltonian dynamics in an 
-          augmented space.
-        </p>
-        <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem; color: #4a5568;">
-          <strong>Key advantage:</strong> Explores parameter space coherently rather than randomly, 
-          dramatically reducing autocorrelation.
-        </p>
-      </div>
-      
-      <div class="algorithm-box">
-        <strong>Nested Sampling</strong>
-        <p style="margin: 0.75rem 0; font-size: 0.9rem;">
-          A fundamentally different approach that simultaneously computes samples from the posterior 
-          <em>and</em> the model evidence (marginal likelihood). Instead of evolving a Markov chain, 
-          nested sampling progressively samples from constrained priors with increasing likelihood thresholds.
-        </p>
-        <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem; color: #4a5568;">
-          <strong>Key advantage:</strong> Natural computation of Bayesian evidence for model comparison, 
-          robust exploration of multimodal distributions.
-        </p>
-      </div>
-    </div>
-    
-    <div style="background: #f9fafb; border: 1px solid #e2e8f0; border-radius: 6px; padding: 1.5rem; margin-top: 1.5rem;">
-      <strong>Practical Recommendations:</strong>
-      <ul style="margin: 0.5rem 0; padding-left: 1.5rem;">
-        <li>For <strong>low-dimensional, well-behaved</strong> posteriors: Metropolis–Hastings is often sufficient</li>
-        <li>For <strong>high-dimensional</strong> problems with smooth posteriors: Use HMC (implemented in Stan, PyMC)</li>
-        <li>For <strong>multimodal</strong> distributions or <strong>model comparison</strong>: Consider nested sampling (implemented in dynesty, MultiNest)</li>
-        <li>For <strong>complex, structured</strong> problems: Specialized variants like Gibbs sampling, NUTS, or adaptive MH</li>
-      </ul>
-    </div>
   </div>
 
   <!-- REFERENCES -->
   <div class="section">
-    <h2 class="section-title">References & Further Reading</h2>
+    <h2 class="section-title">References</h2>
     <div style="font-size: 0.9rem; line-height: 1.8;">
-      <p><strong>Key Papers:</strong></p>
       <ul style="padding-left: 1.5rem; margin: 0.5rem 0;">
-        <li>Metropolis, N., Rosenbluth, A.W., Rosenbluth, M.N., Teller, A.H., & Teller, E. (1953). 
-        "Equation of State Calculations by Fast Computing Machines." 
-        <em>Journal of Chemical Physics</em>, 21(6), 1087-1092.</li>
-        <li>Hastings, W.K. (1970). "Monte Carlo Sampling Methods Using Markov Chains and Their Applications." 
-        <em>Biometrika</em>, 57(1), 97-109.</li>
-        <li>Roberts, G.O., Gelman, A., & Gilks, W.R. (1997). "Weak Convergence and Optimal Scaling of 
-        Random Walk Metropolis Algorithms." <em>The Annals of Applied Probability</em>, 7(1), 110-120.</li>
-        <li>Haario, H., Saksman, E., & Tamminen, J. (1999). "Adaptive Proposal Distribution for Random Walk Metropolis Algorithm." 
-        <em>Computational Statistics</em>, 14, 375-395.</li>
-        <li>Neal, R.M. (2003). "Slice Sampling." <em>The Annals of Statistics</em>, 31(3), 705-767.</li>
-        <li>Roberts, G.O., & Rosenthal, J.S. (2001). "Optimal Scaling for Various Metropolis-Hastings Algorithms." 
-        <em>Statistical Science</em>, 16(4), 351-367.</li>
-      </ul>
-      
-      <p style="margin-top: 1rem;"><strong>Books:</strong></p>
-      <ul style="padding-left: 1.5rem; margin: 0.5rem 0;">
-        <li>Robert, C.P., & Casella, G. (2004). <em>Monte Carlo Statistical Methods</em> (2nd ed.). Springer.</li>
-        <li>Brooks, S., Gelman, A., Jones, G., & Meng, X.-L. (2011). <em>Handbook of Markov Chain Monte Carlo</em>. CRC Press.</li>
-        <li>Gelman, A., Carlin, J.B., Stern, H.S., Dunson, D.B., Vehtari, A., & Rubin, D.B. (2013). 
+        <li>Metropolis, N., Rosenbluth, A.W., Rosenbluth, M.N., Teller, A.H., &amp; Teller, E. (1953).
+        "Equation of State Calculations by Fast Computing Machines."
+        <em>Journal of Chemical Physics</em>, 21(6), 1087–1092.</li>
+        <li>Hastings, W.K. (1970). "Monte Carlo Sampling Methods Using Markov Chains and Their Applications."
+        <em>Biometrika</em>, 57(1), 97–109.</li>
+        <li>Roberts, G.O., Gelman, A., &amp; Gilks, W.R. (1997). "Weak Convergence and Optimal Scaling of
+        Random Walk Metropolis Algorithms." <em>The Annals of Applied Probability</em>, 7(1), 110–120.</li>
+        <li>Haario, H., Saksman, E., &amp; Tamminen, J. (1999). "Adaptive Proposal Distribution for Random Walk Metropolis Algorithm."
+        <em>Computational Statistics</em>, 14, 375–395.</li>
+        <li>Neal, R.M. (2003). "Slice Sampling." <em>The Annals of Statistics</em>, 31(3), 705–767.</li>
+        <li>Roberts, G.O., &amp; Rosenthal, J.S. (2001). "Optimal Scaling for Various Metropolis-Hastings Algorithms."
+        <em>Statistical Science</em>, 16(4), 351–367.</li>
+        <li>Robert, C.P., &amp; Casella, G. (2004). <em>Monte Carlo Statistical Methods</em> (2nd ed.). Springer.</li>
+        <li>Brooks, S., Gelman, A., Jones, G., &amp; Meng, X.-L. (2011). <em>Handbook of Markov Chain Monte Carlo</em>. CRC Press.</li>
+        <li>Gelman, A., Carlin, J.B., Stern, H.S., Dunson, D.B., Vehtari, A., &amp; Rubin, D.B. (2013).
         <em>Bayesian Data Analysis</em> (3rd ed.). CRC Press.</li>
       </ul>
     </div>

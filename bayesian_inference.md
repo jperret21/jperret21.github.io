@@ -75,7 +75,10 @@ The reason this works is detailed balance: the accept/reject rule is constructed
 
 It has real limitations. The chain explores by random walk, which becomes exponentially inefficient as dimensionality grows. Successive samples are correlated, so the effective sample size is much smaller than the number of iterations. Tuning the proposal width matters a lot: too narrow and the chain mixes slowly, too wide and nearly every proposal is rejected. For low-dimensional, smooth, unimodal posteriors it remains a solid and interpretable choice, and it is where most people should start before moving to more sophisticated methods.
 
-[Explore the MCMC sampler](/html_src/interactive_mcmc.html) — trace plots, autocorrelation analysis, effective sample size, proposal scaling.
+<div style="text-align:center; margin: 1.5rem 0;">
+  <a href="/html_src/interactive_mcmc.html" style="display:inline-block; padding: 0.6rem 1.4rem; background:#111827; color:white; border-radius:6px; text-decoration:none; font-size:0.95rem;">Explore the MCMC demo</a>
+  <p style="font-size:0.85rem; color:#718096; margin-top:0.5rem;">trace plots, autocorrelation, effective sample size</p>
+</div>
 
 ### Hamiltonian Monte Carlo
 
@@ -91,7 +94,10 @@ Simulating this system for a fixed time, using a reversible volume-preserving in
 
 The practical consequence is dramatic: HMC scales to hundreds or thousands of dimensions where random-walk MCMC fails completely. The cost is that gradients of the log-posterior must be computed at every leapfrog step, and the method is sensitive to pathological geometries such as sharp funnels or highly anisotropic distributions that require careful reparametrization. The No-U-Turn Sampler (NUTS) extension automates tuning of the trajectory length, which is why Stan and PyMC use it as their default engine and most practitioners never implement vanilla HMC by hand.
 
-[Explore the HMC sampler](/html_src/interactive_hmc.html) — trajectory visualization, leapfrog integration, energy diagnostics, comparison with MCMC.
+<div style="text-align:center; margin: 1.5rem 0;">
+  <a href="/html_src/interactive_hmc.html" style="display:inline-block; padding: 0.6rem 1.4rem; background:#111827; color:white; border-radius:6px; text-decoration:none; font-size:0.95rem;">Explore the HMC demo</a>
+  <p style="font-size:0.85rem; color:#718096; margin-top:0.5rem;">trajectory visualization, leapfrog integration, energy diagnostics</p>
+</div>
 
 ### Nested Sampling
 
@@ -105,9 +111,13 @@ $$
 
 where $\Delta X_i$ is the prior volume shed at step $i$. The posterior samples fall out as a byproduct, weighted by $L_i \Delta X_i$. This makes nested sampling the method of choice when model comparison is the primary goal, or when you need to correctly account for all modes of a multimodal posterior. The main drawback is computational cost relative to HMC for pure parameter inference. In astrophysics, where model selection is often as important as parameter estimation, MultiNest and dynesty are standard tools.
 
-[Explore Nested Sampling](/html_src/interactive_nested_sampling.html) — live point evolution, evidence computation, posterior reconstruction.
+<div style="text-align:center; margin: 1.5rem 0;">
+  <a href="/html_src/interactive_nested_sampling.html" style="display:inline-block; padding: 0.6rem 1.4rem; background:#111827; color:white; border-radius:6px; text-decoration:none; font-size:0.95rem;">Explore the Nested Sampling demo</a>
+  <p style="font-size:0.85rem; color:#718096; margin-top:0.5rem;">live point evolution, evidence computation, posterior reconstruction</p>
+</div>
 
 ### Parallel Tempering
+
 
 Nested sampling handles multimodality by construction, but it can be expensive. Parallel tempering takes a different approach: run several chains simultaneously, each sampling a *tempered* version of the posterior,
 
@@ -119,7 +129,10 @@ at a different temperature $T$. At $T = 1$ this is the true posterior. As $T$ in
 
 The method works well when the posterior has clearly separated modes, as is common in gravitational-wave parameter estimation where waveform symmetries produce degenerate solutions. Since the chains run in parallel, wall-clock time scales more gracefully than the raw number of likelihood evaluations might suggest. Tuning the temperature schedule is the main practical challenge: swap acceptance rates between adjacent chains are the diagnostic to watch, and poorly spaced temperatures mean information propagates slowly down the ladder.
 
-[Explore Parallel Tempering](/html_src/interactive_parralel_tempering.html) — temperature ladder visualization, swap statistics, mode discovery.
+<div style="text-align:center; margin: 1.5rem 0;">
+  <a href="/html_src/interactive_parralel_tempering.html" style="display:inline-block; padding: 0.6rem 1.4rem; background:#111827; color:white; border-radius:6px; text-decoration:none; font-size:0.95rem;">Explore the Parallel Tempering demo</a>
+  <p style="font-size:0.85rem; color:#718096; margin-top:0.5rem;">temperature ladder visualization, swap statistics, mode discovery</p>
+</div>
 
 ## Further Reading
 

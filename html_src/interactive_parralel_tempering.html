@@ -37,10 +37,10 @@
         </span>
       </label>
       <div class="trigger">
-         <a class="page-link" href="/about.html">Curriculum Vitae</a>
-        <a class="page-link" href="/bayesian_inference.html">Introduction to Bayesian Inference</a>
-        <a class="page-link" href="/publications.html">Publications</a>
-        <a class="page-link" href="/research.html">Research</a>
+         <a class="page-link" href="/about">Curriculum Vitae</a>
+        <a class="page-link" href="/bayesian_inference">Bayesian Inference</a>
+        <a class="page-link" href="/publications">Publications</a>
+        <a class="page-link" href="/research">Research</a>
       </div>
     </nav>
   </div>
@@ -48,38 +48,35 @@
 
 <div class="container">
   <h1>Parallel Tempering (Temperature Ladder MCMC)</h1>
-  <p class="subtitle">Part 4 of the MCMC Samplers Series • Interactive visualization of temperature ladder sampling for multimodal distributions</p>
+  <p class="subtitle">Part 4 of the MCMC Samplers Series &bull; Interactive visualization of temperature ladder sampling for multimodal distributions</p>
 
   <!-- INTRODUCTION -->
   <div class="section">
     <h2 class="section-title">What is Parallel Tempering?</h2>
     <p>
-      <strong>Parallel Tempering</strong> is a powerful MCMC method designed to overcome the mode-hopping problem in multimodal distributions. The key insight: 
-      run multiple MCMC chains simultaneously at different "temperatures," then periodically swap states between chains.
+      <strong>Parallel Tempering</strong> is an MCMC method designed to overcome the mode-hopping problem in multimodal distributions.
+      The approach is to run multiple MCMC chains simultaneously at different "temperatures," then periodically swap states between chains.
     </p>
 
     <div class="algorithm-box">
       <strong>The Core Idea:</strong>
       <p style="margin: 0.75rem 0;">
-        Instead of sampling from the target posterior \(\pi(\theta)\), run \(K\) parallel chains sampling from 
+        Instead of sampling from the target posterior \(\pi(\theta)\), run \(K\) parallel chains sampling from
         "tempered" distributions:
       </p>
       $$\pi_\beta(\theta) \propto \pi(\theta)^\beta = [\mathcal{L}(\theta) \pi_0(\theta)]^\beta$$
       <p style="margin: 0.75rem 0;">
-        where \(0 < \beta_K < \beta_{K-1} < \ldots < \beta_2 < \beta_1 = 1\) is the <strong>temperature ladder</strong>:
+        where \(0 < \beta_K < \beta_{K-1} < \ldots < \beta_2 < \beta_1 = 1\) is the <strong>temperature ladder</strong>.
+        The cold chain at \(\beta_1 = 1\) samples the true posterior, while hotter chains at smaller \(\beta\) sample
+        increasingly flattened versions of the distribution, up to near-uniform sampling as \(\beta_k \to 0\).
       </p>
-      <ul style="margin: 0.5rem 0; padding-left: 1.5rem;">
-        <li><strong>\(\beta_1 = 1\):</strong> The "cold" chain samples the true posterior \(\pi(\theta)\)</li>
-        <li><strong>\(\beta_k < 1\):</strong> "Hot" chains sample flattened versions (easier to move between modes)</li>
-        <li><strong>\(\beta_k \to 0\):</strong> The hottest chain samples almost uniformly (pure exploration)</li>
-      </ul>
     </div>
 
     <div class="info-note">
-      <strong>Why does this work?</strong> Hot chains explore a flattened energy landscape where energy barriers between
-      modes are suppressed, enabling efficient mode-hopping. Replica exchange swaps allow information about newly
-      discovered modes to propagate from hot chains to the cold chain sampling the target distribution. This creates
-      an <strong>efficient exploration-exploitation trade-off</strong>.
+      <strong>Why does this work?</strong> At low \(\beta\), the energy landscape is flattened and barriers between
+      modes are suppressed, so hot chains cross freely between regions that trap a cold chain.
+      Replica exchange swaps carry information about newly discovered modes from hot chains down to the cold chain,
+      which samples the true posterior.
     </div>
   </div>
 
@@ -87,7 +84,7 @@
   <div class="section">
     <h2 class="section-title">The Algorithm</h2>
     <p>
-      Parallel tempering alternates between two steps: <strong>local MCMC moves</strong> within each chain and 
+      Parallel tempering alternates between two steps: <strong>local MCMC moves</strong> within each chain and
       <strong>replica exchange swaps</strong> between adjacent temperatures.
     </p>
 
@@ -97,17 +94,17 @@
         <li><strong>Initialize:</strong> Set up \(K\) chains, each at temperature \(\beta_k\), with initial states \(\theta^{(k)}\)</li>
         <li><strong>MCMC step:</strong> For each chain \(k = 1, \ldots, K\):
           <ul style="padding-left: 1.5rem;">
-            <li>Propose \(\theta' \sim q(\cdot \mid \theta^{(k)})\) using Metropolis-Hastings</li>
-            <li>Accept with probability \(\alpha = \min(1, r^{\beta_k})\) where \(r = \frac{\pi(\theta')}{\pi(\theta^{(k)})}\)</li>
+            <li>Propose \(\theta' \sim q(\cdot \mid \theta^{(k)})\) using a symmetric Gaussian random walk</li>
+            <li>Accept with probability \(\alpha = \min\!\left(1,\, \left[\frac{\pi(\theta')}{\pi(\theta^{(k)})}\right]^{\!\beta_k}\right)\) (symmetric proposal cancels)</li>
           </ul>
         </li>
         <li><strong>Exchange step:</strong> For each adjacent pair \((k, k+1)\):
           <ul style="padding-left: 1.5rem;">
             <li>Propose to swap states: \(\theta^{(k)} \leftrightarrow \theta^{(k+1)}\)</li>
             <li>Accept swap with probability:
-              $$\alpha_{\text{swap}} = \min\left(1, \frac{\pi(\theta^{(k)})^{\beta_{k+1}} \pi(\theta^{(k+1)})^{\beta_k}}{\pi(\theta^{(k)})^{\beta_k} \pi(\theta^{(k+1)})^{\beta_{k+1}}}\right)$$
+              $$\alpha_{\text{swap}} = \min\left(1, \frac{\pi(\theta^{(k+1)})^{\beta_k} \pi(\theta^{(k)})^{\beta_{k+1}}}{\pi(\theta^{(k)})^{\beta_k} \pi(\theta^{(k+1)})^{\beta_{k+1}}}\right)$$
               which simplifies to:
-              $$\alpha_{\text{swap}} = \min\left(1, \exp\left[(\beta_k - \beta_{k+1})(\log \pi(\theta^{(k)}) - \log \pi(\theta^{(k+1)}))\right]\right)$$
+              $$\alpha_{\text{swap}} = \min\left(1, \exp\left[(\beta_k - \beta_{k+1})(\log \pi(\theta^{(k+1)}) - \log \pi(\theta^{(k)}))\right]\right)$$
             </li>
           </ul>
         </li>
@@ -116,10 +113,10 @@
     </div>
 
     <div class="info-note">
-      <strong>Key insight on replica exchange:</strong> Swaps are accepted when the energy difference between states
-      is comparable to the temperature gap. This motivates careful temperature ladder design to maintain sufficient
-      overlap between adjacent distributions. Target swap acceptance rates of 20-40% ensure efficient information
-      exchange while maintaining detailed balance.
+      <strong>Replica exchange:</strong> A swap is accepted when the energy difference between the two states
+      is small relative to the temperature gap. Adjacent distributions must overlap sufficiently for swaps
+      to fire regularly, which is why temperature ladder spacing matters. Empirically, swap acceptance rates
+      of 20–40% per adjacent pair give a good balance between exploration and information flow.
     </div>
   </div>
 
@@ -127,43 +124,35 @@
   <div class="section">
     <h2 class="section-title">Target Distributions</h2>
     <p>
-      We provide four distributions to illustrate parallel tempering's strengths and compare with standard MCMC:
+      Four distributions illustrate parallel tempering's strengths and allow comparison with standard MCMC:
     </p>
-    
-    <div style="display: grid; grid-template-columns: 1fr; gap: 1.5rem; margin-top: 1rem;">
+
+    <div class="dist-grid">
       <div class="algorithm-box">
         <strong>Bivariate Gaussian (Baseline)</strong>
-        <p style="margin: 0.5rem 0;">
-          A standard correlated 2D Gaussian with \(\rho = 0.8\). Single mode—parallel tempering is overkill here, 
-          but useful to understand temperature effects.
-        </p>
+        <div class="dist-formula">$$\pi(x_1, x_2) \propto \exp\left(-\frac{1}{2(1-\rho^2)}(x_1^2 - 2\rho x_1 x_2 + x_2^2)\right)$$</div>
+        <p class="dist-note">Single mode (\(\rho = 0.8\)): PT is not needed here, but useful for understanding temperature effects on a well-behaved target.</p>
       </div>
 
       <div class="algorithm-box" style="background: #fef3c7; border-left: 4px solid #f59e0b;">
-        <strong>🌟 Bimodal Gaussian Mixture (Perfect for PT!)</strong>
-        <p style="margin: 0.5rem 0;">
-          Two well-separated modes at (-2,-2) and (+2,+2):
-        </p>
-        $$\pi(\theta) = 0.4 \cdot \mathcal{N}((-2,-2), 0.8^2I) + 0.6 \cdot \mathcal{N}((+2,+2), 0.8^2I)$$
-        <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem; color: #78350f;">
-          <strong>This is where PT shines!</strong> Standard MH gets stuck in one mode. Hot chains easily hop between modes, 
-          and swaps propagate this information to the cold chain. Watch how different temperature chains explore differently!
-        </p>
+        <strong>Bimodal Gaussian Mixture (Best case for PT)</strong>
+        <div class="dist-formula">$$\pi(\theta) = 0.4 \cdot \mathcal{N}((-2,-2), 0.8^2I) + 0.6 \cdot \mathcal{N}((+2,+2), 0.8^2I)$$</div>
+        <p class="dist-note">Hot chains cross the barrier between modes and pass that information to the cold chain via swaps, where standard MH gets stuck.</p>
       </div>
 
       <div class="algorithm-box">
         <strong>Rosenbrock's Banana</strong>
-        <p style="margin: 0.5rem 0;">
-          Strongly correlated along a curved manifold. Single mode but challenging geometry. PT helps but HMC is better here.
-        </p>
+        <div class="dist-formula">$$\pi(x_1, x_2) \propto \exp\left(-\frac{1}{200}(x_1^2 + 100(x_2 - x_1^2)^2)\right)$$</div>
+        <p class="dist-note">Curved manifold, single mode: PT helps explore the geometry but HMC is better suited for this kind of challenge.</p>
       </div>
 
       <div class="algorithm-box">
         <strong>Neal's Funnel</strong>
-        <p style="margin: 0.5rem 0;">
-          Hierarchical model with exponentially varying scales. Hot chains can explore the narrow neck more easily. 
-          PT helps, but the real solution is reparameterization or HMC.
-        </p>
+        <div class="dist-formula">$$\begin{aligned}
+        x_1 &\sim \mathcal{N}(0, 3^2) \\
+        x_2 \mid x_1 &\sim \mathcal{N}(0, \exp(x_1)^2)
+        \end{aligned}$$</div>
+        <p class="dist-note">Hot chains explore the narrow neck more easily, though the deeper fix is reparameterization or HMC.</p>
       </div>
     </div>
   </div>
@@ -171,7 +160,7 @@
   <!-- CONTROLS -->
   <div class="section">
     <h2 class="section-title">Simulation Controls</h2>
-    
+
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
       <div class="control-group">
         <label>
@@ -179,7 +168,7 @@
         </label>
         <select id="dist">
           <option value="gaussian">Bivariate Gaussian</option>
-          <option value="bimodal" selected>Bimodal Mixture (★ Best for PT!)</option>
+          <option value="bimodal" selected>Bimodal Mixture (Best for PT!)</option>
           <option value="banana">Rosenbrock's Banana</option>
           <option value="funnel">Neal's Funnel</option>
         </select>
@@ -239,9 +228,9 @@
     </div>
 
     <div class="button-group">
-      <button onclick="start()">▶ Start Sampling</button>
-      <button class="secondary" onclick="singleStep()">→ Single Step</button>
-      <button class="secondary" onclick="reset()">↻ Reset</button>
+      <button onclick="start()">&#9654; Start Sampling</button>
+      <button class="secondary" onclick="singleStep()">&#8594; Single Step</button>
+      <button class="secondary" onclick="reset()">Reset</button>
     </div>
   </div>
 
@@ -252,16 +241,16 @@
   <div class="section">
     <h2 class="section-title">Temperature Chain Visualizations</h2>
     <p>
-      Each subplot shows one temperature level in the ladder. <strong>Chain 1 (top-left, β=1.0)</strong> always samples 
-      the true posterior—this is your target chain. <strong>Hotter chains (lower β)</strong> sample flattened distributions 
-      and explore more freely. 
+      Each subplot shows one temperature level in the ladder. <strong>Chain 1 (top-left, &beta;=1.0)</strong>
+      samples the true posterior and is the only chain used for inference. <strong>Hotter chains (lower &beta;)</strong>
+      sample progressively flattened distributions and explore more freely.
     </p>
     <p style="margin-top: 0.5rem;">
-      <strong>How swaps work:</strong> States (the x,y positions) move between chains, but each chain position keeps its 
-      temperature. When you see a point jump, that's a state moving from one temperature to another. The cold chain 
-      (position 1) receives information about newly discovered modes from the hot chains through these swaps.
+      Swaps exchange the <em>states</em> between chains while each chain retains its temperature. When
+      a point jumps, a parameter value has moved from one temperature level to another. Mode information
+      discovered by hot chains propagates down the ladder to the cold chain through this mechanism.
     </p>
-    
+
     <div id="replicaGrid" class="replica-grid">
       <!-- Dynamically populated based on number of temperatures -->
     </div>
@@ -271,11 +260,11 @@
   <div class="section">
     <h2 class="section-title">Parallel Tempering Diagnostics</h2>
     <p>
-      The key diagnostics for PT are: <strong>swap acceptance rates</strong> (are chains communicating well?), 
-      <strong>chain exploration</strong> (is each temperature exploring its target properly?), and 
+      The key diagnostics for PT are: <strong>swap acceptance rates</strong> (are chains communicating well?),
+      <strong>chain exploration</strong> (is each temperature exploring its target properly?), and
       <strong>cold chain coverage</strong> (does the final posterior sample all modes correctly?).
     </p>
-    
+
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 1.5rem;">
       <div>
         <div class="canvas-label">Swap Acceptance Rate Between Adjacent Chains</div>
@@ -286,45 +275,42 @@
       </div>
 
       <div>
-        <div class="canvas-label">Cold Chain Trace Plot (θ₁)</div>
+        <div class="canvas-label">Cold Chain Trace Plot (&theta;&#8321;)</div>
         <canvas id="tracePlot" width="100%" height="40" style="width: 100%;"></canvas>
         <p style="font-size: 0.85rem; color: #4a5568; margin-top: 0.5rem;">
-          Chain 1 (β=1.0) position over time. Good mixing shows random walk behavior with mode switches.
+          Chain 1 (&beta;=1.0) position over time. Good mixing shows random walk behavior with mode switches.
         </p>
       </div>
     </div>
   </div>
 
-  <!-- CONVERGENCE DIAGNOSTICS -->
+  <!-- MIXING DIAGNOSTICS -->
   <div class="section">
-    <h2 class="section-title">Convergence Diagnostics</h2>
+    <h2 class="section-title">Mixing Diagnostics</h2>
     <p>
-      Unlike single-chain MCMC, parallel tempering convergence depends on both <strong>within-chain mixing</strong> 
-      (each chain exploring its target) and <strong>between-chain communication</strong> (swaps transferring information). 
-      Watch for the burn-in phase where chains move from initial positions to the target distribution.
+      Unlike single-chain MCMC, mixing quality in parallel tempering depends on both <strong>within-chain exploration</strong>
+      (each chain covering its tempered target) and <strong>between-chain communication</strong> (swaps transferring
+      information up and down the ladder). The initial burn-in transient ends once each chain has settled
+      into its stationary distribution.
     </p>
 
     <div style="margin-top: 1.5rem;">
-      <div class="canvas-label">Cold Chain (β=1.0) - Both Coordinates Over Time</div>
+      <div class="canvas-label">Cold Chain (&beta;=1.0) - Both Coordinates Over Time</div>
       <canvas id="bothCoordinates" width="100%" height="40" style="width: 100%;"></canvas>
       <p style="font-size: 0.85rem; color: #4a5568; margin-top: 0.5rem;">
-        <strong>θ₁ (blue)</strong> and <strong>θ₂ (orange)</strong> vs iteration for the cold chain. 
-        Look for: (1) <strong>Burn-in</strong> - initial transient behavior as chain moves from random start to posterior, 
-        (2) <strong>Stationarity</strong> - stable wandering within posterior region, 
-        (3) <strong>Mode switching</strong> - for bimodal, jumps between (-2,-2) and (+2,+2) regions.
+        <strong>&theta;&#8321; (blue)</strong> and <strong>&theta;&#8322; (orange)</strong> vs iteration for the cold chain.
+        Look for burn-in during the initial transient as the chain moves from its random start to the posterior region,
+        then stable wandering once stationarity is reached. For the bimodal distribution, jumps between the (-2,-2)
+        and (+2,+2) regions indicate successful mode switching.
       </p>
     </div>
 
     <div class="info-note" style="margin-top: 1.5rem;">
-      <strong>Assessing Convergence:</strong>
-      <ul style="margin: 0.5rem 0; padding-left: 1.5rem;">
-        <li><strong>Burn-in phase:</strong> First ~50-200 iterations as chains move from random initialization. 
-        Discard these when analyzing posterior.</li>
-        <li><strong>Within-chain mixing:</strong> Trace plots should show random fluctuations without trends or getting stuck.</li>
-        <li><strong>Between-chain communication:</strong> Swap acceptance rates of 20-40% ensure information flows between temperatures.</li>
-        <li><strong>Mode exploration (multimodal):</strong> Cold chain should visit all modes. Count transitions between modes in trace plot.</li>
-        <li><strong>Visual check:</strong> Does the cold chain posterior coverage match the true distribution? Run longer if modes are missing.</li>
-      </ul>
+      Discard the first 50–200 iterations as burn-in before analyzing the posterior. Trace plots should show
+      rapid fluctuations without trends or extended flat segments. For multimodal targets, verify that the cold chain
+      visits all modes: swap acceptance rates of 20–40% per adjacent pair indicate that information is flowing
+      through the ladder. If a mode is absent from the cold chain, adding more temperature levels or tightening
+      the ladder spacing usually helps.
     </div>
   </div>
 
@@ -332,16 +318,16 @@
   <div class="section">
     <h2 class="section-title">Cold Chain Final Posterior</h2>
     <p>
-      This is the payoff: samples from Chain 1 (β=1.0) represent the true posterior after discarding burn-in.
+      Samples from Chain 1 (&beta;=1.0) represent the true posterior after discarding burn-in.
     </p>
 
     <div style="margin-top: 1.5rem;">
-      <div class="canvas-label">Cold Chain (β=1.0) - True Posterior Samples</div>
+      <div class="canvas-label">Cold Chain (&beta;=1.0) - True Posterior Samples</div>
       <canvas id="coldChainPosterior" width="400" height="400" style="max-width: 100%;"></canvas>
       <p style="font-size: 0.85rem; color: #4a5568; margin-top: 0.5rem;">
-        <strong>This is what matters!</strong> Only samples from the cold chain (Chain 1, β=1.0) represent the true posterior. 
-        For the bimodal distribution: both modes should be explored proportionally to their weights (40% and 60%). 
-        If only one mode appears, parallel tempering isn't helping (try more chains or better temperature spacing).
+        Only samples from the cold chain (Chain 1, &beta;=1.0) represent the true posterior.
+        For the bimodal distribution, both modes should be explored proportionally to their weights (40% and 60%).
+        If only one mode appears, try adding more chains or adjusting the temperature spacing.
       </p>
     </div>
   </div>
@@ -369,13 +355,10 @@
     </div>
 
     <div class="info-note" style="margin-top: 1.5rem;">
-      <strong>Understanding the metrics:</strong>
-      <ul style="margin: 0.5rem 0; padding-left: 1.5rem;">
-        <li><strong>Total Iterations:</strong> MCMC steps × number of chains (each chain moves every iteration)</li>
-        <li><strong>Cold Chain Samples:</strong> Number of posterior samples (one per iteration from Chain 1)</li>
-        <li><strong>Swap Success Rate:</strong> Proportion of accepted swaps (should be 20-40% per adjacent pair)</li>
-        <li><strong>Computational Cost:</strong> PT requires K× more likelihood evaluations than standard MCMC</li>
-      </ul>
+      Total Iterations counts MCMC steps multiplied by the number of chains, since each chain advances every iteration.
+      Cold Chain Samples is the number of posterior samples drawn from Chain 1 alone. The swap success rate should fall
+      between 20% and 40% per adjacent pair. Note that PT requires K times more likelihood evaluations than standard
+      single-chain MCMC, where K is the number of temperature levels.
     </div>
 
     <div id="stepInfo" class="step-info">
@@ -385,48 +368,30 @@
 
   <!-- STRENGTHS AND LIMITATIONS -->
   <div class="section">
-    <h2 class="section-title">Strengths & Limitations</h2>
-    
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1rem;">
-      <div class="algorithm-box">
-        <strong style="color: #059669;">✓ Strengths</strong>
-        <ul style="margin: 0.75rem 0 0 0; padding-left: 1.5rem;">
-          <li style="margin: 0.5rem 0;"><strong>Multimodality:</strong> Excellent for exploring multiple well-separated modes</li>
-          <li style="margin: 0.5rem 0;"><strong>Mode discovery:</strong> Hot chains find modes; swaps propagate to cold chain</li>
-          <li style="margin: 0.5rem 0;"><strong>Proper sampling:</strong> Maintains detailed balance, produces correct posterior samples</li>
-          <li style="margin: 0.5rem 0;"><strong>Parallelizable:</strong> Chains evolve independently between replica exchange steps</li>
-          <li style="margin: 0.5rem 0;"><strong>Gradient-free:</strong> Only requires density evaluation (unlike HMC)</li>
-        </ul>
-      </div>
-      
-      <div class="algorithm-box">
-        <strong style="color: #dc2626;">✗ Limitations</strong>
-        <ul style="margin: 0.75rem 0 0 0; padding-left: 1.5rem;">
-          <li style="margin: 0.5rem 0;"><strong>Computational cost:</strong> \(K\) chains means \(K\times\) function evaluations</li>
-          <li style="margin: 0.5rem 0;"><strong>Temperature ladder design:</strong> Requires careful tuning for efficiency</li>
-          <li style="margin: 0.5rem 0;"><strong>High dimensions:</strong> Swap acceptance decreases exponentially with \(d\)</li>
-          <li style="margin: 0.5rem 0;"><strong>Not for all problems:</strong> Overkill for unimodal posteriors (use HMC instead)</li>
-          <li style="margin: 0.5rem 0;"><strong>Memory overhead:</strong> Must store \(K\) states simultaneously</li>
-        </ul>
-      </div>
-    </div>
+    <h2 class="section-title">Strengths &amp; Limitations</h2>
+
+    <p style="margin-top: 1rem;">
+      Parallel tempering is well suited to multimodal posteriors with well-separated modes. Hot chains discover
+      new modes and swaps propagate that information to the cold chain, which maintains detailed balance and
+      produces correct posterior samples. The chains evolve independently between swap steps, making the
+      algorithm straightforward to parallelize. It requires only density evaluations, with no gradients needed.
+      The main cost is computational: running K chains means K times more likelihood evaluations, and temperature
+      ladder design requires care. Swap acceptance rates decrease as dimension grows, so performance degrades in
+      high-dimensional settings. For unimodal posteriors, simpler methods such as HMC are preferable.
+    </p>
 
     <div class="info-note" style="margin-top: 1.5rem;">
-      <strong>When to use Parallel Tempering:</strong>
-      <ul style="margin: 0.5rem 0; padding-left: 1.5rem;">
-        <li>Multimodal posteriors with well-separated modes (physical phase transitions, mixture models)</li>
-        <li>Rugged energy landscapes (statistical mechanics, protein folding)</li>
-        <li>When you suspect multiple modes but don't know how many</li>
-        <li>When gradients are unavailable (unlike HMC) but you have computational budget</li>
-        <li>Dimensions \(d \lesssim 20\) (swap acceptance degrades in high-d)</li>
-      </ul>
+      Parallel tempering is most appropriate for low-to-moderate dimensional problems (roughly \(d \lesssim 20\))
+      with multimodal posteriors where gradients are unavailable, such as physical phase transitions, mixture models,
+      or rugged energy landscapes. When gradients are available and the posterior is unimodal, HMC or NUTS will
+      typically be more efficient.
     </div>
   </div>
 
   <!-- COMPARISON -->
   <div class="section">
     <h2 class="section-title">Comparison with Other Methods</h2>
-    
+
     <div class="algorithm-box">
       <table style="width: 100%; border-collapse: collapse;">
         <tr style="border-bottom: 2px solid #e2e8f0;">
@@ -447,7 +412,7 @@
           <td style="padding: 0.75rem;">High dimensions</td>
           <td style="padding: 0.75rem;">Poor</td>
           <td style="padding: 0.75rem;"><strong>Excellent</strong></td>
-          <td style="padding: 0.75rem;">Poor (swap rate ↓)</td>
+          <td style="padding: 0.75rem;">Poor (swap rate decreases)</td>
           <td style="padding: 0.75rem;">Poor (curse of d)</td>
         </tr>
         <tr style="border-bottom: 1px solid #e2e8f0;">
@@ -466,61 +431,61 @@
         </tr>
         <tr>
           <td style="padding: 0.75rem;">Computational cost</td>
-          <td style="padding: 0.75rem;">Low (1×)</td>
+          <td style="padding: 0.75rem;">Low (1&times;)</td>
           <td style="padding: 0.75rem;">Medium (gradient)</td>
-          <td style="padding: 0.75rem;"><strong>High (\(K\)×)</strong></td>
+          <td style="padding: 0.75rem;"><strong>High (\(K\)&times;)</strong></td>
           <td style="padding: 0.75rem;">Medium-High</td>
         </tr>
       </table>
     </div>
 
     <p style="margin-top: 1rem;">
-      <strong>Practical recommendation:</strong> Use PT for low-to-moderate dimensional multimodal problems without gradients. 
-      Use HMC/NUTS for high-dimensional unimodal posteriors with gradients. Use nested sampling when you need evidence 
+      Use PT for low-to-moderate dimensional multimodal problems without gradients.
+      Use HMC/NUTS for high-dimensional unimodal posteriors with gradients. Use nested sampling when you need evidence
       (model comparison) or for multimodal problems in very low dimensions.
     </p>
   </div>
 
   <!-- REFERENCES -->
   <div class="section">
-    <h2 class="section-title">References & Further Reading</h2>
+    <h2 class="section-title">References &amp; Further Reading</h2>
     <div style="font-size: 0.9rem; line-height: 1.8;">
       <p><strong>Key Papers:</strong></p>
       <ul style="padding-left: 1.5rem; margin: 0.5rem 0;">
-        <li>Geyer, C.J. (1991). "Markov Chain Monte Carlo Maximum Likelihood." 
+        <li>Geyer, C.J. (1991). "Markov Chain Monte Carlo Maximum Likelihood."
         In <em>Computing Science and Statistics: Proceedings of the 23rd Symposium on the Interface</em>, 156-163.</li>
-        <li>Hukushima, K., & Nemoto, K. (1996). "Exchange Monte Carlo Method and Application to Spin Glass Simulations." 
+        <li>Hukushima, K., &amp; Nemoto, K. (1996). "Exchange Monte Carlo Method and Application to Spin Glass Simulations."
         <em>Journal of the Physical Society of Japan</em>, 65(6), 1604-1608.</li>
-        <li>Earl, D.J., & Deem, M.W. (2005). "Parallel Tempering: Theory, Applications, and New Perspectives." 
+        <li>Earl, D.J., &amp; Deem, M.W. (2005). "Parallel Tempering: Theory, Applications, and New Perspectives."
         <em>Physical Chemistry Chemical Physics</em>, 7(23), 3910-3916.</li>
-        <li>Swendsen, R.H., & Wang, J.S. (1986). "Replica Monte Carlo Simulation of Spin-Glasses." 
+        <li>Swendsen, R.H., &amp; Wang, J.S. (1986). "Replica Monte Carlo Simulation of Spin-Glasses."
         <em>Physical Review Letters</em>, 57(21), 2607-2609. (Original replica exchange idea)</li>
-        <li>Katzgraber, H.G., Trebst, S., Huse, D.A., & Troyer, M. (2006). "Feedback-Optimized Parallel Tempering Monte Carlo." 
+        <li>Katzgraber, H.G., Trebst, S., Huse, D.A., &amp; Troyer, M. (2006). "Feedback-Optimized Parallel Tempering Monte Carlo."
         <em>Journal of Statistical Mechanics: Theory and Experiment</em>, 2006(03), P03018.</li>
       </ul>
-      
+
       <p style="margin-top: 1rem;"><strong>Temperature Ladder Design:</strong></p>
       <ul style="padding-left: 1.5rem; margin: 0.5rem 0;">
-        <li>Kone, A., & Kofke, D.A. (2005). "Selection of Temperature Intervals for Parallel-Tempering Simulations." 
+        <li>Kone, A., &amp; Kofke, D.A. (2005). "Selection of Temperature Intervals for Parallel-Tempering Simulations."
         <em>Journal of Chemical Physics</em>, 122(20), 206101.</li>
-        <li>Rathore, N., Chopra, M., & de Pablo, J.J. (2005). "Optimal Allocation of Replicas in Parallel Tempering Simulations." 
+        <li>Rathore, N., Chopra, M., &amp; de Pablo, J.J. (2005). "Optimal Allocation of Replicas in Parallel Tempering Simulations."
         <em>Journal of Chemical Physics</em>, 122(2), 024111.</li>
       </ul>
-      
+
       <p style="margin-top: 1rem;"><strong>Books:</strong></p>
       <ul style="padding-left: 1.5rem; margin: 0.5rem 0;">
-        <li>Brooks, S., Gelman, A., Jones, G., & Meng, X.-L. (2011). <em>Handbook of Markov Chain Monte Carlo</em>. 
+        <li>Brooks, S., Gelman, A., Jones, G., &amp; Meng, X.-L. (2011). <em>Handbook of Markov Chain Monte Carlo</em>.
         CRC Press. (Chapter 7: Parallel and Interacting Chains)</li>
-        <li>Liu, J.S. (2001). <em>Monte Carlo Strategies in Scientific Computing</em>. Springer. 
+        <li>Liu, J.S. (2001). <em>Monte Carlo Strategies in Scientific Computing</em>. Springer.
         (Chapter 6: Simulated Tempering and Related Methods)</li>
       </ul>
-      
+
       <p style="margin-top: 1rem;"><strong>Software:</strong></p>
       <ul style="padding-left: 1.5rem; margin: 0.5rem 0;">
         <li><strong>emcee:</strong> Python - The MCMC Hammer (includes parallel tempering as PTSampler)</li>
         <li><strong>PyMC:</strong> Can implement PT with custom samplers</li>
         <li><strong>PTEMCEE:</strong> Parallel-tempered ensemble MCMC in Python</li>
-        <li><strong>MrBayes:</strong> Phylogenetics software with Metropolis-Coupled MCMC (MC³)</li>
+        <li><strong>MrBayes:</strong> Phylogenetics software with Metropolis-Coupled MCMC (MC&#179;)</li>
       </ul>
     </div>
   </div>
