@@ -1,6 +1,7 @@
 # General site settings
 title: Jules Perret
 description: Personal page
+source: jperret21
 lsi: false
 safe: true
 incremental: false
