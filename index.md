@@ -7,7 +7,7 @@ title: Welcome
 
 I am a PhD researcher and research engineer in gravitational-wave astrophysics at the [Astroparticle and Cosmology Laboratory (APC, CNRS)](https://apc.u-paris.fr/APC_CS/). My work revolves around one central problem: how do we extract reliable astrophysical information from gravitational-wave signals, efficiently enough to keep pace with current and future detectors?
 
-My current work is focused on **LISA**, the ESA-NASA space interferometer scheduled for launch in the early 2030s. LISA will observe massive binary black holes across cosmic history, but its data analysis pipeline is a genuine computational challenge. I work on parameter estimation for these systems, both on the sampling side and, increasingly, on building **fast, differentiable likelihoods** that run efficiently on CPU and GPU using JAX.
+My current work is focused on **LISA**, the ESA-NASA space interferometer scheduled for launch in the early 2035s. LISA will observe massive binary black holes across cosmic history, but its data analysis pipeline is a genuine computational challenge. I work on parameter estimation for these systems, both on the sampling side and, increasingly, on building **fast, differentiable likelihoods** that run efficiently on CPU and GPU using JAX library. I also work on the devellopment of the french globalfit pipeline develloped in France. 
 
 ## Research
 
@@ -29,7 +29,7 @@ On the inference side, I design and implement sampling algorithms (HMC variants 
 
 I am a member of the **Société Astronomique de Bourgogne**, where I contribute to public outreach and astronomy education. Explaining orbital mechanics to a curious twelve-year-old is a surprisingly good test of whether you actually understand it.
 
-Outside physics, I build things: drones, UAVs, whatever requires soldering and patience. It is a useful counterweight to work that lives entirely in abstract probability spaces.
+Outside physics, I build things: drones, UAVs, whatever flying and requires soldering and patience.
 
 ## Contact
 
