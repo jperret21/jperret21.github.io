@@ -19,11 +19,11 @@ On the inference side, I design and implement sampling algorithms (HMC variants 
 
 | Project | Description | Stack |
 |---|---|---|
-| **JaxMBHB** *(current)* | Fast time-domain LISA likelihood for massive binary black holes | JAX, XLA, TDI |
-| **PT-HMC** | Parallel tempering HMC for multimodal posteriors on LISA sources | JAX, GPU |
-| **DeepHMC** *(PhD)* | Neural metric learning to accelerate HMC for GW parameter estimation | PyTorch, CUDA |
+| **JaxMBHB** *(current)* | Fast time-domain LISA likelihood for massive binary black holes | JAX, XLA, Python |
+| **PT-HMC** | Parallel tempering HMC for multimodal posteriors on LISA sources | JAX, Python |
+| **DeepHMC** *(PhD)* |Deep  Neural Network learning to accelerate HMC for GW parameter estimation | PyTorch, CUDA |
 | **[GW Event Visualizer](https://perretjules.com/GW_event_viz/)** | Interactive GWOSC catalog dashboard, auto-updated via CI | Python, GitHub Actions |
-| **[Bayesian Inference Guide](bayesian_inference)** | Interactive intro to Bayesian methods and sampling algorithms | MCMC, HMC, Nested Sampling |
+| **[Bayesian Inference Guide](bayesian_inference)** | Interactive intro to Bayesian methods and sampling algorithms | X |
 
 ## Beyond the Lab
 
