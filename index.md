@@ -35,4 +35,3 @@ Outside physics, I build things: drones, UAVs, whatever flying and requires sold
 
 - [GitHub](https://github.com/jperret21)
 - [APC Laboratory](https://apc.u-paris.fr/APC_CS/)
-- perretjules@gmail.com
