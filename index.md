@@ -24,6 +24,7 @@ On the inference side, I design and implement sampling algorithms (HMC variants 
 | **DeepHMC** *(PhD)* |Deep  Neural Network learning to accelerate HMC for GW parameter estimation | PyTorch, CUDA |
 | **[GW Event Visualizer](https://perretjules.com/GW_event_viz/)** | Interactive GWOSC catalog dashboard, auto-updated via CI | Python, GitHub Actions |
 | **[Bayesian Inference Guide](bayesian_inference)** | Interactive intro to Bayesian methods and sampling algorithms | X |
+|**[Argos](https://perretjules.com/argos)**| Desktop astrophotography & differential photometry for the ZWO Seestar telescope. | Python |
 
 ## Beyond the Lab
 
